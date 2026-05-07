@@ -5,7 +5,8 @@
     "fields": {
       "name": "Budget 2026 - Conservateur",
       "period": "2026",
-      "description": "Scénario conservateur pour tests"
+      "description": "Scénario conservateur pour tests",
+      "created_at": "2024-06-01T12:00:00Z"
     }
   },
   {
@@ -14,7 +15,8 @@
     "fields": {
       "name": "Budget 2026 - Optimiste",
       "period": "2026",
-      "description": "Scénario optimiste pour tests"
+      "description": "Scénario optimiste pour tests",
+      "created_at":"2024-06-01T12:00:00Z"
     }
   },
   {
