@@ -1,0 +1,70 @@
+[
+  {
+    "model": "costs.costscenario",
+    "pk": 1,
+    "fields": {
+      "name": "Budget 2026 - Conservateur",
+      "period": "2026",
+      "description": "Scénario conservateur pour tests"
+    }
+  },
+  {
+    "model": "costs.costscenario",
+    "pk": 2,
+    "fields": {
+      "name": "Budget 2026 - Optimiste",
+      "period": "2026",
+      "description": "Scénario optimiste pour tests"
+    }
+  },
+  {
+    "model": "costs.costcenter",
+    "pk": 1,
+    "fields": {"scenario": 1, "code": "A1", "name": "Production", "is_auxiliary": false}
+  },
+  {
+    "model": "costs.costcenter",
+    "pk": 2,
+    "fields": {"scenario": 1, "code": "B1", "name": "Administration", "is_auxiliary": false}
+  },
+  {
+    "model": "costs.costcenter",
+    "pk": 3,
+    "fields": {"scenario": 2, "code": "A1", "name": "Production", "is_auxiliary": false}
+  },
+  {
+    "model": "costs.costcenter",
+    "pk": 4,
+    "fields": {"scenario": 2, "code": "B2", "name": "Ventes", "is_auxiliary": false}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 1,
+    "fields": {"scenario": 1, "label": "Salaires production", "amount": "10000.00", "center": 1, "is_direct": true}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 2,
+    "fields": {"scenario": 1, "label": "Loyer admin", "amount": "2000.00", "center": 2, "is_direct": false}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 3,
+    "fields": {"scenario": 1, "label": "Matériel", "amount": "1500.00", "center": 1, "is_direct": true}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 4,
+    "fields": {"scenario": 2, "label": "Salaires production", "amount": "9000.00", "center": 3, "is_direct": true}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 5,
+    "fields": {"scenario": 2, "label": "Commission ventes", "amount": "1200.00", "center": 4, "is_direct": true}
+  },
+  {
+    "model": "costs.costline",
+    "pk": 6,
+    "fields": {"scenario": 2, "label": "Frais généraux", "amount": "3000.00", "center": null, "is_direct": false}
+  }
+]
