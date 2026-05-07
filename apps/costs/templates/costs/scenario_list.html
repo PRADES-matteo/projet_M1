@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block content %}
+<h1>Scénarios</h1>
+<div class="grid">
+  {% for scenario in scenarios %}
+  <article class="card">
+    <h2>
+      <a href="{% url 'scenario-detail' scenario.pk %}">{{ scenario.name }}</a>
+    </h2>
+    <p>{{ scenario.period }}</p>
+  </article>
+  {% empty %}
+  <p>Aucun scénario enregistré.</p>
+  {% endfor %}
+</div>
+{% endblock %}

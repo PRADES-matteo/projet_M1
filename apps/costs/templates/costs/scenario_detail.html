@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ scenario.name }}</h1>
+<p>{{ scenario.description }}</p>
+
+<div class="grid">
+  <section class="card">
+    <h2>Méthode des centres d'analyse</h2>
+    <p>Total général : {{ center_analysis.total_general }}</p>
+  </section>
+  <section class="card">
+    <h2>Direct costing</h2>
+    <p>Coûts directs : {{ direct_costing.direct_costs }}</p>
+    <p>Coûts indirects : {{ direct_costing.indirect_costs }}</p>
+    <p>Total : {{ direct_costing.total_cost }}</p>
+  </section>
+</div>
+{% endblock %}
