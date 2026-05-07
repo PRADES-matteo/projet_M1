@@ -49,10 +49,50 @@ projet_M1/
 ```
 
 ## Lancement
-1. Installer les dépendances : `pip install -r requirements.txt`
-2. Créer les migrations : `python manage.py makemigrations`
-3. Appliquer les migrations : `python manage.py migrate`
-4. Lancer le serveur : `python manage.py runserver`
+Exécuter les commandes depuis le dossier `projet_M1/`.
+
+1. Créer un environnement virtuel (si besoin) :
+```powershell
+py -m venv .venv
+```
+2. Activer l'environnement virtuel (PowerShell) :
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+3. Installer les dépendances :
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+4. Créer et appliquer les migrations :
+```powershell
+python manage.py makemigrations
+python manage.py migrate
+```
+5. Lancer le serveur :
+```powershell
+python manage.py runserver
+```
+
+## Charger les scénarios de test
+Pour importer les données d'exemple dans la base SQLite :
+```powershell
+python manage.py loaddata apps/costs/fixtures/sample_scenarios.json
+```
+
+Pour vérifier ensuite que les scénarios sont bien présents :
+```powershell
+python manage.py test apps.costs
+```
+
+## Accès au site
+Une fois le serveur lancé, ouvrir :
+- `http://127.0.0.1:8000/`
+
+Si le port 8000 est déjà utilisé :
+```powershell
+python manage.py runserver 8080
+```
 
 ## Suite logique
 - ajouter l’authentification utilisateur
