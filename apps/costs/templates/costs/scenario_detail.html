@@ -6,37 +6,6 @@
 <p><strong>Description :</strong> {{ scenario.description }}</p>
 <p><strong>Méthode :</strong> {{ scenario.get_method_display }}</p>
 <p><strong>Template :</strong> {{ scenario.get_preset_display }} | <strong>Niveau :</strong> {{ scenario.get_ui_mode_display }}</p>
-
-<section class="card" style="margin: 1rem 0;">
-    <h2>Paramètres du scénario</h2>
-    <p>Configurez ici le mode de saisie et les options avancées après création.</p>
-    <form method="post" action="{% url 'scenario-settings' scenario.pk %}" novalidate>
-        {% csrf_token %}
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:0.75rem;">
-            <div>
-                {{ settings_form.input_mode.label_tag }}<br />
-                {{ settings_form.input_mode }}
-            </div>
-            <div>
-                {{ settings_form.preset.label_tag }}<br />
-                {{ settings_form.preset }}
-            </div>
-            <div>
-                {{ settings_form.ui_mode.label_tag }}<br />
-                {{ settings_form.ui_mode }}
-            </div>
-            <div style="display:flex; align-items:center; gap:0.4rem;">
-                {{ settings_form.use_reciprocal_allocation }} {{ settings_form.use_reciprocal_allocation.label_tag }}
-            </div>
-            <div style="display:flex; align-items:center; gap:0.4rem;">
-                {{ settings_form.use_seasonality }} {{ settings_form.use_seasonality.label_tag }}
-            </div>
-        </div>
-        <div style="margin-top:0.75rem;">
-            <button type="submit" style="padding:0.45rem 0.7rem;background:#0f766e;color:#fff;border:none;border-radius:8px;">Mettre à jour</button>
-        </div>
-    </form>
-</section>
 <p>
     <strong>Mode de saisie :</strong> {{ scenario.get_input_mode_display }} |
     <strong>Preset :</strong> {{ scenario.get_preset_display }} |

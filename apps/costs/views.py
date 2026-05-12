@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.shortcuts import render, redirect
-from .forms import CostScenarioForm, ProductForm, CostLineForm, ScenarioSettingsForm
+from .forms import CostScenarioForm, ProductForm, CostLineForm
 from .models import CostScenario, Product, CostLine
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
@@ -71,7 +71,6 @@ def scenario_detail(request, pk):
         "costs/scenario_detail.html",
         {
             "scenario": scenario,
-            "settings_form": ScenarioSettingsForm(instance=scenario),
             "center_analysis": calculate_center_analysis(cost_lines),
             "direct_costing": calculate_direct_costing(cost_lines),
             "summary_rows": summary_rows,
@@ -84,15 +83,6 @@ def scenario_detail(request, pk):
             },
         },
     )
-
-
-def update_scenario_settings(request, pk):
-    scenario = CostScenario.objects.get(pk=pk)
-    if request.method == "POST":
-        form = ScenarioSettingsForm(request.POST, instance=scenario)
-        if form.is_valid():
-            form.save()
-    return redirect("scenario-detail", pk=pk)
 
 
 def create_scenario(request):
@@ -113,13 +103,6 @@ def add_product(request, scenario_id):
         if form.is_valid():
             product = form.save(commit=False)
             product.scenario = scenario
-
-            entry_mode = form.cleaned_data.get("entry_mode")
-            if entry_mode == "ca_total":
-                quantity = Decimal(form.cleaned_data["quantity"])
-                revenue_total = Decimal(form.cleaned_data["revenue_total"])
-                product.unit_price = (revenue_total / quantity) if quantity else Decimal("0.00")
-
             product.save()
             return redirect("add_cost_line", scenario_id=scenario.id, product_id=product.id)
     else:

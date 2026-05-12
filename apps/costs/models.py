@@ -65,6 +65,7 @@ class CostLine(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     center = models.ForeignKey(CostCenter, on_delete=models.SET_NULL, null=True, blank=True, related_name="cost_lines")
     is_direct = models.BooleanField(default=False)
+    is_product = models.BooleanField(default=False)
 
     def __str__(self):
         return self.label

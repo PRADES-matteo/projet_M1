@@ -2,40 +2,15 @@
 
 {% block content %}
 <h1>Ajouter un produit au scénario : {{ scenario.name }}</h1>
-<p><strong>Mode de saisie du scénario :</strong> {{ scenario.get_input_mode_display }}</p>
+<p>Renseignez les données produit, puis choisissez les catégories de coûts min/max.</p>
 <form method="post" novalidate>
         {% csrf_token %}
         {{ form.non_field_errors }}
         <p>{{ form.name.label_tag }}<br>{{ form.name }} {{ form.name.errors }}</p>
-        <p>{{ form.entry_mode.label_tag }}<br>{{ form.entry_mode }} {{ form.entry_mode.errors }}</p>
         <p>{{ form.quantity.label_tag }}<br>{{ form.quantity }} {{ form.quantity.errors }}</p>
-
-        <div id="block-ca" style="display:none;">
-                <p>{{ form.revenue_total.label_tag }}<br>{{ form.revenue_total }} {{ form.revenue_total.errors }}</p>
-        </div>
-        <div id="block-pv" style="display:none;">
-                <p>{{ form.unit_price.label_tag }}<br>{{ form.unit_price }} {{ form.unit_price.errors }}</p>
-        </div>
+        <p>{{ form.unit_price.label_tag }}<br>{{ form.unit_price }} {{ form.unit_price.errors }}</p>
 
     <button type="submit" class="btn btn-primary">Ajouter le produit</button>
 </form>
-
-<script>
-    (function () {
-        const entryMode = document.getElementById("id_entry_mode");
-        const caBlock = document.getElementById("block-ca");
-        const pvBlock = document.getElementById("block-pv");
-        function syncMode() {
-            if (!entryMode) return;
-            const isCA = entryMode.value === "ca_total";
-            if (caBlock) caBlock.style.display = isCA ? "block" : "none";
-            if (pvBlock) pvBlock.style.display = isCA ? "none" : "block";
-        }
-        if (entryMode) {
-            entryMode.addEventListener("change", syncMode);
-            syncMode();
-        }
-    })();
-</script>
 <a href="{% url 'scenario-detail' scenario.id %}">Retour au scénario</a>
 {% endblock %}
