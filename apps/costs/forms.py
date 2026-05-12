@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import CostCenter, CostLine, CostScenario
+from .models import CostCenter, CostLine, CostScenario, Product
 
 
 class CostScenarioForm(forms.ModelForm):
@@ -18,4 +18,9 @@ class CostCenterForm(forms.ModelForm):
 class CostLineForm(forms.ModelForm):
     class Meta:
         model = CostLine
-        fields = ["scenario", "label", "amount", "center", "is_direct"]
+        fields = ["scenario", "label", "amount", "center", "is_direct", "product", "scenario"]
+        
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ["name", "quantity", "unit_price", "scenario"]

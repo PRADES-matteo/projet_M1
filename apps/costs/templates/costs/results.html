@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Résultats pour le scénario : {{ scenario.name }}</h1>
+
+<h2>Méthode : {{ scenario.get_method_display }}</h2>
+
+<h3>Résultats</h3>
+<ul>
+    {% if scenario.method == "direct_costing" %}
+        <li>Coûts directs : {{ result.direct_costs }}</li>
+        <li>Coûts indirects : {{ result.indirect_costs }}</li>
+        <li>Coût total : {{ result.total_cost }}</li>
+    {% elif scenario.method == "center_analysis" %}
+        <li>Total général : {{ result.total_general }}</li>
+        <li>Totaux par centre :</li>
+        <ul>
+            {% for center, total in result.total_by_center.items %}
+                <li>{{ center }} : {{ total }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</ul>
+
+<h3>Analyse de la rentabilité</h3>
+<p>Rentabilité globale : {{ result.global_profitability }}%</p>
+<ul>
+    {% for product, profitability in result.product_profitability.items %}
+        <li>{{ product }} : {{ profitability }}%</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
+{% endblock %}
