@@ -2,10 +2,87 @@
 
 {% block content %}
 <h1>Créer un nouveau scénario</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Créer</button>
+<p>Renseignez les informations générales. Le mode de saisie des produits sera défini après la création.</p>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 0.85rem;
+        align-items: start;
+    }
+    .field-box {
+        min-width: 0;
+    }
+    .field-box label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .field-box input,
+    .field-box select,
+    .field-box textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        max-width: 100%;
+    }
+    .field-box small {
+        display: block;
+        color: #6b7280;
+        margin-top: 0.2rem;
+    }
+    .errorlist {
+        margin: 0.25rem 0 0;
+        padding-left: 1rem;
+        color: #991b1b;
+    }
+    @media (max-width: 640px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-grid">
+            <div class="field-box">
+                {{ form.name.label_tag }}
+                {{ form.name }} {{ form.name.errors }}
+            </div>
+            <div class="field-box">
+                {{ form.period.label_tag }}
+                {{ form.period }} {{ form.period.errors }}
+            </div>
+            <div class="field-box">
+                {{ form.method.label_tag }}
+                {{ form.method }} {{ form.method.errors }}
+                <small>{{ form.method.help_text }}</small>
+            </div>
+            <div class="field-box">
+                {{ form.preset.label_tag }}
+                {{ form.preset }} {{ form.preset.errors }}
+                <small>{{ form.preset.help_text }}</small>
+            </div>
+            <div class="field-box">
+                {{ form.ui_mode.label_tag }}
+                {{ form.ui_mode }} {{ form.ui_mode.errors }}
+                <small>{{ form.ui_mode.help_text }}</small>
+            </div>
+        </div>
+        <div class="field-box" style="margin-top:0.75rem;">
+            {{ form.description.label_tag }}
+            {{ form.description }} {{ form.description.errors }}
+        </div>
+        <div style="margin-top:0.75rem;">
+            <button type="submit" class="btn btn-primary">Créer le scénario</button>
+        </div>
 </form>
 <a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
 {% endblock %}

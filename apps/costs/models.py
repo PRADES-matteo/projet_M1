@@ -8,9 +8,26 @@ class CostScenario(models.Model):
     description = models.TextField(blank=True)
     method = models.CharField(
         max_length=50,
-        choices=[("direct_costing", "Direct Costing"), ("center_analysis", "Center Analysis")],
+        choices=[("direct_costing", "Méthode du direct costing"), ("center_analysis", "Méthode des centres d'analyse")],
         default="direct_costing",
     )
+    input_mode = models.CharField(
+        max_length=20,
+        choices=[("ca_total", "Je fournis le CA"), ("pv_volume", "Je fournis PV et volumes")],
+        default="pv_volume",
+    )
+    preset = models.CharField(
+        max_length=20,
+        choices=[("small_business", "Petite entreprise"), ("factory", "Usine"), ("distribution", "Distribution")],
+        default="small_business",
+    )
+    ui_mode = models.CharField(
+        max_length=10,
+        choices=[("simple", "Simple"), ("expert", "Expert")],
+        default="simple",
+    )
+    use_reciprocal_allocation = models.BooleanField(default=False)
+    use_seasonality = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

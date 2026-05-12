@@ -5,6 +5,124 @@
 <p><strong>Période :</strong> {{ scenario.period }}</p>
 <p><strong>Description :</strong> {{ scenario.description }}</p>
 <p><strong>Méthode :</strong> {{ scenario.get_method_display }}</p>
+<p><strong>Template :</strong> {{ scenario.get_preset_display }} | <strong>Niveau :</strong> {{ scenario.get_ui_mode_display }}</p>
+
+<section class="card" style="margin: 1rem 0;">
+    <h2>Paramètres du scénario</h2>
+    <p>Configurez ici le mode de saisie et les options avancées après création.</p>
+    <form method="post" action="{% url 'scenario-settings' scenario.pk %}" novalidate>
+        {% csrf_token %}
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:0.75rem;">
+            <div>
+                {{ settings_form.input_mode.label_tag }}<br />
+                {{ settings_form.input_mode }}
+            </div>
+            <div>
+                {{ settings_form.preset.label_tag }}<br />
+                {{ settings_form.preset }}
+            </div>
+            <div>
+                {{ settings_form.ui_mode.label_tag }}<br />
+                {{ settings_form.ui_mode }}
+            </div>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+                {{ settings_form.use_reciprocal_allocation }} {{ settings_form.use_reciprocal_allocation.label_tag }}
+            </div>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+                {{ settings_form.use_seasonality }} {{ settings_form.use_seasonality.label_tag }}
+            </div>
+        </div>
+        <div style="margin-top:0.75rem;">
+            <button type="submit" style="padding:0.45rem 0.7rem;background:#0f766e;color:#fff;border:none;border-radius:8px;">Mettre à jour</button>
+        </div>
+    </form>
+</section>
+<p>
+    <strong>Mode de saisie :</strong> {{ scenario.get_input_mode_display }} |
+    <strong>Preset :</strong> {{ scenario.get_preset_display }} |
+    <strong>Niveau :</strong> {{ scenario.get_ui_mode_display }}
+</p>
+
+<style>
+    .table-wrap {
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+    table.summary {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+    table.summary th,
+    table.summary td {
+        border: 1px solid #e5e7eb;
+        padding: 0.45rem 0.55rem;
+        text-align: right;
+        white-space: nowrap;
+    }
+    table.summary th:first-child,
+    table.summary td:first-child {
+        text-align: left;
+    }
+    table.summary thead {
+        background: #f3f4f6;
+    }
+    table.summary tfoot {
+        background: #f9fafb;
+        font-weight: 700;
+    }
+</style>
+
+<h2>Vision d'ensemble Direct Costing</h2>
+<div class="table-wrap">
+    <table class="summary">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>CV unitaire</th>
+                <th>Chiffre d'affaires total</th>
+                <th>Coût variable total</th>
+                <th>MCV</th>
+                <th>CF spécifiques</th>
+                <th>Résultat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in summary_rows %}
+            <tr>
+                <td>{{ row.product.name }}</td>
+                <td>{{ row.quantity|floatformat:0 }}</td>
+                <td>{{ row.unit_price|floatformat:2 }}</td>
+                <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
+                <td>{{ row.revenue|floatformat:2 }}</td>
+                <td>{{ row.variable|floatformat:2 }}</td>
+                <td>{{ row.contribution|floatformat:2 }}</td>
+                <td>{{ row.fixed|floatformat:2 }}</td>
+                <td>{{ row.result|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">Aucun produit saisi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>Total</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>{{ summary_totals.revenue|floatformat:2 }}</td>
+                <td>{{ summary_totals.variable|floatformat:2 }}</td>
+                <td>{{ summary_totals.contribution|floatformat:2 }}</td>
+                <td>{{ summary_totals.fixed|floatformat:2 }}</td>
+                <td>{{ summary_totals.result|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
 
 <h2>Produits</h2>
 <ul>
