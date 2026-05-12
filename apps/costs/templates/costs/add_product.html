@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Ajouter un produit au scénario : {{ scenario.name }}</h1>
-<p>Renseignez les données produit, puis choisissez les catégories de coûts min/max.</p>
+<p>Renseignez les données produit.</p>
 <form method="post" novalidate>
         {% csrf_token %}
         {{ form.non_field_errors }}

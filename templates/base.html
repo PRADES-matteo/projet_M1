@@ -46,12 +46,42 @@
         border-radius: 14px;
         box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
       }
+      .messages {
+        margin: 0 0 1rem 0;
+        padding: 0;
+        list-style: none;
+      }
+      .messages li {
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        border: 1px solid transparent;
+      }
+      .messages li.success {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
+      }
+      .messages li.error {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+      }
     </style>
   </head>
   <body>
     <header>
       <strong>Gestion des coûts</strong>
     </header>
-    <main>{% block content %}{% endblock %}</main>
+    <main>
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
   </body>
 </html>

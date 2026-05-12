@@ -8,7 +8,11 @@ class CostScenario(models.Model):
     description = models.TextField(blank=True)
     method = models.CharField(
         max_length=50,
-        choices=[("direct_costing", "Méthode du direct costing"), ("center_analysis", "Méthode des centres d'analyse")],
+        choices=[
+            ("center_analysis", "Centres d'analyse"),
+            ("direct_costing", "Direct costing"),
+            ("direct_costing_advanced", "Direct costing évolué"),
+        ],
         default="direct_costing",
     )
     input_mode = models.CharField(

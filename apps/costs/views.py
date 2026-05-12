@@ -1,6 +1,8 @@
 from decimal import Decimal
 
-from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import transaction
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CostScenarioForm, ProductForm, CostLineForm
 from .models import CostScenario, Product, CostLine
 from .services.direct_costing import calculate_direct_costing
@@ -85,6 +87,63 @@ def scenario_detail(request, pk):
     )
 
 
+def save_scenario(request, pk):
+    if request.method == "POST":
+        messages.success(request, "Scénario sauvegardé.")
+    return redirect("scenario-detail", pk=pk)
+
+
+@transaction.atomic
+def duplicate_scenario(request, pk):
+    source = CostScenario.objects.prefetch_related("products", "cost_centers", "cost_lines").get(pk=pk)
+
+    cloned = CostScenario.objects.create(
+        name=f"{source.name} (copie)",
+        period=source.period,
+        description=source.description,
+        method=source.method,
+        input_mode=source.input_mode,
+        preset=source.preset,
+        ui_mode=source.ui_mode,
+        use_reciprocal_allocation=source.use_reciprocal_allocation,
+        use_seasonality=source.use_seasonality,
+    )
+
+    center_map = {}
+    for center in source.cost_centers.all():
+        new_center = center.__class__.objects.create(
+            scenario=cloned,
+            code=center.code,
+            name=center.name,
+            is_auxiliary=center.is_auxiliary,
+        )
+        center_map[center.id] = new_center
+
+    product_map = {}
+    for product in source.products.all():
+        new_product = Product.objects.create(
+            scenario=cloned,
+            name=product.name,
+            quantity=product.quantity,
+            unit_price=product.unit_price,
+        )
+        product_map[product.id] = new_product
+
+    for line in source.cost_lines.all():
+        CostLine.objects.create(
+            scenario=cloned,
+            product=product_map.get(line.product_id),
+            label=line.label,
+            amount=line.amount,
+            center=center_map.get(line.center_id),
+            is_direct=line.is_direct,
+            is_product=getattr(line, "is_product", False),
+        )
+
+    messages.success(request, f"Scénario dupliqué: {cloned.name}")
+    return redirect("scenario-detail", pk=cloned.pk)
+
+
 def create_scenario(request):
     if request.method == "POST":
         form = CostScenarioForm(request.POST)
@@ -97,17 +156,46 @@ def create_scenario(request):
 
 
 def add_product(request, scenario_id):
-    scenario = CostScenario.objects.get(id=scenario_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id)
     if request.method == "POST":
         form = ProductForm(request.POST, scenario=scenario)
         if form.is_valid():
             product = form.save(commit=False)
             product.scenario = scenario
             product.save()
-            return redirect("add_cost_line", scenario_id=scenario.id, product_id=product.id)
+            messages.success(request, f'Le produit « {product.name} » a été ajouté avec succès.')
+            return redirect("scenario-detail", pk=scenario.id)
     else:
         form = ProductForm(scenario=scenario)
     return render(request, "costs/add_product.html", {"form": form, "scenario": scenario})
+
+
+def edit_product(request, scenario_id, product_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id)
+    product = get_object_or_404(Product, id=product_id, scenario=scenario)
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product, scenario=scenario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Le produit « {product.name} » a été modifié.')
+            return redirect("scenario-detail", pk=scenario.id)
+    else:
+        form = ProductForm(instance=product, scenario=scenario)
+
+    return render(request, "costs/edit_product.html", {"form": form, "scenario": scenario, "product": product})
+
+
+def delete_product(request, scenario_id, product_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id)
+    product = get_object_or_404(Product, id=product_id, scenario=scenario)
+
+    if request.method == "POST":
+        product_name = product.name
+        product.delete()
+        messages.success(request, f'Le produit « {product_name} » a été supprimé.')
+
+    return redirect("scenario-detail", pk=scenario.id)
 
 
 def add_cost_line(request, scenario_id, product_id):
