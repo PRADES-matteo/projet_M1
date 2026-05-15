@@ -257,42 +257,40 @@
          LISTE DES SCÉNARIOS
     ========================== -->
 
-    <div class="scenario-section">
+    <div style="display:flex;">
 
-        <div class="scenario-title">
-            Mes scénarios
-        </div>
-
-        <div class="scenario-list">
-
-            {% for scenario in scenarios %}
-
-            <a
-                href="{% url 'scenario-detail' scenario.pk %}"
-                class="scenario-item"
-            >
-
-                <div class="scenario-name">
-                    {{ scenario.name }}
-                </div>
-
-                <div class="scenario-period">
-                    {{ scenario.period }}
-                </div>
-
-            </a>
-
-            {% empty %}
-
-            <div class="scenario-item">
-                Aucun scénario enregistré.
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
+      <!-- SIDEBAR -->
+      <div style="width:280px; border-right:1px solid #ddd; height:100vh; overflow:auto;">
+  
+          {% for scenario in scenarios %}
+  
+              <a
+                  href="{% url 'scenario-detail' scenario.pk %}"
+  
+                  hx-get="{% url 'scenario-detail' scenario.pk %}"
+                  hx-target="#panel"
+                  hx-swap="innerHTML"
+  
+                  style="display:block;padding:10px;border-bottom:1px solid #eee;text-decoration:none;"
+              >
+                  <strong>{{ scenario.name }}</strong><br>
+                  <small>{{ scenario.period }}</small>
+              </a>
+  
+          {% endfor %}
+  
+      </div>
+  
+      <!-- PANEL DROIT -->
+      <div style="flex:1;padding:20px;">
+  
+          <div id="panel">
+              <h3>Sélectionne un scénario</h3>
+          </div>
+  
+      </div>
+  
+  </div>
 
 </div>
 

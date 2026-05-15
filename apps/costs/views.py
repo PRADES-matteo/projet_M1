@@ -20,7 +20,15 @@ def scenario_list(request):
         form = CostScenarioForm()
 
     scenarios = CostScenario.objects.all().order_by("-created_at")
-    return render(request, "costs/scenario_list.html", {"scenarios": scenarios, "form": form})
+
+    return render(
+        request,
+        "costs/scenario_list.html",
+        {
+            "scenarios": scenarios,
+            "form": form
+        }
+    )
 
 
 def scenario_detail(request, pk):
@@ -48,19 +56,19 @@ def scenario_detail(request, pk):
         contribution = revenue - variable
         result = contribution - fixed
         variable_unit_cost = variable / quantity if quantity else Decimal("0.00")
-        summary_rows.append(
-            {
-                "product": product,
-                "quantity": quantity,
-                "unit_price": unit_price,
-                "variable_unit_cost": variable_unit_cost,
-                "revenue": revenue,
-                "variable": variable,
-                "fixed": fixed,
-                "contribution": contribution,
-                "result": result,
-            }
-        )
+
+        summary_rows.append({
+            "product": product,
+            "quantity": quantity,
+            "unit_price": unit_price,
+            "variable_unit_cost": variable_unit_cost,
+            "revenue": revenue,
+            "variable": variable,
+            "fixed": fixed,
+            "contribution": contribution,
+            "result": result,
+        })
+
         total_revenue += revenue
         total_variable += variable
         total_fixed += fixed
@@ -68,23 +76,24 @@ def scenario_detail(request, pk):
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
 
-    return render(
-        request,
-        "costs/scenario_detail.html",
-        {
-            "scenario": scenario,
-            "center_analysis": calculate_center_analysis(cost_lines),
-            "direct_costing": calculate_direct_costing(cost_lines),
-            "summary_rows": summary_rows,
-            "summary_totals": {
-                "revenue": total_revenue,
-                "variable": total_variable,
-                "fixed": total_fixed,
-                "contribution": total_contribution,
-                "result": total_result,
-            },
+    context = {
+        "scenario": scenario,
+        "center_analysis": calculate_center_analysis(cost_lines),
+        "direct_costing": calculate_direct_costing(cost_lines),
+        "summary_rows": summary_rows,
+        "summary_totals": {
+            "revenue": total_revenue,
+            "variable": total_variable,
+            "fixed": total_fixed,
+            "contribution": total_contribution,
+            "result": total_result,
         },
-    )
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(request, "costs/partials/scenario_detail_panel.html", context)
+
+    return render(request, "costs/scenario_detail.html", context)
 
 
 def save_scenario(request, pk):
