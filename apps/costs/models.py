@@ -109,3 +109,19 @@ class FixedCost(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SeasonalityEntry(models.Model):
+    """Monthly percentage distribution for sales in a scenario."""
+    MONTH_CHOICES = [(i, i) for i in range(1, 13)]
+
+    scenario = models.ForeignKey(CostScenario, related_name='seasonality', on_delete=models.CASCADE)
+    month = models.PositiveSmallIntegerField(choices=MONTH_CHOICES)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = (('scenario', 'month'),)
+        ordering = ['month']
+
+    def __str__(self):
+        return f"{self.scenario.name} - Mois {self.month}: {self.percentage}%"

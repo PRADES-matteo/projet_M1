@@ -6,6 +6,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.db.models import Sum
+import calendar
 from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm, FixedCostForm
 from .models import CostScenario, Product, CostLine, VariableCost, FixedCost
 from .services.direct_costing import calculate_direct_costing
@@ -74,6 +75,18 @@ def scenario_detail(request, pk):
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
 
+    # Seasonality: ensure entries exist for months 1..12
+    from .models import SeasonalityEntry
+    existing = {e.month: e for e in scenario.seasonality.all()}
+    seasonality_list = []
+    for m in range(1, 13):
+        if m in existing:
+            entry = existing[m]
+        else:
+            entry = SeasonalityEntry.objects.create(scenario=scenario, month=m, percentage=0)
+        est_rev = (total_revenue * (entry.percentage / Decimal('100.0'))).quantize(Decimal('0.01'))
+        seasonality_list.append({'month': m, 'month_name': calendar.month_name[m], 'percentage': entry.percentage, 'estimated_revenue': est_rev})
+
     context = {
         'scenario': scenario,
         'variable_costs_total': variable_costs_total,
@@ -85,8 +98,31 @@ def scenario_detail(request, pk):
             'contribution': total_revenue - total_variable,
             'fixed': total_fixed,
         },
+        'seasonality_list': seasonality_list,
+        'total_revenue': total_revenue,
     }
     return render(request, 'costs/scenario_detail.html', context)
+
+
+def edit_seasonality(request, scenario_id):
+    from .models import SeasonalityEntry, CostScenario
+    scenario = get_object_or_404(CostScenario, pk=scenario_id)
+    if request.method == 'POST':
+        for m in range(1, 13):
+            key = f'month_{m}'
+            val = request.POST.get(key, '0')
+            try:
+                pct = Decimal(val)
+            except Exception:
+                pct = Decimal('0')
+            entry, _ = SeasonalityEntry.objects.get_or_create(scenario=scenario, month=m)
+            entry.percentage = pct
+            entry.save()
+        messages.success(request, 'Saisonnalité mise à jour.')
+        return redirect('scenario-detail', pk=scenario_id)
+    else:
+        # redirect to scenario detail where form is embedded
+        return redirect('scenario-detail', pk=scenario_id)
 
 
 def save_scenario(request, pk):
