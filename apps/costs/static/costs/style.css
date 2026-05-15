@@ -1,0 +1,32 @@
+/* Style pour la barre latérale */
+.sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 1rem;
+    border-right: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.sidebar .btn {
+    margin-bottom: 1rem;
+}
+
+/* Style pour le contenu principal */
+main {
+    margin-left: 16.6667%; /* Correspond à la largeur de la barre latérale (col-md-3) */
+    padding: 2rem;
+}

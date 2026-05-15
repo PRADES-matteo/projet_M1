@@ -1,123 +1,395 @@
-{% extends "base.html" %} {% block content %}
-<h1>Scénarios</h1>
+{% extends "costs/base.html" %}
+
+{% block content %}
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 0.85rem;
-    align-items: start;
-  }
-  .field-box {
-    min-width: 0;
-  }
-  .field-box label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-  .field-box input,
-  .field-box select,
-  .field-box textarea {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    max-width: 100%;
-  }
-  .field-box small {
-    display: block;
-    color: #6b7280;
-    margin-top: 0.2rem;
-  }
-  .errorlist {
-    margin: 0.25rem 0 0;
-    padding-left: 1rem;
-    color: #991b1b;
-  }
-  @media (max-width: 640px) {
-    .form-grid {
-      grid-template-columns: 1fr;
+    * {
+        box-sizing: border-box;
     }
-  }
-  .hint {
-    background: #f0fdfa;
-    border: 1px solid #99f6e4;
-    border-radius: 10px;
-    padding: 0.6rem 0.8rem;
-    margin: 0.6rem 0;
-  }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #f3f4f6;
+        font-family: Arial, sans-serif;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        background-color: #ffffff;
+        border-right: 1px solid #e5e7eb;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 1.2rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sidebar-brand {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0f172a;
+    }
+
+    .sidebar .nav-link {
+        color: #374151;
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        transition: 0.2s;
+        border-radius: 8px;
+        margin: 0.2rem 0.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: #f3f4f6;
+    }
+
+    .sidebar .nav-link.active {
+        background-color: #0f766e;
+        color: white;
+    }
+
+    /* =========================
+       SCENARIO LIST IN SIDEBAR
+    ========================== */
+
+    .scenario-section {
+        margin-top: 1.5rem;
+        padding: 0 1rem 1rem;
+    }
+
+    .scenario-title {
+        font-size: 0.85rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #6b7280;
+        margin-bottom: 0.8rem;
+    }
+
+    .scenario-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .scenario-item {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.7rem;
+        text-decoration: none;
+        color: #111827;
+        transition: 0.2s;
+    }
+
+    .scenario-item:hover {
+        background: #ecfeff;
+        border-color: #5eead4;
+    }
+
+    .scenario-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .scenario-period {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.2rem;
+    }
+
+    /* =========================
+       MAIN CONTENT
+    ========================== */
+
+    .main-content {
+        margin-left: 260px;
+        padding: 2rem;
+    }
+
+    .page-title {
+        margin-bottom: 1.5rem;
+        color: #111827;
+    }
+
+    /* =========================
+       CARD
+    ========================== */
+
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    /* =========================
+       FORM
+    ========================== */
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 0.85rem;
+        align-items: start;
+    }
+
+    .field-box {
+        min-width: 0;
+    }
+
+    .field-box label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .field-box input,
+    .field-box select,
+    .field-box textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        max-width: 100%;
+    }
+
+    .field-box textarea {
+        min-height: 120px;
+    }
+
+    .field-box small {
+        display: block;
+        color: #6b7280;
+        margin-top: 0.2rem;
+    }
+
+    .errorlist {
+        margin: 0.25rem 0 0;
+        padding-left: 1rem;
+        color: #991b1b;
+    }
+
+    .hint {
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
+        padding: 0.8rem;
+        margin: 1rem 0;
+    }
+
+    .submit-btn {
+        padding: 0.7rem 1rem;
+        background: #0f766e;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .submit-btn:hover {
+        background: #115e59;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 768px) {
+
+        .sidebar {
+            position: relative;
+            width: 100%;
+            height: auto;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 1rem;
+        }
+    }
 </style>
 
-<section class="card">
-  <h2>Créer un nouveau scénario</h2>
-  <p>Étape 1: définir le scénario. Le mode de saisie des produits se règle juste après création.</p>
-  <div class="hint">
-    Astuce: choisissez <strong>Simple</strong> pour un démarrage rapide, ou <strong>Expert</strong> pour activer plus d'options ensuite.
-  </div>
-  <form method="post" novalidate>
-    {% csrf_token %} {{ form.non_field_errors }}
-    <div class="form-grid">
-      <div class="field-box">
-        {{ form.name.label_tag }}
-        {{ form.name }} {{ form.name.errors }}
-      </div>
-      <div class="field-box">
-        {{ form.period.label_tag }}
-        {{ form.period }} {{ form.period.errors }}
-      </div>
-      <div class="field-box">
-        {{ form.method.label_tag }}
-        {{ form.method }} {{ form.method.errors }}
-        <small>{{ form.method.help_text }}</small>
-      </div>
-      <div class="field-box">
-        {{ form.preset.label_tag }}
-        {{ form.preset }} {{ form.preset.errors }}
-        <small>{{ form.preset.help_text }}</small>
-      </div>
-      <div class="field-box">
-        {{ form.ui_mode.label_tag }}
-        {{ form.ui_mode }} {{ form.ui_mode.errors }}
-        <small>{{ form.ui_mode.help_text }}</small>
-      </div>
-    </div>
-    <div class="field-box" style="margin-top:0.8rem;">
-      {{ form.description.label_tag }}
-      {{ form.description }} {{ form.description.errors }}
-    </div>
-    <div style="margin-top: 0.75rem">
-      <button
-        type="submit"
-        style="
-          padding: 0.5rem 0.8rem;
-          background: #0f766e;
-          color: #fff;
-          border: none;
-          border-radius: 8px;
-        "
-      >
-        Créer
-      </button>
-    </div>
-  </form>
-</section>
+<!-- =========================
+     SIDEBAR
+========================= -->
 
-<div style="height: 1rem"></div>
+<div class="sidebar">
 
-<div class="grid">
-  {% for scenario in scenarios %}
-  <article class="card">
-    <h2>
-      <a href="{% url 'scenario-detail' scenario.pk %}">{{ scenario.name }}</a>
-    </h2>
-    <p>{{ scenario.period }}</p>
-  </article>
-  {% empty %}
-  <p>Aucun scénario enregistré.</p>
-  {% endfor %}
+    <div class="sidebar-header">
+        <h4 class="sidebar-brand">CoreUI</h4>
+    </div>
+
+    <ul class="nav flex-column">
+
+        <li class="nav-item">
+            <a class="nav-link active" href="#">
+                <i class="bi bi-house-door"></i>
+                Tableau de bord
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-plus-circle"></i>
+                Nouveau scénario
+            </a>
+        </li>
+
+    </ul>
+
+    <!-- =========================
+         LISTE DES SCÉNARIOS
+    ========================== -->
+
+    <div class="scenario-section">
+
+        <div class="scenario-title">
+            Mes scénarios
+        </div>
+
+        <div class="scenario-list">
+
+            {% for scenario in scenarios %}
+
+            <a
+                href="{% url 'scenario-detail' scenario.pk %}"
+                class="scenario-item"
+            >
+
+                <div class="scenario-name">
+                    {{ scenario.name }}
+                </div>
+
+                <div class="scenario-period">
+                    {{ scenario.period }}
+                </div>
+
+            </a>
+
+            {% empty %}
+
+            <div class="scenario-item">
+                Aucun scénario enregistré.
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
 </div>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<div class="main-content">
+
+    <h1 class="page-title">
+        Scénarios
+    </h1>
+
+    <section class="card-custom">
+
+        <h2>
+            Créer un nouveau scénario
+        </h2>
+
+        <p>
+            Étape 1 : définir le scénario.
+            Le mode de saisie des produits se règle juste après création.
+        </p>
+
+        <div class="hint">
+            Astuce :
+            choisissez <strong>Simple</strong> pour un démarrage rapide,
+            ou <strong>Expert</strong> pour activer plus d'options ensuite.
+        </div>
+
+        <form method="post" novalidate>
+
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <div class="form-grid">
+
+                <div class="field-box">
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="field-box">
+                    {{ form.period.label_tag }}
+                    {{ form.period }}
+                    {{ form.period.errors }}
+                </div>
+
+                <div class="field-box">
+                    {{ form.method.label_tag }}
+                    {{ form.method }}
+                    {{ form.method.errors }}
+                    <small>{{ form.method.help_text }}</small>
+                </div>
+
+                <div class="field-box">
+                    {{ form.preset.label_tag }}
+                    {{ form.preset }}
+                    {{ form.preset.errors }}
+                    <small>{{ form.preset.help_text }}</small>
+                </div>
+
+                <div class="field-box">
+                    {{ form.ui_mode.label_tag }}
+                    {{ form.ui_mode }}
+                    {{ form.ui_mode.errors }}
+                    <small>{{ form.ui_mode.help_text }}</small>
+                </div>
+
+            </div>
+
+            <div
+                class="field-box"
+                style="margin-top: 1rem;"
+            >
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <div style="margin-top: 1rem;">
+
+                <button
+                    type="submit"
+                    class="submit-btn"
+                >
+                    Créer
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
 {% endblock %}
