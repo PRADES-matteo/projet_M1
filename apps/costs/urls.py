@@ -12,4 +12,7 @@ urlpatterns = [
     path("scenario/<int:scenario_id>/product/<int:product_id>/delete/", views.delete_product, name="delete_product"),
     path("scenario/<int:scenario_id>/product/<int:product_id>/cost-line/add/", views.add_cost_line, name="add_cost_line"),
     path("scenario/<int:scenario_id>/results/", views.calculate_results, name="calculate_results"),
+    path('scenario/<int:scenario_id>/variable-cost/add/', views.VariableCostCreateView.as_view(), name='add_variable_cost'),
+    path('variable-cost/<int:pk>/edit/', views.VariableCostUpdateView.as_view(), name='edit_variable_cost'),
+    path('variable-cost/<int:pk>/delete/', views.VariableCostDeleteView.as_view(), name='delete_variable_cost'),
 ]

@@ -1,16 +1,19 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h1>Ajouter un produit au scénario : {{ scenario.name }}</h1>
 <p>Renseignez les données produit.</p>
 <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        <p>{{ form.name.label_tag }}<br>{{ form.name }} {{ form.name.errors }}</p>
-        <p>{{ form.quantity.label_tag }}<br>{{ form.quantity }} {{ form.quantity.errors }}</p>
-        <p>{{ form.unit_price.label_tag }}<br>{{ form.unit_price }} {{ form.unit_price.errors }}</p>
+  {% csrf_token %} {{ form.non_field_errors }}
+  <p>{{ form.name.label_tag }}<br />{{ form.name }} {{ form.name.errors }}</p>
+  <p>
+    {{ form.quantity.label_tag }}<br />{{ form.quantity }} {{
+    form.quantity.errors }}
+  </p>
+  <p>
+    {{ form.unit_price.label_tag }}<br />{{ form.unit_price }} {{
+    form.unit_price.errors }}
+  </p>
 
-    <button type="submit" class="btn btn-primary">Ajouter le produit</button>
+  <button type="submit" class="btn btn-primary">Ajouter le produit</button>
 </form>
 <a href="{% url 'scenario-detail' scenario.id %}">Retour au scénario</a>
 {% endblock %}

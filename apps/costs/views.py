@@ -1,10 +1,13 @@
 from decimal import Decimal
+from django.urls import reverse
 
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CostScenarioForm, ProductForm, CostLineForm
-from .models import CostScenario, Product, CostLine
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.db.models import Sum
+from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm
+from .models import CostScenario, Product, CostLine, VariableCost
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
 
@@ -31,6 +34,8 @@ def scenario_detail(request, pk):
     total_revenue = Decimal("0.00")
     total_variable = Decimal("0.00")
     total_fixed = Decimal("0.00")
+
+    variable_costs_total = scenario.variable_costs.aggregate(total=Sum('amount'))['total'] or 0
 
     for product in scenario.products.all():
         quantity = Decimal(product.quantity)
@@ -68,23 +73,18 @@ def scenario_detail(request, pk):
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
 
-    return render(
-        request,
-        "costs/scenario_detail.html",
-        {
-            "scenario": scenario,
-            "center_analysis": calculate_center_analysis(cost_lines),
-            "direct_costing": calculate_direct_costing(cost_lines),
-            "summary_rows": summary_rows,
-            "summary_totals": {
-                "revenue": total_revenue,
-                "variable": total_variable,
-                "fixed": total_fixed,
-                "contribution": total_contribution,
-                "result": total_result,
-            },
+    context = {
+        'scenario': scenario,
+        'variable_costs_total': variable_costs_total,
+        'summary_rows': summary_rows,
+        'summary_totals': {
+            'revenue': total_revenue,
+            'variable': total_variable,
+            'contribution': total_revenue - total_variable,
+            'fixed': total_fixed,
         },
-    )
+    }
+    return render(request, 'costs/scenario_detail.html', context)
 
 
 def save_scenario(request, pk):
@@ -223,3 +223,33 @@ def calculate_results(request, scenario_id):
         result = calculate_center_analysis(lines)
 
     return render(request, "costs/results.html", {"scenario": scenario, "result": result})
+
+
+class VariableCostCreateView(CreateView):
+    model = VariableCost
+    form_class = VariableCostForm
+    template_name = 'costs/variable_cost_form.html'
+    success_url = "/costs/{scenario_id}/"
+
+    def form_valid(self, form):
+        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        return super().form_valid(form)
+
+
+class VariableCostUpdateView(UpdateView):
+    model = VariableCost
+    form_class = VariableCostForm
+    template_name = 'costs/variable_cost_form.html'
+    success_url = "/costs/{scenario_id}/"
+
+    def form_valid(self, form):
+        form.instance.scenario = self.object.scenario
+        return super().form_valid(form)
+
+
+class VariableCostDeleteView(DeleteView):
+    model = VariableCost
+    template_name = 'costs/variable_cost_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})

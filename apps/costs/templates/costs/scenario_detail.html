@@ -1,235 +1,316 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <style>
-    .topbar {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: grid;
-        gap: 0.8rem;
-    }
-    .topbar-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-    .topbar-title h1 {
-        margin: 0;
-        font-size: 1.35rem;
-    }
-    .meta {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-top: 0.35rem;
-    }
-    .pill {
-        background: #f3f4f6;
-        border: 1px solid #d1d5db;
-        border-radius: 999px;
-        padding: 0.25rem 0.6rem;
-        font-size: 0.88rem;
-    }
-    .actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .btn-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        background: #0f766e;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.45rem 0.7rem;
-        text-decoration: none;
-        cursor: pointer;
-        font-size: 0.9rem;
-    }
-    .btn-secondary {
-        background: #1f2937;
-    }
-    .btn-light {
-        background: #ffffff;
-        color: #111827;
-        border: 1px solid #d1d5db;
-    }
+  .topbar {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .topbar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .topbar-title h1 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
+  }
+  .pill {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.88rem;
+  }
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #0f766e;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.7rem;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .btn-secondary {
+    background: #1f2937;
+  }
+  .btn-light {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+  }
 
-    .table-wrap {
-        overflow-x: auto;
-        margin: 1rem 0;
-    }
-    table.summary {
-        width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-    }
-    table.summary th,
-    table.summary td {
-        border: 1px solid #e5e7eb;
-        padding: 0.45rem 0.55rem;
-        text-align: right;
-        white-space: nowrap;
-    }
-    table.summary th:first-child,
-    table.summary td:first-child {
-        text-align: left;
-    }
-    table.summary thead {
-        background: #f3f4f6;
-    }
-    table.summary tfoot {
-        background: #f9fafb;
-        font-weight: 700;
-    }
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  table.summary {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  table.summary th,
+  table.summary td {
+    border: 1px solid #e5e7eb;
+    padding: 0.45rem 0.55rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+  table.summary th:first-child,
+  table.summary td:first-child {
+    text-align: left;
+  }
+  table.summary thead {
+    background: #f3f4f6;
+  }
+  table.summary tfoot {
+    background: #f9fafb;
+    font-weight: 700;
+  }
 </style>
 
 <section class="topbar">
-    <div class="topbar-head">
-        <div class="topbar-title">
-            <h1>Scénario: {{ scenario.name }}</h1>
-            <div class="meta">
-                <span class="pill">Méthode: {{ scenario.get_method_display }}</span>
-                <span class="pill">Période: {{ scenario.period|default:"N/A" }}</span>
-            </div>
-        </div>
-        <div class="actions">
-            <form method="post" action="{% url 'scenario-save' scenario.pk %}" style="margin:0;">
-                {% csrf_token %}
-                <button type="submit" class="btn-action">Sauvegarder</button>
-            </form>
-            <button type="button" class="btn-action btn-light" onclick="history.back()">Retour arrière</button>
-            <a href="{% url 'scenario-duplicate' scenario.pk %}" class="btn-action btn-secondary">Dupliquer scénario</a>
-            <button type="button" class="btn-action btn-light" onclick="window.print()">Export PDF</button>
-        </div>
+  <div class="topbar-head">
+    <div class="topbar-title">
+      <h1>Scénario: {{ scenario.name }}</h1>
+      <div class="meta">
+        <span class="pill">Méthode: {{ scenario.get_method_display }}</span>
+        <span class="pill">Période: {{ scenario.period|default:"N/A" }}</span>
+      </div>
     </div>
+    <div class="actions">
+      <form
+        method="post"
+        action="{% url 'scenario-save' scenario.pk %}"
+        style="margin: 0"
+      >
+        {% csrf_token %}
+        <button type="submit" class="btn-action">Sauvegarder</button>
+      </form>
+      <button
+        type="button"
+        class="btn-action btn-light"
+        onclick="history.back()"
+      >
+        Retour arrière
+      </button>
+      <a
+        href="{% url 'scenario-duplicate' scenario.pk %}"
+        class="btn-action btn-secondary"
+        >Dupliquer scénario</a
+      >
+      <button
+        type="button"
+        class="btn-action btn-light"
+        onclick="window.print()"
+      >
+        Export PDF
+      </button>
+    </div>
+  </div>
 </section>
 
 <p>{{ scenario.description }}</p>
 
 <h2>Vision d'ensemble Direct Costing</h2>
 <div class="table-wrap">
-    {% if summary_rows %}
-    <table class="summary">
-        <thead>
-            <tr>
-                <th>Indicateur</th>
-                {% for row in summary_rows %}
-                <th>{{ row.product.name }}</th>
-                {% endfor %}
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Quantité</td>
-                {% for row in summary_rows %}
-                <td>{{ row.quantity|floatformat:0 }}</td>
-                {% endfor %}
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>Prix unitaire</td>
-                {% for row in summary_rows %}
-                <td>{{ row.unit_price|floatformat:2 }}</td>
-                {% endfor %}
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>CV unitaire</td>
-                {% for row in summary_rows %}
-                <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
-                {% endfor %}
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>Chiffre d'affaires</td>
-                {% for row in summary_rows %}
-                <td>{{ row.revenue|floatformat:2 }}</td>
-                {% endfor %}
-                <td>{{ summary_totals.revenue|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>Coût variable total</td>
-                {% for row in summary_rows %}
-                <td>{{ row.variable|floatformat:2 }}</td>
-                {% endfor %}
-                <td>{{ summary_totals.variable|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>MCV</td>
-                {% for row in summary_rows %}
-                <td>{{ row.contribution|floatformat:2 }}</td>
-                {% endfor %}
-                <td>{{ summary_totals.contribution|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>CF spécifiques</td>
-                {% for row in summary_rows %}
-                <td>{{ row.fixed|floatformat:2 }}</td>
-                {% endfor %}
-                <td>{{ summary_totals.fixed|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>Résultat</td>
-                {% for row in summary_rows %}
-                <td>{{ row.result|floatformat:2 }}</td>
-                {% endfor %}
-                <td>{{ summary_totals.result|floatformat:2 }}</td>
-            </tr>
-        </tbody>
-    </table>
-    {% else %}
-    <p>Aucun produit saisi.</p>
-    {% endif %}
+  {% if summary_rows %}
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>Indicateur</th>
+        {% for row in summary_rows %}
+        <th>{{ row.product.name }}</th>
+        {% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Quantité</td>
+        {% for row in summary_rows %}
+        <td>{{ row.quantity|floatformat:0 }}</td>
+        {% endfor %}
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>Prix unitaire</td>
+        {% for row in summary_rows %}
+        <td>{{ row.unit_price|floatformat:2 }}</td>
+        {% endfor %}
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>CV unitaire</td>
+        {% for row in summary_rows %}
+        <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
+        {% endfor %}
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>Chiffre d'affaires</td>
+        {% for row in summary_rows %}
+        <td>{{ row.revenue|floatformat:2 }}</td>
+        {% endfor %}
+        <td>{{ summary_totals.revenue|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td>Coût variable total</td>
+        {% for row in summary_rows %}
+        <td>{{ row.variable|floatformat:2 }}</td>
+        {% endfor %}
+        <td>{{ summary_totals.variable|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td>MCV</td>
+        {% for row in summary_rows %}
+        <td>{{ row.contribution|floatformat:2 }}</td>
+        {% endfor %}
+        <td>{{ summary_totals.contribution|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td>CF spécifiques</td>
+        {% for row in summary_rows %}
+        <td>{{ row.fixed|floatformat:2 }}</td>
+        {% endfor %}
+        <td>{{ summary_totals.fixed|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td>Résultat</td>
+        {% for row in summary_rows %}
+        <td>{{ row.result|floatformat:2 }}</td>
+        {% endfor %}
+        <td>{{ summary_totals.result|floatformat:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <p>Aucun produit saisi.</p>
+  {% endif %}
 </div>
 
 <h2>Produits</h2>
 <div class="table-wrap">
-    <table class="summary">
-        <thead>
-            <tr>
-                <th>Nom du produit</th>
-                <th>Prix de vente unitaire</th>
-                <th>Quantité vendue prévue</th>
-                <th>Chiffre d'affaires (auto)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in scenario.products.all %}
-            <tr>
-                <td>{{ product.name }}</td>
-                <td>{{ product.unit_price|floatformat:2 }}</td>
-                <td>{{ product.quantity|floatformat:0 }}</td>
-                <td>{{ product.total_revenue|floatformat:2 }}</td>
-                <td>
-                    <a href="{% url 'edit_product' scenario.id product.id %}" class="btn-action btn-light">Modifier</a>
-                    <form method="post" action="{% url 'delete_product' scenario.id product.id %}" style="display:inline; margin-left:0.25rem;" onsubmit="return confirm('Supprimer ce produit ?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-action btn-light">Supprimer</button>
-                    </form>
-                    <a href="{% url 'add_cost_line' scenario.id product.id %}" class="btn-action btn-secondary" style="margin-left:0.25rem;">Lignes de coût</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">Aucun produit saisi.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>Nom du produit</th>
+        <th>Prix de vente unitaire</th>
+        <th>Quantité vendue prévue</th>
+        <th>Chiffre d'affaires (auto)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in scenario.products.all %}
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.unit_price|floatformat:2 }}</td>
+        <td>{{ product.quantity|floatformat:0 }}</td>
+        <td>{{ product.total_revenue|floatformat:2 }}</td>
+        <td>
+          <a
+            href="{% url 'edit_product' scenario.id product.id %}"
+            class="btn-action btn-light"
+            >Modifier</a
+          >
+          <form
+            method="post"
+            action="{% url 'delete_product' scenario.id product.id %}"
+            style="display: inline; margin-left: 0.25rem"
+            onsubmit="return confirm('Supprimer ce produit ?');"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn-action btn-light">
+              Supprimer
+            </button>
+          </form>
+          <a
+            href="{% url 'add_cost_line' scenario.id product.id %}"
+            class="btn-action btn-secondary"
+            style="margin-left: 0.25rem"
+            >Lignes de coût</a
+          >
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">Aucun produit saisi.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-<a href="{% url 'add_product' scenario.id %}" class="btn-action">Ajouter un produit</a>
+<a href="{% url 'add_product' scenario.id %}" class="btn-action"
+  >Ajouter un produit</a
+>
+
+<h2>Charges variables</h2>
+<div class="table-wrap">
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Catégorie</th>
+        <th>Montant</th>
+        <th>Produit associé</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cost in scenario.variable_costs.all %}
+      <tr>
+        <td>{{ cost.name }}</td>
+        <td>{{ cost.get_category_display }}</td>
+        <td>{{ cost.amount|floatformat:2 }}</td>
+        <td>{{ cost.product.name|default:"N/A" }}</td>
+        <td>
+          <a href="{% url 'edit_variable_cost' cost.id %}" class="btn-action btn-light">Modifier</a>
+          <form method="post" action="{% url 'delete_variable_cost' cost.id %}" style="display: inline; margin-left: 0.25rem" onsubmit="return confirm('Supprimer cette charge variable ?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-action btn-light">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">Aucune charge variable saisie.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">Total</td>
+        <td colspan="3">{{ variable_costs_total|floatformat:2 }}</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+<a href="{% url 'add_variable_cost' scenario.id %}" class="btn-action">Ajouter une charge variable</a>
 
 <h2>Actions</h2>
-<a href="{% url 'calculate_results' scenario.id %}" class="btn btn-success">Calculer les résultats</a>
-<a href="{% url 'scenario-list' %}" class="btn btn-secondary">Retour à la liste des scénarios</a>
+<a href="{% url 'calculate_results' scenario.id %}" class="btn btn-success"
+  >Calculer les résultats</a>
+<a href="{% url 'scenario-list' %}" class="btn btn-secondary"
+  >Retour à la liste des scénarios</a>
 {% endblock %}

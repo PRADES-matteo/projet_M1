@@ -1,6 +1,11 @@
 from django.db import models
 from decimal import Decimal
+from django.utils.translation import gettext_lazy as _
 
+class VariableCostCategory(models.TextChoices):
+    MATERIAL = 'Material', 'Matériel'
+    LABOR = 'Labor', 'Main-d’œuvre'
+    OVERHEAD = 'Overhead', 'Frais généraux'
 
 class CostScenario(models.Model):
     name = models.CharField(max_length=150)
@@ -73,3 +78,14 @@ class CostLine(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class VariableCost(models.Model):
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=VariableCostCategory.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
+    scenario = models.ForeignKey(CostScenario, related_name='variable_costs', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name

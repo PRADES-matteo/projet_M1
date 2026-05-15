@@ -54,40 +54,40 @@
 
 <section class="card">
   <h2>Créer un nouveau scénario</h2>
-  <p>Étape 1: définir le scénario. Le mode de saisie des produits se règle juste après création.</p>
+  <p>
+    Étape 1: définir le scénario. Le mode de saisie des produits se règle juste
+    après création.
+  </p>
   <div class="hint">
-    Astuce: choisissez <strong>Simple</strong> pour un démarrage rapide, ou <strong>Expert</strong> pour activer plus d'options ensuite.
+    Astuce: choisissez <strong>Simple</strong> pour un démarrage rapide, ou
+    <strong>Expert</strong> pour activer plus d'options ensuite.
   </div>
   <form method="post" novalidate>
     {% csrf_token %} {{ form.non_field_errors }}
     <div class="form-grid">
       <div class="field-box">
-        {{ form.name.label_tag }}
-        {{ form.name }} {{ form.name.errors }}
+        {{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}
       </div>
       <div class="field-box">
-        {{ form.period.label_tag }}
-        {{ form.period }} {{ form.period.errors }}
+        {{ form.period.label_tag }} {{ form.period }} {{ form.period.errors }}
       </div>
       <div class="field-box">
-        {{ form.method.label_tag }}
-        {{ form.method }} {{ form.method.errors }}
+        {{ form.method.label_tag }} {{ form.method }} {{ form.method.errors }}
         <small>{{ form.method.help_text }}</small>
       </div>
       <div class="field-box">
-        {{ form.preset.label_tag }}
-        {{ form.preset }} {{ form.preset.errors }}
+        {{ form.preset.label_tag }} {{ form.preset }} {{ form.preset.errors }}
         <small>{{ form.preset.help_text }}</small>
       </div>
       <div class="field-box">
-        {{ form.ui_mode.label_tag }}
-        {{ form.ui_mode }} {{ form.ui_mode.errors }}
+        {{ form.ui_mode.label_tag }} {{ form.ui_mode }} {{ form.ui_mode.errors
+        }}
         <small>{{ form.ui_mode.help_text }}</small>
       </div>
     </div>
-    <div class="field-box" style="margin-top:0.8rem;">
-      {{ form.description.label_tag }}
-      {{ form.description }} {{ form.description.errors }}
+    <div class="field-box" style="margin-top: 0.8rem">
+      {{ form.description.label_tag }} {{ form.description }} {{
+      form.description.errors }}
     </div>
     <div style="margin-top: 0.75rem">
       <button
