@@ -13,6 +13,65 @@ from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
 
 
+def _decimal(value):
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value or 0))
+
+
+def build_automatic_results(scenario):
+    products = list(scenario.products.prefetch_related("cost_lines"))
+    variable_costs = list(scenario.variable_costs.select_related("product"))
+    fixed_costs = list(scenario.fixed_costs.select_related("product"))
+
+    total_revenue = Decimal("0.00")
+    total_variable_costs = Decimal("0.00")
+    total_fixed_costs = Decimal("0.00")
+    fixed_specific_costs = Decimal("0.00")
+
+    for product in products:
+        total_revenue += _decimal(product.total_revenue)
+
+    for cost in variable_costs:
+        total_variable_costs += _decimal(cost.amount)
+
+    for cost in fixed_costs:
+        amount = _decimal(cost.amount)
+        total_fixed_costs += amount
+        if not cost.is_common:
+            fixed_specific_costs += amount
+
+    mcv = total_revenue - total_variable_costs
+    taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
+    seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+    point_mort = ((seuil_rentabilite / total_revenue) * Decimal("365.00")) if total_revenue and seuil_rentabilite else Decimal("0.00")
+    marge_securite = total_revenue - seuil_rentabilite
+    indice_securite = ((marge_securite / total_revenue) * Decimal("100.00")) if total_revenue else Decimal("0.00")
+    resultat = mcv - total_fixed_costs
+    levier_operationnel = (mcv / resultat) if resultat else Decimal("0.00")
+
+    marge_specifique = mcv - fixed_specific_costs
+    seuil_rentabilite_specifique = (fixed_specific_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+
+    return {
+        "total_revenue": total_revenue,
+        "total_variable_costs": total_variable_costs,
+        "total_fixed_costs": total_fixed_costs,
+        "fixed_specific_costs": fixed_specific_costs,
+        "mcv": mcv,
+        "taux_marge": taux_marge,
+        "seuil_rentabilite": seuil_rentabilite,
+        "point_mort": point_mort,
+        "indice_securite": indice_securite,
+        "marge_securite": marge_securite,
+        "levier_operationnel": levier_operationnel,
+        "marge_specifique": marge_specifique,
+        "seuil_rentabilite_specifique": seuil_rentabilite_specifique,
+        "resultat": resultat,
+        "has_chart_data": any(value != 0 for value in [total_revenue, total_variable_costs, total_fixed_costs]),
+    }
+
+
 
 def scenario_list(request):
     if request.method == "POST":
@@ -260,7 +319,16 @@ def calculate_results(request, scenario_id):
     else:
         result = calculate_center_analysis(lines)
 
-    return render(request, "costs/results.html", {"scenario": scenario, "result": result})
+    automatic_results = build_automatic_results(scenario)
+    return render(
+        request,
+        "costs/results.html",
+        {
+            "scenario": scenario,
+            "result": result,
+            "automatic_results": automatic_results,
+        },
+    )
 
 
 class VariableCostCreateView(CreateView):
