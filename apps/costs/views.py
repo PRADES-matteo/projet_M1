@@ -6,8 +6,8 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.db.models import Sum
-from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm
-from .models import CostScenario, Product, CostLine, VariableCost
+from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm, FixedCostForm
+from .models import CostScenario, Product, CostLine, VariableCost, FixedCost
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
 
@@ -36,6 +36,7 @@ def scenario_detail(request, pk):
     total_fixed = Decimal("0.00")
 
     variable_costs_total = scenario.variable_costs.aggregate(total=Sum('amount'))['total'] or 0
+    fixed_costs_total = scenario.fixed_costs.aggregate(total=Sum('amount'))['total'] or 0
 
     for product in scenario.products.all():
         quantity = Decimal(product.quantity)
@@ -76,6 +77,7 @@ def scenario_detail(request, pk):
     context = {
         'scenario': scenario,
         'variable_costs_total': variable_costs_total,
+        'fixed_costs_total': fixed_costs_total,
         'summary_rows': summary_rows,
         'summary_totals': {
             'revenue': total_revenue,
@@ -250,6 +252,40 @@ class VariableCostUpdateView(UpdateView):
 class VariableCostDeleteView(DeleteView):
     model = VariableCost
     template_name = 'costs/variable_cost_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostCreateView(CreateView):
+    model = FixedCost
+    form_class = FixedCostForm
+    template_name = 'costs/fixed_cost_form.html'
+
+    def form_valid(self, form):
+        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostUpdateView(UpdateView):
+    model = FixedCost
+    form_class = FixedCostForm
+    template_name = 'costs/fixed_cost_form.html'
+
+    def form_valid(self, form):
+        form.instance.scenario = self.object.scenario
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostDeleteView(DeleteView):
+    model = FixedCost
+    template_name = 'costs/fixed_cost_confirm_delete.html'
 
     def get_success_url(self):
         return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})

@@ -15,4 +15,7 @@ urlpatterns = [
     path('scenario/<int:scenario_id>/variable-cost/add/', views.VariableCostCreateView.as_view(), name='add_variable_cost'),
     path('variable-cost/<int:pk>/edit/', views.VariableCostUpdateView.as_view(), name='edit_variable_cost'),
     path('variable-cost/<int:pk>/delete/', views.VariableCostDeleteView.as_view(), name='delete_variable_cost'),
+    path('scenario/<int:scenario_id>/fixed-cost/add/', views.FixedCostCreateView.as_view(), name='add_fixed_cost'),
+    path('fixed-cost/<int:pk>/edit/', views.FixedCostUpdateView.as_view(), name='edit_fixed_cost'),
+    path('fixed-cost/<int:pk>/delete/', views.FixedCostDeleteView.as_view(), name='delete_fixed_cost'),
 ]

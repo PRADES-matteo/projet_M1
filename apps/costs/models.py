@@ -89,3 +89,23 @@ class VariableCost(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FixedCostCategory(models.TextChoices):
+    RENT = 'Rent', 'Loyer'
+    SALARY = 'Salary', 'Salaires'
+    DEPRECIATION = 'Depreciation', 'Amortissement'
+    OTHER = 'Other', 'Autre'
+
+
+class FixedCost(models.Model):
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=FixedCostCategory.choices)
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    # If specific to a product, link it; otherwise leave null for shared/common fixed cost
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
+    is_common = models.BooleanField(default=True)
+    scenario = models.ForeignKey(CostScenario, related_name='fixed_costs', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
