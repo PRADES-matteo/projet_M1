@@ -300,6 +300,9 @@ def scenario_detail(request, pk):
         est_rev = (total_revenue * (entry.percentage / Decimal('100.0'))).quantize(Decimal('0.01'))
         seasonality_list.append({'month': m, 'month_name': calendar.month_name[m], 'percentage': entry.percentage, 'estimated_revenue': est_rev})
 
+    seasonality_labels = [item['month_name'] for item in seasonality_list]
+    seasonality_values = [float(item['percentage']) for item in seasonality_list]
+
     context = {
         'scenario': scenario,
         'scenario_versions': scenario.versions.all(),
@@ -314,6 +317,8 @@ def scenario_detail(request, pk):
             'fixed': total_fixed,
         },
         'seasonality_list': seasonality_list,
+        'seasonality_labels': seasonality_labels,
+        'seasonality_values': seasonality_values,
         'total_revenue': total_revenue,
     }
     return render(request, 'costs/scenario_detail.html', context)
