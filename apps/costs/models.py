@@ -1,6 +1,11 @@
 from django.db import models
 from decimal import Decimal
+from django.utils.translation import gettext_lazy as _
 
+class VariableCostCategory(models.TextChoices):
+    MATERIAL = 'Material', 'Matériel'
+    LABOR = 'Labor', 'Main-d’œuvre'
+    OVERHEAD = 'Overhead', 'Frais généraux'
 
 class CostScenario(models.Model):
     name = models.CharField(max_length=150)
@@ -73,3 +78,65 @@ class CostLine(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class VariableCost(models.Model):
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=VariableCostCategory.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
+    scenario = models.ForeignKey(CostScenario, related_name='variable_costs', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class FixedCostCategory(models.TextChoices):
+    RENT = 'Rent', 'Loyer'
+    SALARY = 'Salary', 'Salaires'
+    DEPRECIATION = 'Depreciation', 'Amortissement'
+    OTHER = 'Other', 'Autre'
+
+
+class FixedCost(models.Model):
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=FixedCostCategory.choices)
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    # If specific to a product, link it; otherwise leave null for shared/common fixed cost
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
+    is_common = models.BooleanField(default=True)
+    scenario = models.ForeignKey(CostScenario, related_name='fixed_costs', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class SeasonalityEntry(models.Model):
+    """Monthly percentage distribution for sales in a scenario."""
+    MONTH_CHOICES = [(i, i) for i in range(1, 13)]
+
+    scenario = models.ForeignKey(CostScenario, related_name='seasonality', on_delete=models.CASCADE)
+    month = models.PositiveSmallIntegerField(choices=MONTH_CHOICES)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = (('scenario', 'month'),)
+        ordering = ['month']
+
+    def __str__(self):
+        return f"{self.scenario.name} - Mois {self.month}: {self.percentage}%"
+
+
+class ScenarioVersion(models.Model):
+    scenario = models.ForeignKey(CostScenario, related_name='versions', on_delete=models.CASCADE)
+    version_number = models.PositiveIntegerField()
+    label = models.CharField(max_length=200, blank=True)
+    snapshot = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('scenario', 'version_number'),)
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.scenario.name} - v{self.version_number}"

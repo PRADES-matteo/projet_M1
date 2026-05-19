@@ -1,34 +1,331 @@
-{% extends "costs/base.html" %}
+{% extends "costs/base.html" %} {% load l10n %} {% block content %}
+<style>
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 0.75rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  }
+  .kpi-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.35rem;
+  }
+  .kpi-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .section-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table.summary {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table.summary th,
+  table.summary td {
+    border: 1px solid #e5e7eb;
+    padding: 0.55rem 0.7rem;
+    text-align: right;
+  }
+  table.summary th:first-child,
+  table.summary td:first-child {
+    text-align: left;
+  }
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .chart-panel {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-panel h3 {
+    margin-top: 0;
+  }
+  .chart-panel.chart-bar canvas {
+    width: 100% !important;
+    height: 280px !important;
+  }
+  .chart-panel.chart-doughnut {
+    aspect-ratio: 1 / 1;
+  }
+  .chart-panel.chart-doughnut canvas {
+    width: 290px !important;
+    height: 290px !important;
+    max-width: 100%;
+    max-height: 290px;
+    margin: 0 auto;
+  }
+</style>
 
-{% block content %}
-<h1>Résultats pour le scénario : {{ scenario.name }}</h1>
+<h1>Résultats automatiques - {{ scenario.name }}</h1>
+<p>Méthode : {{ scenario.get_method_display }}</p>
 
-<h2>Méthode : {{ scenario.get_method_display }}</h2>
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">Chiffre d'affaires total</div>
+    <div class="kpi-value">
+      {{ automatic_results.total_revenue|floatformat:2 }}
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Marge sur coût variable</div>
+    <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Taux de marge</div>
+    <div class="kpi-value">
+      {{ automatic_results.taux_marge|floatformat:2 }}%
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Seuil de rentabilité</div>
+    <div class="kpi-value">
+      {{ automatic_results.seuil_rentabilite|floatformat:2 }}
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Point mort</div>
+    <div class="kpi-value">
+      {{ automatic_results.point_mort|floatformat:0 }} jours
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Indice de sécurité</div>
+    <div class="kpi-value">
+      {{ automatic_results.indice_securite|floatformat:2 }}%
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Marge de sécurité</div>
+    <div class="kpi-value">
+      {{ automatic_results.marge_securite|floatformat:2 }}
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Levier opérationnel</div>
+    <div class="kpi-value">
+      {{ automatic_results.levier_operationnel|floatformat:2 }}
+    </div>
+  </div>
+</div>
 
-<h3>Résultats</h3>
-<ul>
-    {% if scenario.method == "direct_costing" %}
-        <li>Coûts directs : {{ result.direct_costs }}</li>
-        <li>Coûts indirects : {{ result.indirect_costs }}</li>
-        <li>Coût total : {{ result.total_cost }}</li>
-    {% elif scenario.method == "center_analysis" %}
-        <li>Total général : {{ result.total_general }}</li>
-        <li>Totaux par centre :</li>
-        <ul>
-            {% for center, total in result.total_by_center.items %}
-                <li>{{ center }} : {{ total }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-</ul>
+<div class="section-card">
+  <h2>Tableau récapitulatif</h2>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr>
+          <th>Indicateur</th>
+          <th>Valeur</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chiffre d'affaires total</td>
+          <td>{{ automatic_results.total_revenue|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>Charges variables</td>
+          <td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>Charges fixes totales</td>
+          <td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>MCV</td>
+          <td>{{ automatic_results.mcv|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>Taux de marge</td>
+          <td>{{ automatic_results.taux_marge|floatformat:2 }}%</td>
+        </tr>
+        <tr>
+          <td>Seuil de rentabilité</td>
+          <td>{{ automatic_results.seuil_rentabilite|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>Point mort</td>
+          <td>{{ automatic_results.point_mort|floatformat:0 }} jours</td>
+        </tr>
+        <tr>
+          <td>Indice de sécurité</td>
+          <td>{{ automatic_results.indice_securite|floatformat:2 }}%</td>
+        </tr>
+        <tr>
+          <td>Marge de sécurité</td>
+          <td>{{ automatic_results.marge_securite|floatformat:2 }}</td>
+        </tr>
+        <tr>
+          <td>Levier opérationnel</td>
+          <td>{{ automatic_results.levier_operationnel|floatformat:2 }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-<h3>Analyse de la rentabilité</h3>
-<p>Rentabilité globale : {{ result.global_profitability }}%</p>
-<ul>
-    {% for product, profitability in result.product_profitability.items %}
-        <li>{{ product }} : {{ profitability }}%</li>
-    {% endfor %}
-</ul>
+{% if scenario.method == "direct_costing_advanced" %}
+<div class="section-card">
+  <h2>Indicateurs du direct costing évolué</h2>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Charges fixes spécifiques</div>
+      <div class="kpi-value">
+        {{ automatic_results.fixed_specific_costs|floatformat:2 }}
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marge spécifique</div>
+      <div class="kpi-value">
+        {{ automatic_results.marge_specifique|floatformat:2 }}
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Seuil de rentabilité spécifique</div>
+      <div class="kpi-value">
+        {{ automatic_results.seuil_rentabilite_specifique|floatformat:2 }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
-<a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
+<div class="section-card">
+  <h2>Résultat détaillé de la méthode</h2>
+  {% if scenario.method == "direct_costing" %}
+  <ul>
+    <li>Coûts directs : {{ result.direct_costs }}</li>
+    <li>Coûts indirects : {{ result.indirect_costs }}</li>
+    <li>Coût total : {{ result.total_cost }}</li>
+    <li>Rentabilité globale : {{ result.global_profitability }}%</li>
+  </ul>
+  {% elif scenario.method == "center_analysis" %}
+  <ul>
+    <li>Total général : {{ result.total_general }}</li>
+    <li>Rentabilité globale : {{ result.global_profitability }}%</li>
+  </ul>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr>
+          <th>Centre</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for center, total in result.total_by_center.items %}
+        <tr>
+          <td>{{ center }}</td>
+          <td>{{ total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="section-card">
+  <h2>Graphiques simples</h2>
+
+  {% if automatic_results.has_chart_data %}
+  <div class="chart-grid">
+    <div class="section-card chart-panel chart-bar">
+      <h3>Vue synthétique</h3>
+      <canvas id="kpiChart"></canvas>
+    </div>
+    <div class="section-card chart-panel chart-doughnut">
+      <h3>Répartition des charges</h3>
+      <canvas id="mixChart"></canvas>
+    </div>
+  </div>
+  <p style="margin-top: 0.75rem; color: #6b7280; font-size: 0.92rem">
+    Légende: le graphique de gauche compare les principaux montants, celui de
+    droite compare charges variables et charges fixes.
+  </p>
+  {% else %}
+  <div
+    class="section-card"
+    style="
+      background: #f9fafb;
+      border-style: dashed;
+      text-align: center;
+      padding: 2rem;
+    "
+  >
+    <strong>Aucune donnée suffisante pour afficher les graphiques.</strong>
+    <div style="margin-top: 0.5rem; color: #6b7280">
+      Ajoutez des produits et des charges pour générer la visualisation.
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if automatic_results.has_chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const kpiCtx = document.getElementById('kpiChart');
+  const mixCtx = document.getElementById('mixChart');
+
+  if (kpiCtx) {
+      new Chart(kpiCtx, {
+          type: 'bar',
+          data: {
+              labels: ['CA', 'CV', 'CF', 'MCV'],
+              datasets: [{
+                  label: 'Montant',
+                  data: [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}],
+                  backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#16a34a']
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+          }
+      });
+  }
+
+  if (mixCtx) {
+      new Chart(mixCtx, {
+          type: 'doughnut',
+          data: {
+              labels: ['Variables', 'Fixes'],
+              datasets: [{
+                  data: [{{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}],
+                  backgroundColor: ['#2563eb', '#0f766e']
+              }]
+          },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: 'top' } }
+            }
+      });
+  }
+</script>
+{% endif %}
+
+<p><a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a></p>
 {% endblock %}

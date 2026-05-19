@@ -1,12 +1,229 @@
 from decimal import Decimal
+from django.urls import reverse
 
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CostScenarioForm, ProductForm, CostLineForm
-from .models import CostScenario, Product, CostLine
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.db.models import Sum, Max
+import calendar
+from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm, FixedCostForm
+from .models import CostScenario, Product, CostLine, VariableCost, FixedCost, CostCenter, SeasonalityEntry, ScenarioVersion
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
+
+
+def _decimal(value):
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value or 0))
+
+
+def build_automatic_results(scenario):
+    products = list(scenario.products.prefetch_related("cost_lines"))
+    variable_costs = list(scenario.variable_costs.select_related("product"))
+    fixed_costs = list(scenario.fixed_costs.select_related("product"))
+
+    total_revenue = Decimal("0.00")
+    total_variable_costs = Decimal("0.00")
+    total_fixed_costs = Decimal("0.00")
+    fixed_specific_costs = Decimal("0.00")
+
+    for product in products:
+        total_revenue += _decimal(product.total_revenue)
+
+    for cost in variable_costs:
+        total_variable_costs += _decimal(cost.amount)
+
+    for cost in fixed_costs:
+        amount = _decimal(cost.amount)
+        total_fixed_costs += amount
+        if not cost.is_common:
+            fixed_specific_costs += amount
+
+    mcv = total_revenue - total_variable_costs
+    taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
+    seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+    point_mort = ((seuil_rentabilite / total_revenue) * Decimal("365.00")) if total_revenue and seuil_rentabilite else Decimal("0.00")
+    marge_securite = total_revenue - seuil_rentabilite
+    indice_securite = ((marge_securite / total_revenue) * Decimal("100.00")) if total_revenue else Decimal("0.00")
+    resultat = mcv - total_fixed_costs
+    levier_operationnel = (mcv / resultat) if resultat else Decimal("0.00")
+
+    marge_specifique = mcv - fixed_specific_costs
+    seuil_rentabilite_specifique = (fixed_specific_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+
+    return {
+        "total_revenue": total_revenue,
+        "total_variable_costs": total_variable_costs,
+        "total_fixed_costs": total_fixed_costs,
+        "fixed_specific_costs": fixed_specific_costs,
+        "mcv": mcv,
+        "taux_marge": taux_marge,
+        "seuil_rentabilite": seuil_rentabilite,
+        "point_mort": point_mort,
+        "indice_securite": indice_securite,
+        "marge_securite": marge_securite,
+        "levier_operationnel": levier_operationnel,
+        "marge_specifique": marge_specifique,
+        "seuil_rentabilite_specifique": seuil_rentabilite_specifique,
+        "resultat": resultat,
+        "has_chart_data": any(value != 0 for value in [total_revenue, total_variable_costs, total_fixed_costs]),
+    }
+
+
+def _serialize_scenario_snapshot(scenario):
+    return {
+        "scenario": {
+            "name": scenario.name,
+            "period": scenario.period,
+            "description": scenario.description,
+            "method": scenario.method,
+            "input_mode": scenario.input_mode,
+            "preset": scenario.preset,
+            "ui_mode": scenario.ui_mode,
+            "use_reciprocal_allocation": scenario.use_reciprocal_allocation,
+            "use_seasonality": scenario.use_seasonality,
+        },
+        "cost_centers": [
+            {
+                "id": center.id,
+                "code": center.code,
+                "name": center.name,
+                "is_auxiliary": center.is_auxiliary,
+            }
+            for center in scenario.cost_centers.all()
+        ],
+        "products": [
+            {
+                "id": product.id,
+                "name": product.name,
+                "quantity": product.quantity,
+                "unit_price": str(product.unit_price),
+            }
+            for product in scenario.products.all()
+        ],
+        "cost_lines": [
+            {
+                "label": line.label,
+                "amount": str(line.amount),
+                "product_id": line.product_id,
+                "center_id": line.center_id,
+                "is_direct": line.is_direct,
+                "is_product": line.is_product,
+            }
+            for line in scenario.cost_lines.all()
+        ],
+        "variable_costs": [
+            {
+                "name": cost.name,
+                "category": cost.category,
+                "amount": str(cost.amount),
+                "product_id": cost.product_id,
+            }
+            for cost in scenario.variable_costs.all()
+        ],
+        "fixed_costs": [
+            {
+                "name": cost.name,
+                "category": cost.category,
+                "amount": str(cost.amount),
+                "product_id": cost.product_id,
+                "is_common": cost.is_common,
+            }
+            for cost in scenario.fixed_costs.all()
+        ],
+        "seasonality": [
+            {
+                "month": entry.month,
+                "percentage": str(entry.percentage),
+            }
+            for entry in scenario.seasonality.all()
+        ],
+    }
+
+
+@transaction.atomic
+def _restore_scenario_from_snapshot(scenario, snapshot):
+    scenario_data = snapshot.get("scenario", {})
+    for field in [
+        "name",
+        "period",
+        "description",
+        "method",
+        "input_mode",
+        "preset",
+        "ui_mode",
+        "use_reciprocal_allocation",
+        "use_seasonality",
+    ]:
+        if field in scenario_data:
+            setattr(scenario, field, scenario_data[field])
+    scenario.save()
+
+    scenario.variable_costs.all().delete()
+    scenario.fixed_costs.all().delete()
+    scenario.seasonality.all().delete()
+    scenario.cost_lines.all().delete()
+    scenario.products.all().delete()
+    scenario.cost_centers.all().delete()
+
+    center_id_map = {}
+    for center_data in snapshot.get("cost_centers", []):
+        new_center = CostCenter.objects.create(
+            scenario=scenario,
+            code=center_data.get("code", ""),
+            name=center_data.get("name", ""),
+            is_auxiliary=center_data.get("is_auxiliary", False),
+        )
+        center_id_map[center_data.get("id")] = new_center
+
+    product_id_map = {}
+    for product_data in snapshot.get("products", []):
+        new_product = Product.objects.create(
+            scenario=scenario,
+            name=product_data.get("name", ""),
+            quantity=product_data.get("quantity", 0),
+            unit_price=product_data.get("unit_price", "0"),
+        )
+        product_id_map[product_data.get("id")] = new_product
+
+    for line_data in snapshot.get("cost_lines", []):
+        CostLine.objects.create(
+            scenario=scenario,
+            label=line_data.get("label", ""),
+            amount=line_data.get("amount", "0"),
+            product=product_id_map.get(line_data.get("product_id")),
+            center=center_id_map.get(line_data.get("center_id")),
+            is_direct=line_data.get("is_direct", False),
+            is_product=line_data.get("is_product", False),
+        )
+
+    for cost_data in snapshot.get("variable_costs", []):
+        VariableCost.objects.create(
+            scenario=scenario,
+            name=cost_data.get("name", ""),
+            category=cost_data.get("category", "Material"),
+            amount=cost_data.get("amount", "0"),
+            product=product_id_map.get(cost_data.get("product_id")),
+        )
+
+    for cost_data in snapshot.get("fixed_costs", []):
+        FixedCost.objects.create(
+            scenario=scenario,
+            name=cost_data.get("name", ""),
+            category=cost_data.get("category", "Other"),
+            amount=cost_data.get("amount", "0"),
+            product=product_id_map.get(cost_data.get("product_id")),
+            is_common=cost_data.get("is_common", True),
+        )
+
+    for seasonality_data in snapshot.get("seasonality", []):
+        SeasonalityEntry.objects.create(
+            scenario=scenario,
+            month=seasonality_data.get("month", 1),
+            percentage=seasonality_data.get("percentage", "0"),
+        )
 
 
 
@@ -39,6 +256,9 @@ def scenario_detail(request, pk):
     total_revenue = Decimal("0.00")
     total_variable = Decimal("0.00")
     total_fixed = Decimal("0.00")
+
+    variable_costs_total = scenario.variable_costs.aggregate(total=Sum('amount'))['total'] or 0
+    fixed_costs_total = scenario.fixed_costs.aggregate(total=Sum('amount'))['total'] or 0
 
     for product in scenario.products.all():
         quantity = Decimal(product.quantity)
@@ -76,30 +296,155 @@ def scenario_detail(request, pk):
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
 
+    # Seasonality: ensure entries exist for months 1..12
+    from .models import SeasonalityEntry
+    existing = {e.month: e for e in scenario.seasonality.all()}
+    seasonality_list = []
+    for m in range(1, 13):
+        if m in existing:
+            entry = existing[m]
+        else:
+            entry = SeasonalityEntry.objects.create(scenario=scenario, month=m, percentage=0)
+        est_rev = (total_revenue * (entry.percentage / Decimal('100.0'))).quantize(Decimal('0.01'))
+        seasonality_list.append({'month': m, 'month_name': calendar.month_name[m], 'percentage': entry.percentage, 'estimated_revenue': est_rev})
+
     context = {
-        "scenario": scenario,
-        "center_analysis": calculate_center_analysis(cost_lines),
-        "direct_costing": calculate_direct_costing(cost_lines),
-        "summary_rows": summary_rows,
-        "summary_totals": {
-            "revenue": total_revenue,
-            "variable": total_variable,
-            "fixed": total_fixed,
-            "contribution": total_contribution,
-            "result": total_result,
+        'scenario': scenario,
+        'scenario_versions': scenario.versions.all(),
+        'all_scenarios': CostScenario.objects.exclude(pk=scenario.pk).order_by('name'),
+        'variable_costs_total': variable_costs_total,
+        'fixed_costs_total': fixed_costs_total,
+        'summary_rows': summary_rows,
+        'summary_totals': {
+            'revenue': total_revenue,
+            'variable': total_variable,
+            'contribution': total_revenue - total_variable,
+            'fixed': total_fixed,
         },
+        'seasonality_list': seasonality_list,
+        'total_revenue': total_revenue,
     }
+    return render(request, 'costs/scenario_detail.html', context)
 
-    if request.headers.get("HX-Request"):
-        return render(request, "costs/partials/scenario_detail_panel.html", context)
 
-    return render(request, "costs/scenario_detail.html", context)
+def edit_seasonality(request, scenario_id):
+    scenario = get_object_or_404(CostScenario, pk=scenario_id)
+    if request.method == 'POST':
+        for m in range(1, 13):
+            key = f'month_{m}'
+            val = request.POST.get(key, '0')
+            try:
+                pct = Decimal(val)
+            except Exception:
+                pct = Decimal('0')
+            entry, _ = SeasonalityEntry.objects.get_or_create(scenario=scenario, month=m)
+            entry.percentage = pct
+            entry.save()
+        messages.success(request, 'Saisonnalité mise à jour.')
+        return redirect('scenario-detail', pk=scenario_id)
+    else:
+        # redirect to scenario detail where form is embedded
+        return redirect('scenario-detail', pk=scenario_id)
 
 
 def save_scenario(request, pk):
+    scenario = get_object_or_404(CostScenario, pk=pk)
     if request.method == "POST":
-        messages.success(request, "Scénario sauvegardé.")
+        snapshot = _serialize_scenario_snapshot(scenario)
+        max_version = scenario.versions.aggregate(max_num=Max('version_number'))['max_num'] or 0
+        next_version = max_version + 1
+        label = request.POST.get('version_label', '').strip()
+        ScenarioVersion.objects.create(
+            scenario=scenario,
+            version_number=next_version,
+            label=label,
+            snapshot=snapshot,
+        )
+        messages.success(request, f"Version v{next_version} sauvegardée.")
     return redirect("scenario-detail", pk=pk)
+
+
+@transaction.atomic
+def restore_scenario_version(request, pk, version_id):
+    scenario = get_object_or_404(CostScenario, pk=pk)
+    version = get_object_or_404(ScenarioVersion, pk=version_id, scenario=scenario)
+
+    if request.method == "POST":
+        _restore_scenario_from_snapshot(scenario, version.snapshot)
+        messages.success(request, f"Scénario restauré depuis la version v{version.version_number}.")
+
+    return redirect("scenario-detail", pk=pk)
+
+
+def compare_scenarios(request):
+    scenarios = CostScenario.objects.all().order_by('name')
+    scenario_a_id = request.GET.get('scenario_a')
+    scenario_b_id = request.GET.get('scenario_b')
+    scenario_a = None
+    scenario_b = None
+    comparison = None
+
+    if scenario_a_id and scenario_b_id:
+        scenario_a = get_object_or_404(CostScenario, pk=scenario_a_id)
+        scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id)
+        auto_a = build_automatic_results(scenario_a)
+        auto_b = build_automatic_results(scenario_b)
+
+        comparison = [
+            {
+                "label": "Chiffre d'affaires",
+                "value_a": auto_a["total_revenue"],
+                "value_b": auto_b["total_revenue"],
+                "delta": auto_a["total_revenue"] - auto_b["total_revenue"],
+            },
+            {
+                "label": "Charges variables",
+                "value_a": auto_a["total_variable_costs"],
+                "value_b": auto_b["total_variable_costs"],
+                "delta": auto_a["total_variable_costs"] - auto_b["total_variable_costs"],
+            },
+            {
+                "label": "Charges fixes",
+                "value_a": auto_a["total_fixed_costs"],
+                "value_b": auto_b["total_fixed_costs"],
+                "delta": auto_a["total_fixed_costs"] - auto_b["total_fixed_costs"],
+            },
+            {
+                "label": "MCV",
+                "value_a": auto_a["mcv"],
+                "value_b": auto_b["mcv"],
+                "delta": auto_a["mcv"] - auto_b["mcv"],
+            },
+            {
+                "label": "Taux de marge (%)",
+                "value_a": auto_a["taux_marge"],
+                "value_b": auto_b["taux_marge"],
+                "delta": auto_a["taux_marge"] - auto_b["taux_marge"],
+            },
+            {
+                "label": "Seuil de rentabilité",
+                "value_a": auto_a["seuil_rentabilite"],
+                "value_b": auto_b["seuil_rentabilite"],
+                "delta": auto_a["seuil_rentabilite"] - auto_b["seuil_rentabilite"],
+            },
+            {
+                "label": "Résultat",
+                "value_a": auto_a["resultat"],
+                "value_b": auto_b["resultat"],
+                "delta": auto_a["resultat"] - auto_b["resultat"],
+            },
+        ]
+
+    return render(
+        request,
+        "costs/scenario_compare.html",
+        {
+            "scenarios": scenarios,
+            "scenario_a": scenario_a,
+            "scenario_b": scenario_b,
+            "comparison": comparison,
+        },
+    )
 
 
 @transaction.atomic
@@ -231,4 +576,77 @@ def calculate_results(request, scenario_id):
     else:
         result = calculate_center_analysis(lines)
 
-    return render(request, "costs/results.html", {"scenario": scenario, "result": result})
+    automatic_results = build_automatic_results(scenario)
+    return render(
+        request,
+        "costs/results.html",
+        {
+            "scenario": scenario,
+            "result": result,
+            "automatic_results": automatic_results,
+        },
+    )
+
+
+class VariableCostCreateView(CreateView):
+    model = VariableCost
+    form_class = VariableCostForm
+    template_name = 'costs/variable_cost_form.html'
+    success_url = "/costs/{scenario_id}/"
+
+    def form_valid(self, form):
+        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        return super().form_valid(form)
+
+
+class VariableCostUpdateView(UpdateView):
+    model = VariableCost
+    form_class = VariableCostForm
+    template_name = 'costs/variable_cost_form.html'
+    success_url = "/costs/{scenario_id}/"
+
+    def form_valid(self, form):
+        form.instance.scenario = self.object.scenario
+        return super().form_valid(form)
+
+
+class VariableCostDeleteView(DeleteView):
+    model = VariableCost
+    template_name = 'costs/variable_cost_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostCreateView(CreateView):
+    model = FixedCost
+    form_class = FixedCostForm
+    template_name = 'costs/fixed_cost_form.html'
+
+    def form_valid(self, form):
+        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostUpdateView(UpdateView):
+    model = FixedCost
+    form_class = FixedCostForm
+    template_name = 'costs/fixed_cost_form.html'
+
+    def form_valid(self, form):
+        form.instance.scenario = self.object.scenario
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+class FixedCostDeleteView(DeleteView):
+    model = FixedCost
+    template_name = 'costs/fixed_cost_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})

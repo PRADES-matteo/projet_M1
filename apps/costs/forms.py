@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import CostCenter, CostLine, CostScenario, Product
+from .models import CostCenter, CostLine, CostScenario, Product, VariableCost, FixedCost
 
 
 class CostScenarioForm(forms.ModelForm):
@@ -59,3 +59,15 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.scenario = scenario
+
+
+class VariableCostForm(forms.ModelForm):
+    class Meta:
+        model = VariableCost
+        fields = ["name", "category", "amount", "product"]
+
+
+class FixedCostForm(forms.ModelForm):
+    class Meta:
+        model = FixedCost
+        fields = ["name", "category", "amount", "is_common", "product"]

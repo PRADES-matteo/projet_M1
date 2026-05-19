@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block content %}
+<h1>Confirmer la suppression</h1>
+<p>Voulez-vous réellement supprimer la charge fixe "{{ object.name }}" ?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Confirmer</button>
+  <a href="{{ request.META.HTTP_REFERER }}">Annuler</a>
+</form>
+{% endblock %}
