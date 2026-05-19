@@ -125,3 +125,18 @@ class SeasonalityEntry(models.Model):
 
     def __str__(self):
         return f"{self.scenario.name} - Mois {self.month}: {self.percentage}%"
+
+
+class ScenarioVersion(models.Model):
+    scenario = models.ForeignKey(CostScenario, related_name='versions', on_delete=models.CASCADE)
+    version_number = models.PositiveIntegerField()
+    label = models.CharField(max_length=200, blank=True)
+    snapshot = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('scenario', 'version_number'),)
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.scenario.name} - v{self.version_number}"

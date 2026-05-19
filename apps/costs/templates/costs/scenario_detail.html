@@ -98,6 +98,20 @@
   .section-card h2 {
     margin-top: 0;
   }
+  .inline-form {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0.5rem 0;
+  }
+  .inline-form input,
+  .inline-form select {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.45rem 0.55rem;
+    min-width: 200px;
+  }
 </style>
 
 <section class="topbar">
@@ -468,6 +482,71 @@
       });
     }
   </script>
+</div>
+
+<div class="section-card">
+  <h2>Gestion des scénarios</h2>
+
+  <h3 style="margin-bottom: 0.5rem">Sauvegarder une version</h3>
+  <form method="post" action="{% url 'scenario-save' scenario.pk %}" class="inline-form">
+    {% csrf_token %}
+    <input
+      type="text"
+      name="version_label"
+      placeholder="Ex: Avant hausse des coûts"
+    />
+    <button type="submit" class="btn-action">Sauvegarder une version</button>
+  </form>
+
+  <h3 style="margin: 1rem 0 0.5rem">Comparer deux scénarios</h3>
+  <form method="get" action="{% url 'compare_scenarios' %}" class="inline-form">
+    <input type="hidden" name="scenario_a" value="{{ scenario.id }}" />
+    <select name="scenario_b" required>
+      <option value="">Choisir un scénario à comparer</option>
+      {% for other in all_scenarios %}
+      <option value="{{ other.id }}">{{ other.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-action btn-secondary">Comparer</button>
+  </form>
+
+  <h3 style="margin: 1rem 0 0.5rem">Restaurer une ancienne version</h3>
+  {% if scenario_versions %}
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Libellé</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for version in scenario_versions %}
+        <tr>
+          <td>v{{ version.version_number }}</td>
+          <td>{{ version.label|default:'-' }}</td>
+          <td>{{ version.created_at|date:'d/m/Y H:i' }}</td>
+          <td>
+            <form
+              method="post"
+              action="{% url 'scenario-version-restore' scenario.pk version.id %}"
+              style="display: inline"
+              onsubmit="return confirm('Restaurer cette version ? Les données actuelles seront remplacées.');"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn-action btn-light">Restaurer</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>Aucune version sauvegardée pour le moment.</p>
+  {% endif %}
 </div>
 
 <div class="section-card">
