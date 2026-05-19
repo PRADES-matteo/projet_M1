@@ -7,7 +7,6 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
     <style>
@@ -15,96 +14,9 @@
             margin: 0;
             background: #f3f4f6;
         }
-
-        /* SIDEBAR */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 280px;
-            height: 100vh;
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: bold;
-        }
-
-        .scenario-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f1f1f1;
-            text-decoration: none;
-            color: #111827;
-        }
-
-        .scenario-item:hover {
-            background: #f3f4f6;
-        }
-
-        .scenario-item.active {
-            background: #0f766e;
-            color: white;
-        }
-
-        /* MAIN PANEL */
-        .main {
-            margin-left: 280px;
-            padding: 1.5rem;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            min-height: 80vh;
-        }
     </style>
 </head>
-
 <body>
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-
-    <div class="sidebar-header">
-        Gestion des coûts
-    </div>
-
-    {% for scenario in scenarios %}
-
-        <a
-            href="{% url 'scenario-detail' scenario.pk %}"
-
-            class="scenario-item"
-
-            hx-get="{% url 'scenario-detail' scenario.pk %}"
-            hx-target="#scenario-panel"
-            hx-swap="innerHTML"
-        >
-            <div><strong>{{ scenario.name }}</strong></div>
-            <small>{{ scenario.period }}</small>
-        </a>
-
-    {% endfor %}
-
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-    <div id="scenario-panel" class="panel">
-
-        <h3>Bienvenue</h3>
-        <p>Sélectionne un scénario à gauche</p>
-
-    </div>
-
-</div>
-
+{% block content %}{% endblock %}
 </body>
 </html>
