@@ -27,12 +27,19 @@
             background-color: #ffffff;
             border-right: 1px solid #e5e7eb;
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 1000;
+            transition: width 0.25s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
         }
 
         .sidebar-header {
             padding: 1.2rem;
             border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
         }
 
         .sidebar-brand {
@@ -52,6 +59,7 @@
             transition: 0.2s;
             border-radius: 8px;
             margin: 0.2rem 0.5rem;
+            white-space: nowrap;
         }
 
         .sidebar .nav-link:hover {
@@ -66,6 +74,7 @@
         .scenario-section {
             margin-top: 1.5rem;
             padding: 0 1rem 1rem;
+            white-space: nowrap;
         }
 
         .scenario-title {
@@ -119,28 +128,71 @@
             margin-top: 0.2rem;
         }
 
+        /* TOGGLE BUTTON */
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            left: 260px;
+            z-index: 1100;
+            width: 28px;
+            height: 28px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.25s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-toggle:hover {
+            background: #f3f4f6;
+        }
+
+        .sidebar-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 0;
+        }
+
+        .sidebar-toggle.collapsed svg {
+            transform: rotate(180deg);
+        }
+
+        /* MAIN */
         .main-content {
             margin-left: 260px;
             padding: 2rem;
             min-height: 100vh;
+            transition: margin-left 0.25s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
         }
     </style>
 </head>
 <body>
 
+<!-- TOGGLE BUTTON -->
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 2L4 7L9 12" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+</button>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
 
     <div class="sidebar-header">
         <h4 class="sidebar-brand">CoreUI</h4>
     </div>
 
     <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'scenario-list' %}">
-                Tableau de bord
-            </a>
-        </li>
         <li class="nav-item">
             <a class="nav-link {% block nav_new %}{% endblock %}" href="{% url 'scenario-list' %}">
                 Nouveau scénario
@@ -176,6 +228,18 @@
 <div class="main-content" id="panel">
     {% block content %}{% endblock %}
 </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebarToggle');
+        const main = document.getElementById('panel');
+
+        sidebar.classList.toggle('collapsed');
+        toggle.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+    }
+</script>
 
 </body>
 </html>
