@@ -1,6 +1,7 @@
-{% extends "base.html" %}
+{% extends "costs/base.html" %}
 
 {% block content %}
+
 <style>
     .topbar {
         background: #ffffff;
@@ -8,8 +9,6 @@
         border-radius: 14px;
         padding: 1rem;
         margin-bottom: 1rem;
-        display: grid;
-        gap: 0.8rem;
     }
     .topbar-head {
         display: flex;
@@ -53,15 +52,14 @@
         cursor: pointer;
         font-size: 0.9rem;
     }
-    .btn-secondary {
-        background: #1f2937;
-    }
+    .btn-action:hover { opacity: 0.88; color: #fff; }
+    .btn-secondary { background: #1f2937; }
     .btn-light {
         background: #ffffff;
         color: #111827;
         border: 1px solid #d1d5db;
     }
-
+    .btn-light:hover { color: #111827; }
     .table-wrap {
         overflow-x: auto;
         margin: 1rem 0;
@@ -79,12 +77,8 @@
         white-space: nowrap;
     }
     table.summary th:first-child,
-    table.summary td:first-child {
-        text-align: left;
-    }
-    table.summary thead {
-        background: #f3f4f6;
-    }
+    table.summary td:first-child { text-align: left; }
+    table.summary thead { background: #f3f4f6; }
     table.summary tfoot {
         background: #f9fafb;
         font-weight: 700;
@@ -94,10 +88,10 @@
 <section class="topbar">
     <div class="topbar-head">
         <div class="topbar-title">
-            <h1>Scénario: {{ scenario.name }}</h1>
+            <h1>Scénario : {{ scenario.name }}</h1>
             <div class="meta">
-                <span class="pill">Méthode: {{ scenario.get_method_display }}</span>
-                <span class="pill">Période: {{ scenario.period|default:"N/A" }}</span>
+                <span class="pill">Méthode : {{ scenario.get_method_display }}</span>
+                <span class="pill">Période : {{ scenario.period|default:"N/A" }}</span>
             </div>
         </div>
         <div class="actions">
@@ -105,14 +99,12 @@
                 {% csrf_token %}
                 <button type="submit" class="btn-action">Sauvegarder</button>
             </form>
-            <button type="button" class="btn-action btn-light" onclick="history.back()">Retour arrière</button>
-            <a href="{% url 'scenario-duplicate' scenario.pk %}" class="btn-action btn-secondary">Dupliquer scénario</a>
+            <button type="button" class="btn-action btn-light" onclick="history.back()">Retour</button>
+            <a href="{% url 'scenario-duplicate' scenario.pk %}" class="btn-action btn-secondary">Dupliquer</a>
             <button type="button" class="btn-action btn-light" onclick="window.print()">Export PDF</button>
         </div>
     </div>
 </section>
-
-
 
 <p>{{ scenario.description }}</p>
 
@@ -123,67 +115,49 @@
         <thead>
             <tr>
                 <th>Indicateur</th>
-                {% for row in summary_rows %}
-                <th>{{ row.product.name }}</th>
-                {% endfor %}
+                {% for row in summary_rows %}<th>{{ row.product.name }}</th>{% endfor %}
                 <th>Total</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>Quantité</td>
-                {% for row in summary_rows %}
-                <td>{{ row.quantity|floatformat:0 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.quantity|floatformat:0 }}</td>{% endfor %}
                 <td>-</td>
             </tr>
             <tr>
                 <td>Prix unitaire</td>
-                {% for row in summary_rows %}
-                <td>{{ row.unit_price|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.unit_price|floatformat:2 }}</td>{% endfor %}
                 <td>-</td>
             </tr>
             <tr>
                 <td>CV unitaire</td>
-                {% for row in summary_rows %}
-                <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.variable_unit_cost|floatformat:2 }}</td>{% endfor %}
                 <td>-</td>
             </tr>
             <tr>
                 <td>Chiffre d'affaires</td>
-                {% for row in summary_rows %}
-                <td>{{ row.revenue|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.revenue|floatformat:2 }}</td>{% endfor %}
                 <td>{{ summary_totals.revenue|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td>Coût variable total</td>
-                {% for row in summary_rows %}
-                <td>{{ row.variable|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.variable|floatformat:2 }}</td>{% endfor %}
                 <td>{{ summary_totals.variable|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td>MCV</td>
-                {% for row in summary_rows %}
-                <td>{{ row.contribution|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.contribution|floatformat:2 }}</td>{% endfor %}
                 <td>{{ summary_totals.contribution|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td>CF spécifiques</td>
-                {% for row in summary_rows %}
-                <td>{{ row.fixed|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.fixed|floatformat:2 }}</td>{% endfor %}
                 <td>{{ summary_totals.fixed|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td>Résultat</td>
-                {% for row in summary_rows %}
-                <td>{{ row.result|floatformat:2 }}</td>
-                {% endfor %}
+                {% for row in summary_rows %}<td>{{ row.result|floatformat:2 }}</td>{% endfor %}
                 <td>{{ summary_totals.result|floatformat:2 }}</td>
             </tr>
         </tbody>
@@ -222,16 +196,16 @@
                 </td>
             </tr>
             {% empty %}
-            <tr>
-                <td colspan="5">Aucun produit saisi.</td>
-            </tr>
+            <tr><td colspan="5">Aucun produit saisi.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
 <a href="{% url 'add_product' scenario.id %}" class="btn-action">Ajouter un produit</a>
 
 <h2>Actions</h2>
 <a href="{% url 'calculate_results' scenario.id %}" class="btn btn-success">Calculer les résultats</a>
-<a href="{% url 'scenario-list' %}" class="btn btn-secondary">Retour à la liste des scénarios</a>
+<a href="{% url 'scenario-list' %}" class="btn btn-secondary">Retour à la liste</a>
+
 {% endblock %}
