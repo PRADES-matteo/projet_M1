@@ -84,7 +84,6 @@ def _serialize_scenario_snapshot(scenario):
             "method": scenario.method,
             "input_mode": scenario.input_mode,
             "preset": scenario.preset,
-            "ui_mode": scenario.ui_mode,
             "use_reciprocal_allocation": scenario.use_reciprocal_allocation,
             "use_seasonality": scenario.use_seasonality,
         },
@@ -151,7 +150,7 @@ def _restore_scenario_from_snapshot(scenario, snapshot):
     scenario_data = snapshot.get("scenario", {})
     for field in [
         "name", "period", "description", "method", "input_mode",
-        "preset", "ui_mode", "use_reciprocal_allocation", "use_seasonality",
+        "preset", "use_reciprocal_allocation", "use_seasonality",
     ]:
         if field in scenario_data:
             setattr(scenario, field, scenario_data[field])
@@ -315,6 +314,9 @@ def scenario_detail(request, pk):
             'estimated_revenue': est_rev,
         })
 
+    seasonality_labels = [item['month_name'] for item in seasonality_list]
+    seasonality_values = [float(item['percentage']) for item in seasonality_list]
+
     context = {
         'scenario': scenario,
         'scenario_versions': scenario.versions.all(),
@@ -330,6 +332,8 @@ def scenario_detail(request, pk):
             'fixed': total_fixed,
         },
         'seasonality_list': seasonality_list,
+        'seasonality_labels': seasonality_labels,
+        'seasonality_values': seasonality_values,
         'total_revenue': total_revenue,
     }
     return render(request, 'costs/scenario_detail.html', context)
@@ -474,7 +478,6 @@ def duplicate_scenario(request, pk):
         method=source.method,
         input_mode=source.input_mode,
         preset=source.preset,
-        ui_mode=source.ui_mode,
         use_reciprocal_allocation=source.use_reciprocal_allocation,
         use_seasonality=source.use_seasonality,
     )

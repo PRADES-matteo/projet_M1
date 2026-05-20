@@ -5,18 +5,6 @@
 {% block content %}
 
 <style>
-    .page-title {
-        margin-bottom: 1.5rem;
-        color: #111827;
-    }
-
-    .card-custom {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
     .form-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -56,6 +44,10 @@
         color: #991b1b;
     }
 
+    .errorlist.is-hidden {
+        display: none;
+    }
+
     .hint {
         background: #f0fdfa;
         border: 1px solid #99f6e4;
@@ -75,60 +67,452 @@
     }
 
     .submit-btn:hover { background: #115e59; }
+
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .period-options {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+
+    .period-btn {
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #0f172a;
+        position: relative;
+        text-align: left;
+        min-width: 132px;
+        transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .period-btn:hover { transform: translateY(-1px); }
+
+    .period-btn.active {
+        background: #0f766e;
+        color: #ffffff;
+        border-color: #0f766e;
+    }
+
+    .period-btn.active::after {
+        content: "\2713";
+        position: absolute;
+        top: 0.45rem;
+        right: 0.55rem;
+        font-size: 0.8rem;
+        color: #ffffff;
+    }
+
+    .period-dynamic {
+        margin-top: 0.75rem;
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .period-panel {
+        display: none;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem;
+        background: #f9fafb;
+    }
+
+    .period-panel.is-visible {
+        display: block;
+        animation: periodSlide 180ms ease;
+    }
+
+    @keyframes periodSlide {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .period-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        align-items: end;
+    }
+
+    .period-summary {
+        margin-top: 0.75rem;
+        border-radius: 14px;
+        padding: 0.8rem 0.9rem;
+        background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+        border: 1px solid #a7f3d0;
+    }
+
+    .period-summary-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0f766e;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .period-summary-range { font-weight: 700; color: #0f172a; }
+
+    .period-summary-duration {
+        margin-top: 0.2rem;
+        color: #374151;
+    }
+
+    .inline-note {
+        margin-top: 0.35rem;
+        color: #6b7280;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 640px) {
+        .form-grid { grid-template-columns: 1fr; }
+    }
 </style>
 
 <section class="card-custom">
-  <h2>Créer un nouveau scénario</h2>
-  <p>
-    Étape 1: définir le scénario. Le mode de saisie des produits se règle juste
-    après sa création.
-  </p>
-  <div class="hint">
-    Astuce: choisissez <strong>Simple</strong> pour un démarrage rapide, ou
-    <strong>Expert</strong> pour activer plus d'options ensuite.
-  </div>
-  <form method="post" novalidate>
-    {% csrf_token %} {{ form.non_field_errors }}
-    <div class="form-grid">
-      <div class="field-box">
-        {{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}
-      </div>
-      <div class="field-box">
-        {{ form.period.label_tag }} {{ form.period }} {{ form.period.errors }}
-      </div>
-      <div class="field-box">
-        {{ form.method.label_tag }} {{ form.method }} {{ form.method.errors }}
-        <small>{{ form.method.help_text }}</small>
-      </div>
-      <div class="field-box">
-        {{ form.preset.label_tag }} {{ form.preset }} {{ form.preset.errors }}
-        <small>{{ form.preset.help_text }}</small>
-      </div>
-      <div class="field-box">
-        {{ form.ui_mode.label_tag }} {{ form.ui_mode }} {{ form.ui_mode.errors
-        }}
-        <small>{{ form.ui_mode.help_text }}</small>
-      </div>
+    <h2>Créer un nouveau scénario</h2>
+    <p>
+        Étape 1 : définir le scénario.
+        Le mode de saisie des produits se règle juste après sa création.
+    </p>
+
+    <div class="hint">
+        Astuce : choisissez <strong>Simple</strong> pour un démarrage rapide,
+        ou <strong>Expert</strong> pour activer plus d'options ensuite.
     </div>
-    <div class="field-box" style="margin-top: 0.8rem">
-      {{ form.description.label_tag }} {{ form.description }} {{
-      form.description.errors }}
-    </div>
-    <div style="margin-top: 0.75rem">
-      <button
-        type="submit"
-        style="
-          padding: 0.5rem 0.8rem;
-          background: #0f766e;
-          color: #fff;
-          border: none;
-          border-radius: 8px;
-        "
-      >
-        Créer
-      </button>
-    </div>
-  </form>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+
+            <div class="field-box">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {% if form.name.errors %}<div class="errorlist" data-error-for="name">{{ form.name.errors }}</div>{% endif %}
+            </div>
+
+            <div class="field-box">
+                {{ form.method.label_tag }}
+                {{ form.method }}
+                {% if form.method.errors %}<div class="errorlist" data-error-for="method">{{ form.method.errors }}</div>{% endif %}
+                <small>{{ form.method.help_text }}</small>
+            </div>
+
+            <div class="field-box">
+                {{ form.preset.label_tag }}
+                {{ form.preset }}
+                {% if form.preset.errors %}<div class="errorlist" data-error-for="preset">{{ form.preset.errors }}</div>{% endif %}
+                <small>{{ form.preset.help_text }}</small>
+            </div>
+
+            <div class="field-box">
+                <label>Type de période :</label>
+                {{ form.period }}
+
+                <div class="period-selector" style="margin-top: 0.35rem;">
+                    <div class="period-options" role="tablist" aria-label="Type de période">
+                        <button type="button" class="period-btn" data-value="Mensuel" aria-pressed="false">Mensuel</button>
+                        <button type="button" class="period-btn" data-value="Trimestriel" aria-pressed="false">Trimestriel</button>
+                        <button type="button" class="period-btn" data-value="Semestriel" aria-pressed="false">Semestriel</button>
+                        <button type="button" class="period-btn" data-value="Annuel" aria-pressed="false">Annuel</button>
+                        <button type="button" class="period-btn" data-value="Personnalisé" aria-pressed="false">Personnalisé</button>
+                    </div>
+
+                    {% if form.period.errors %}
+                    <div class="errorlist" data-error-for="period">{{ form.period.errors }}</div>
+                    {% endif %}
+
+                    <div class="period-dynamic" id="period_dynamic">
+                        <div class="period-panel" id="shared_panel">
+                            <div class="period-grid">
+                                <div>
+                                    {{ form.period_year.label_tag }}
+                                    {{ form.period_year }}
+                                </div>
+                                <div id="month_group">
+                                    {{ form.period_month.label_tag }}
+                                    {{ form.period_month }}
+                                </div>
+                                <div id="quarter_group">
+                                    {{ form.period_quarter.label_tag }}
+                                    {{ form.period_quarter }}
+                                </div>
+                                <div id="semester_group">
+                                    {{ form.period_semester.label_tag }}
+                                    {{ form.period_semester }}
+                                </div>
+                            </div>
+                            <div class="inline-note" id="shared_note"></div>
+                        </div>
+
+                        <div class="period-panel" id="custom_panel">
+                            <div class="period-grid">
+                                <div>
+                                    {{ form.period_start.label_tag }}
+                                    {{ form.period_start }}
+                                </div>
+                                <div>
+                                    {{ form.period_end.label_tag }}
+                                    {{ form.period_end }}
+                                </div>
+                                <div>
+                                    <div class="period-summary-duration" id="custom_duration">
+                                        Choisissez deux dates pour calculer la durée.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="period-summary" id="period_summary">
+                        <div class="period-summary-label">Période sélectionnée</div>
+                        <div class="period-summary-range" id="period_summary_range">Aucune période sélectionnée</div>
+                        <div class="period-summary-duration" id="period_summary_duration">—</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="field-box" style="margin-top: 1rem;">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}<div class="errorlist" data-error-for="description">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div style="margin-top: 1rem;">
+            <button type="submit" class="submit-btn">Créer</button>
+        </div>
+
+    </form>
 </section>
+
+<script>
+  (function(){
+    const periodField = document.getElementById('id_period');
+    const buttons = Array.from(document.querySelectorAll('.period-btn'));
+    const yearField = document.getElementById('id_period_year');
+    const monthField = document.getElementById('id_period_month');
+    const quarterField = document.getElementById('id_period_quarter');
+    const semesterField = document.getElementById('id_period_semester');
+    const startField = document.getElementById('id_period_start');
+    const endField = document.getElementById('id_period_end');
+    const sharedPanel = document.getElementById('shared_panel');
+    const customPanel = document.getElementById('custom_panel');
+    const monthGroup = document.getElementById('month_group');
+    const quarterGroup = document.getElementById('quarter_group');
+    const semesterGroup = document.getElementById('semester_group');
+    const sharedNote = document.getElementById('shared_note');
+    const summaryRange = document.getElementById('period_summary_range');
+    const summaryDuration = document.getElementById('period_summary_duration');
+    const customDuration = document.getElementById('custom_duration');
+
+    if(!periodField) return;
+
+    function pad(value){ return String(value).padStart(2, '0'); }
+    function formatDate(date){ return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`; }
+    function isoDate(date){ return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`; }
+    function lastDayOfMonth(year, monthIndex){ return new Date(year, monthIndex + 1, 0); }
+    function monthsBetweenInclusive(startDate, endDate){
+      if(!startDate || !endDate || endDate < startDate) return 0;
+      const base = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+      return Math.max(1, base - (endDate.getDate() < startDate.getDate() ? 1 : 0));
+    }
+
+    function setYearOptions(){
+      if(yearField.options.length) return;
+      const currentYear = new Date().getFullYear();
+      for(let year = currentYear - 2; year <= currentYear + 2; year++){
+        const option = document.createElement('option');
+        option.value = String(year);
+        option.textContent = String(year);
+        yearField.appendChild(option);
+      }
+      yearField.value = String(currentYear);
+    }
+
+    function showPanels(type){
+      const visible = (el, yes) => el.classList.toggle('is-visible', yes);
+      visible(sharedPanel, Boolean(type) && type !== 'Personnalisé');
+      visible(customPanel, type === 'Personnalisé');
+      monthGroup.style.display = type === 'Mensuel' ? 'block' : 'none';
+      quarterGroup.style.display = type === 'Trimestriel' ? 'block' : 'none';
+      semesterGroup.style.display = type === 'Semestriel' ? 'block' : 'none';
+      sharedNote.textContent = type === 'Annuel' ? "La période est calculée automatiquement à partir de l'année choisie." : '';
+    }
+
+    function syncActiveButton(type){
+      buttons.forEach((btn) => {
+        const active = btn.dataset.value === type;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+
+    function setErrorVisibility(fieldName, visible){
+      document.querySelectorAll(`[data-error-for="${fieldName}"]`).forEach((node) => {
+        node.classList.toggle('is-hidden', !visible);
+      });
+    }
+
+    function fieldHasValue(field){
+      if(!field) return false;
+      if(field.type === 'checkbox' || field.type === 'radio') return field.checked;
+      return String(field.value || '').trim() !== '';
+    }
+
+    function wireDynamicErrors(){
+      ['name', 'method', 'preset', 'description'].forEach((fieldName) => {
+        const field = document.getElementById(`id_${fieldName}`);
+        if(!field) return;
+        const refresh = () => setErrorVisibility(fieldName, !fieldHasValue(field));
+        field.addEventListener('input', refresh);
+        field.addEventListener('change', refresh);
+        refresh();
+      });
+      const refreshPeriod = () => setErrorVisibility('period', !periodField.value);
+      buttons.forEach((btn) => btn.addEventListener('click', refreshPeriod));
+      refreshPeriod();
+    }
+
+    function updateSummary(rangeText, durationText){
+      summaryRange.textContent = rangeText || 'Aucune période sélectionnée';
+      summaryDuration.textContent = durationText || '—';
+    }
+
+    function updateCustomSummary(){
+      const startValue = startField.value;
+      const endValue = endField.value;
+      if(!startValue || !endValue){
+        customDuration.textContent = 'Choisissez deux dates pour calculer la durée.';
+        updateSummary('Période personnalisée', '—');
+        return;
+      }
+      const startDate = new Date(`${startValue}T00:00:00`);
+      const endDate = new Date(`${endValue}T00:00:00`);
+      if(endDate < startDate){
+        customDuration.textContent = 'La date de fin doit être postérieure à la date de début.';
+        updateSummary('Période personnalisée', 'Date de fin invalide');
+        return;
+      }
+      const months = monthsBetweenInclusive(startDate, endDate);
+      customDuration.textContent = `Durée : ${months} mois`;
+      updateSummary(`${formatDate(startDate)} → ${formatDate(endDate)}`, `Durée : ${months} mois`);
+    }
+
+    function applyAnnual(){
+      setYearOptions();
+      const year = Number(yearField.value || new Date().getFullYear());
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31);
+      startField.value = isoDate(startDate);
+      endField.value = isoDate(endDate);
+      updateSummary(`${formatDate(startDate)} → ${formatDate(endDate)}`, 'Durée : 12 mois');
+    }
+
+    function applyMonthly(){
+      setYearOptions();
+      const year = Number(yearField.value || new Date().getFullYear());
+      const month = Number(monthField.value || 1);
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = lastDayOfMonth(year, month - 1);
+      startField.value = isoDate(startDate);
+      endField.value = isoDate(endDate);
+      updateSummary(`${formatDate(startDate)} → ${formatDate(endDate)}`, 'Durée : 1 mois');
+    }
+
+    function applyQuarterly(){
+      setYearOptions();
+      const year = Number(yearField.value || new Date().getFullYear());
+      const quarter = quarterField.value || 'T1';
+      const quarterIndex = Number(quarter.slice(1)) - 1;
+      const startMonth = quarterIndex * 3;
+      const startDate = new Date(year, startMonth, 1);
+      const endDate = lastDayOfMonth(year, startMonth + 2);
+      startField.value = isoDate(startDate);
+      endField.value = isoDate(endDate);
+      updateSummary(`${formatDate(startDate)} → ${formatDate(endDate)}`, 'Durée : 3 mois');
+    }
+
+    function applySemester(){
+      setYearOptions();
+      const year = Number(yearField.value || new Date().getFullYear());
+      const semester = semesterField.value || 'S1';
+      const startMonth = semester === 'S2' ? 6 : 0;
+      const endMonth = semester === 'S2' ? 11 : 5;
+      const startDate = new Date(year, startMonth, 1);
+      const endDate = lastDayOfMonth(year, endMonth);
+      startField.value = isoDate(startDate);
+      endField.value = isoDate(endDate);
+      updateSummary(`${formatDate(startDate)} → ${formatDate(endDate)}`, 'Durée : 6 mois');
+    }
+
+    function applyCustom(){
+      if(!startField.value && !endField.value){
+        const today = new Date();
+        const defaultStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        startField.value = isoDate(defaultStart);
+        endField.value = isoDate(today);
+      }
+      updateCustomSummary();
+    }
+
+    function selectType(type){
+      periodField.value = type;
+      syncActiveButton(type);
+      showPanels(type);
+      if(type === 'Mensuel') applyMonthly();
+      else if(type === 'Trimestriel') applyQuarterly();
+      else if(type === 'Semestriel') applySemester();
+      else if(type === 'Annuel') applyAnnual();
+      else if(type === 'Personnalisé') applyCustom();
+      else updateSummary('Aucune période sélectionnée', '—');
+    }
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => selectType(btn.dataset.value));
+    });
+
+    yearField.addEventListener('change', () => {
+      if(periodField.value === 'Mensuel') applyMonthly();
+      if(periodField.value === 'Trimestriel') applyQuarterly();
+      if(periodField.value === 'Semestriel') applySemester();
+      if(periodField.value === 'Annuel') applyAnnual();
+    });
+    monthField.addEventListener('change', () => { if(periodField.value === 'Mensuel') applyMonthly(); });
+    quarterField.addEventListener('change', () => { if(periodField.value === 'Trimestriel') applyQuarterly(); });
+    semesterField.addEventListener('change', () => { if(periodField.value === 'Semestriel') applySemester(); });
+    startField.addEventListener('change', () => { if(periodField.value === 'Personnalisé') updateCustomSummary(); });
+    endField.addEventListener('change', () => { if(periodField.value === 'Personnalisé') updateCustomSummary(); });
+
+    const initialType = periodField.value;
+    setYearOptions();
+    if(initialType){
+      syncActiveButton(initialType);
+      showPanels(initialType);
+      if(initialType === 'Mensuel') applyMonthly();
+      else if(initialType === 'Trimestriel') applyQuarterly();
+      else if(initialType === 'Semestriel') applySemester();
+      else if(initialType === 'Annuel') applyAnnual();
+      else if(initialType === 'Personnalisé') applyCustom();
+    } else {
+      showPanels('');
+      updateSummary('Aucune période sélectionnée', '—');
+    }
+
+    wireDynamicErrors();
+  })();
+</script>
 
 {% endblock %}

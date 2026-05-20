@@ -33,11 +33,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='costscenario',
-            name='ui_mode',
-            field=models.CharField(choices=[('simple', 'Simple'), ('expert', 'Expert')], default='simple', max_length=10),
-        ),
-        migrations.AddField(
-            model_name='costscenario',
             name='use_reciprocal_allocation',
             field=models.BooleanField(default=False),
         ),

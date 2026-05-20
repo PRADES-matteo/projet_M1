@@ -113,6 +113,13 @@
   }
 </style>
 
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
 <section class="topbar">
   <div class="topbar-head">
     <div class="topbar-title">
@@ -154,9 +161,11 @@
   </div>
 </section>
 
+{% if description %}
 <div class="section-card">
   <p style="margin-top: 0">{{ scenario.description }}</p>
 </div>
+{% endif %}
 
 <div class="section-card">
   <h2>Vision d'ensemble Direct Costing</h2>
@@ -461,10 +470,13 @@
     <canvas id="seasonalityChart"></canvas>
   </div>
 
+  {{ seasonality_labels|json_script:"seasonality-labels-data" }}
+  {{ seasonality_values|json_script:"seasonality-values-data" }}
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const labels = [{% for s in seasonality_list %}'{{ s.month_name }}',{% endfor %}];
-    const data = [{% for s in seasonality_list %}{{ s.percentage }},{% endfor %}];
+    const labels = JSON.parse(document.getElementById('seasonality-labels-data').textContent);
+    const data = JSON.parse(document.getElementById('seasonality-values-data').textContent);
     const ctx = document.getElementById('seasonalityChart');
     if (ctx) {
       new Chart(ctx, {
@@ -487,7 +499,11 @@
   <h2>Gestion des scénarios</h2>
 
   <h3 style="margin-bottom: 0.5rem">Sauvegarder une version</h3>
-  <form method="post" action="{% url 'scenario-save' scenario.pk %}" class="inline-form">
+  <form
+    method="post"
+    action="{% url 'scenario-save' scenario.pk %}"
+    class="inline-form"
+  >
     {% csrf_token %}
     <input
       type="text"
@@ -532,10 +548,16 @@
               method="post"
               action="{% url 'scenario-version-restore' scenario.pk version.id %}"
               style="display: inline"
-              onsubmit="return confirm('Restaurer cette version ? Les données actuelles seront remplacées.');"
+              onsubmit="
+                return confirm(
+                  'Restaurer cette version ? Les données actuelles seront remplacées.',
+                );
+              "
             >
               {% csrf_token %}
-              <button type="submit" class="btn-action btn-light">Restaurer</button>
+              <button type="submit" class="btn-action btn-light">
+                Restaurer
+              </button>
             </form>
           </td>
         </tr>

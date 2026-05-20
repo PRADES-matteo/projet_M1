@@ -1,56 +1,94 @@
-{% extends "costs/base.html" %}
-{% block content %}
-<h1>Comparaison de scénarios</h1>
+{% extends "costs/base.html" %} {% block content %}
+<h1>Comparer deux scénarios</h1>
 
-<div class="card" style="padding: 1rem; margin-bottom: 1rem">
-  <form method="get" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center">
-    <label for="scenario_a">Scénario A</label>
-    <select id="scenario_a" name="scenario_a" required>
-      <option value="">Choisir</option>
-      {% for s in scenarios %}
-      <option value="{{ s.id }}" {% if scenario_a and s.id == scenario_a.id %}selected{% endif %}>{{ s.name }}</option>
-      {% endfor %}
-    </select>
+<form
+  method="get"
+  action="{% url 'compare_scenarios' %}"
+  class="inline-form"
+  style="margin-bottom: 1rem"
+>
+  <label style="margin-right: 0.5rem">Scénario A</label>
+  <select name="scenario_a" required>
+    <option value="">Choisir...</option>
+    {% for s in scenarios %}
+    <option
+      value="{{ s.id }}"
+      {%
+      if
+      scenario_a
+      and
+      scenario_a.id=""
+      ="s.id"
+      %}selected{%
+      endif
+      %}
+    >
+      {{ s.name }}
+    </option>
+    {% endfor %}
+  </select>
 
-    <label for="scenario_b">Scénario B</label>
-    <select id="scenario_b" name="scenario_b" required>
-      <option value="">Choisir</option>
-      {% for s in scenarios %}
-      <option value="{{ s.id }}" {% if scenario_b and s.id == scenario_b.id %}selected{% endif %}>{{ s.name }}</option>
-      {% endfor %}
-    </select>
+  <label style="margin: 0 0.5rem">Scénario B</label>
+  <select name="scenario_b" required>
+    <option value="">Choisir...</option>
+    {% for s in scenarios %}
+    <option
+      value="{{ s.id }}"
+      {%
+      if
+      scenario_b
+      and
+      scenario_b.id=""
+      ="s.id"
+      %}selected{%
+      endif
+      %}
+    >
+      {{ s.name }}
+    </option>
+    {% endfor %}
+  </select>
 
-    <button type="submit" class="btn btn-primary">Comparer</button>
-  </form>
-</div>
+  <button type="submit" class="btn-action" style="margin-left: 0.6rem">
+    Comparer
+  </button>
+</form>
 
-{% if comparison and scenario_a and scenario_b %}
-<div class="card" style="padding: 1rem">
-  <h2 style="margin-top: 0">{{ scenario_a.name }} vs {{ scenario_b.name }}</h2>
-  <div style="overflow-x: auto">
-    <table class="summary" style="width: 100%; border-collapse: collapse">
+{% if comparison %}
+<div class="section-card">
+  <h2>Résultats de la comparaison</h2>
+  <div class="table-wrap">
+    <table class="summary">
       <thead>
         <tr>
-          <th style="text-align: left; border: 1px solid #e5e7eb; padding: 0.5rem">Indicateur</th>
-          <th style="border: 1px solid #e5e7eb; padding: 0.5rem">{{ scenario_a.name }}</th>
-          <th style="border: 1px solid #e5e7eb; padding: 0.5rem">{{ scenario_b.name }}</th>
-          <th style="border: 1px solid #e5e7eb; padding: 0.5rem">Écart (A - B)</th>
+          <th>Indicateur</th>
+          <th>{{ scenario_a.name }}</th>
+          <th>{{ scenario_b.name }}</th>
+          <th>Delta (A - B)</th>
         </tr>
       </thead>
       <tbody>
         {% for row in comparison %}
         <tr>
-          <td style="text-align: left; border: 1px solid #e5e7eb; padding: 0.5rem">{{ row.label }}</td>
-          <td style="text-align: right; border: 1px solid #e5e7eb; padding: 0.5rem">{{ row.value_a|floatformat:2 }}</td>
-          <td style="text-align: right; border: 1px solid #e5e7eb; padding: 0.5rem">{{ row.value_b|floatformat:2 }}</td>
-          <td style="text-align: right; border: 1px solid #e5e7eb; padding: 0.5rem">{{ row.delta|floatformat:2 }}</td>
+          <td>{{ row.label }}</td>
+          <td style="text-align: right">{{ row.value_a }}</td>
+          <td style="text-align: right">{{ row.value_b }}</td>
+          <td style="text-align: right">{{ row.delta }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+{% else %}
+<p>
+  Sélectionnez deux scénarios puis cliquez sur « Comparer » pour afficher les
+  différences.
+</p>
 {% endif %}
 
-<p style="margin-top: 1rem"><a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a></p>
+<p style="margin-top: 1rem">
+  <a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
+</p>
+
 {% endblock %}

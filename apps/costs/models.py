@@ -34,13 +34,14 @@ class CostScenario(models.Model):
     )
     preset = models.CharField(
         max_length=20,
-        choices=[("small_business", "Petite entreprise"), ("factory", "Usine"), ("distribution", "Distribution")],
-        default="small_business",
-    )
-    ui_mode = models.CharField(
-        max_length=10,
-        choices=[("simple", "Simple"), ("expert", "Expert")],
-        default="simple",
+        choices=[
+            ("", "Aucun"),
+            ("small_business", "Petite entreprise"),
+            ("factory", "Usine"),
+            ("distribution", "Distribution"),
+        ],
+        blank=True,
+        null=True,
     )
     use_reciprocal_allocation = models.BooleanField(default=False)
     use_seasonality = models.BooleanField(default=False)

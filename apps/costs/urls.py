@@ -3,11 +3,10 @@ from . import views
 
 urlpatterns = [
     path("", views.scenario_list, name="scenario-list"),
-    path("scenario/compare/", views.compare_scenarios, name="compare_scenarios"),
     path("<int:pk>/", views.scenario_detail, name="scenario-detail"),
     path("<int:pk>/save/", views.save_scenario, name="scenario-save"),
-    path("<int:pk>/versions/<int:version_id>/restore/", views.restore_scenario_version, name="scenario-version-restore"),
     path("<int:pk>/duplicate/", views.duplicate_scenario, name="scenario-duplicate"),
+    path("compare/", views.compare_scenarios, name="compare_scenarios"),
     path("scenario/create/", views.create_scenario, name="create_scenario"),
     path('scenario/<int:pk>/delete/', views.delete_scenario, name='delete-scenario'),
     path("scenario/<int:scenario_id>/product/add/", views.add_product, name="add_product"),
@@ -22,4 +21,5 @@ urlpatterns = [
     path('fixed-cost/<int:pk>/edit/', views.FixedCostUpdateView.as_view(), name='edit_fixed_cost'),
     path('fixed-cost/<int:pk>/delete/', views.FixedCostDeleteView.as_view(), name='delete_fixed_cost'),
     path('scenario/<int:scenario_id>/seasonality/', views.edit_seasonality, name='edit_seasonality'),
+    path('scenario/<int:pk>/version/<int:version_id>/restore/', views.restore_scenario_version, name='scenario-version-restore'),
 ]
