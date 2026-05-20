@@ -529,6 +529,16 @@ def create_scenario(request):
 
 
 @login_required
+def delete_scenario(request, pk):
+    scenario = get_object_or_404(CostScenario, pk=pk)
+    if request.method == "POST":
+        scenario.delete()
+        messages.success(request, f"Le scénario '{scenario.name}' a été supprimé avec succès.")
+        return redirect('scenario-list')
+    return redirect('scenario-list')
+
+
+@login_required
 def add_product(request, scenario_id):
     scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     if request.method == "POST":

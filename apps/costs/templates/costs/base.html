@@ -31,6 +31,9 @@
             overflow-x: hidden;
             z-index: 1000;
             transition: width 0.25s ease;
+            display: flex;           
+            flex-direction: column;  
+        
         }
 
         .sidebar.collapsed {
@@ -68,7 +71,6 @@
         }
 
         .sidebar .nav-link.active {
-            background-color: #0f766e;
             color: white;
         }
 
@@ -109,9 +111,6 @@
         }
 
         .scenario-item.active {
-            background: #0f766e;
-            color: white;
-            border-color: #0f766e;
         }
 
         .scenario-item.active .scenario-period {
@@ -181,9 +180,44 @@
         .main-content.expanded {
             margin-left: 0;
         }
+
+        .btn-delete {
+            padding: 0.5rem 0.8rem;
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #b91c1c;
+        }
+
+        .messages {
+            margin: 1rem 0;
+        }
+
+        .message {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
     </style>
 </head>
 <body>
+
 
 <!-- TOGGLE BUTTON -->
 <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" hx-preserve>
@@ -193,54 +227,125 @@
 </button>
 
 <!-- SIDEBAR -->
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar" hx-preserve>
 
     <div class="sidebar-header">
-        <h4 class="sidebar-brand">CoreUI</h4>
+        <h4 class="sidebar-brand">ERP</h4>
     </div>
 
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link {% block nav_new %}{% endblock %}" href="{% url 'scenario-list' %}">
-                Nouveau scénario
-            </a>
-        </li>
-    </ul>
+    <!-- Zone scrollable qui prend tout l'espace disponible -->
+    <div style="
+        flex: 1; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+        ">
 
-    <div class="scenario-section">
-        <div class="scenario-title">Mes scénarios</div>
-        <div class="scenario-list" id="scenario-sidebar-list">
-            {% for scenario in all_scenarios %}
-                <a
-                    href="{% url 'scenario-detail' scenario.pk %}"
-                    class="scenario-item {% if current_scenario and current_scenario.pk == scenario.pk %}active{% endif %}"
-                    hx-get="{% url 'scenario-detail' scenario.pk %}"
-                    hx-target="#panel"
-                    hx-swap="innerHTML"
-                >
-                <div class="scenario-name">{{ scenario.name }}</div>
-                <div class="scenario-period">{{ scenario.period }}</div>
-            </a>
-            {% empty %}
-            <div style="color: #6b7280; font-size: 0.9rem;">
-                Aucun scénario enregistré.
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a 
+                style="
+                padding: 0.6rem;
+                background: #0f766e;
+                color: white;
+            "
+            class="nav-link {% block nav_new %}{% endblock %}" href="{% url 'scenario-list' %}">
+                    Nouveau scénario
+                </a>
+            </li>
+        </ul>
+
+        <div class="scenario-section">
+            <div class="scenario-title">Mes scénarios</div>
+            <div class="scenario-list" id="scenario-sidebar-list">
+                {% for scenario in all_scenarios %}
+                    <div class="scenario-item {% if current_scenario and current_scenario.pk == scenario.pk %}active{% endif %}">
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                            <a
+                                href="{% url 'scenario-detail' scenario.pk %}"
+                                hx-get="{% url 'scenario-detail' scenario.pk %}"
+                                hx-target="#panel"
+                                hx-swap="innerHTML"
+                                style="text-decoration: none; color: inherit; flex: 1; min-width: 0;"
+                            >
+                                <div class="scenario-name">{{ scenario.name }}</div>
+                            </a>
+
+                            <form
+                                method="post"
+                                action="{% url 'delete-scenario' scenario.id %}"
+                                onsubmit="return confirm('Supprimer ce scénario ?');"
+                                style="flex-shrink: 0;"
+                            >
+                                {% csrf_token %}
+                                <button type="submit" title="Supprimer" style="
+                                    background: none;
+                                    border: none;
+                                    cursor: pointer;
+                                    padding: 0.2rem;
+                                    color: #9ca3af;
+                                    display: flex;
+                                    align-items: center;
+                                    border-radius: 4px;
+                                    transition: 0.2s;
+                                "
+                                onmouseover="this.style.color='#dc2626'"
+                                onmouseout="this.style.color='#9ca3af'"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                        <path d="M10 11v6"/>
+                                        <path d="M14 11v6"/>
+                                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <a
+                            href="{% url 'scenario-detail' scenario.pk %}"
+                            hx-get="{% url 'scenario-detail' scenario.pk %}"
+                            hx-target="#panel"
+                            hx-swap="innerHTML"
+                            style="text-decoration: none; color: inherit; display: block;"
+                        >
+                            <div class="scenario-period">{{ scenario.period }}</div>
+                        </a>
+
+                    </div>
+                    {% empty %}
+                    <div style="color: #6b7280; font-size: 0.9rem;">
+                        Aucun scénario enregistré.
+                    </div>
+                    {% endfor %}
             </div>
-            {% endfor %}
         </div>
+
     </div>
-    <div style="padding: 1rem; border-top: 1px solid #e5e7eb; margin-top: auto;">
+    <!-- Fin zone scrollable -->
+
+    <!-- Bouton déconnexion toujours en bas -->
+    <div style="
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+        background: #ffffff;
+        flex-shrink: 0;
+    ">
         <form method="post" action="/accounts/logout/">
             {% csrf_token %}
             <button type="submit" style="
                 width: 100%;
                 padding: 0.6rem;
-                background: #f9fafb;
-                border: 1px solid #e5e7eb;
+                background: #dc2626;
+                color: white;
+                border: none;
                 border-radius: 10px;
                 cursor: pointer;
-                color: #374151;
-                text-align: left;
                 font-size: 0.9rem;
+                font-weight: 600;
+                transition: 0.2s;
             ">
                 Déconnexion — {{ request.user.username }}
             </button>

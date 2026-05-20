@@ -9,6 +9,7 @@ urlpatterns = [
     path("<int:pk>/versions/<int:version_id>/restore/", views.restore_scenario_version, name="scenario-version-restore"),
     path("<int:pk>/duplicate/", views.duplicate_scenario, name="scenario-duplicate"),
     path("scenario/create/", views.create_scenario, name="create_scenario"),
+    path('scenario/<int:pk>/delete/', views.delete_scenario, name='delete-scenario'),
     path("scenario/<int:scenario_id>/product/add/", views.add_product, name="add_product"),
     path("scenario/<int:scenario_id>/product/<int:product_id>/edit/", views.edit_product, name="edit_product"),
     path("scenario/<int:scenario_id>/product/<int:product_id>/delete/", views.delete_product, name="delete_product"),
