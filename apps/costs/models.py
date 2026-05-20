@@ -1,6 +1,7 @@
 from django.db import models
 from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 
 class VariableCostCategory(models.TextChoices):
     MATERIAL = 'Material', 'Matériel'
@@ -8,6 +9,12 @@ class VariableCostCategory(models.TextChoices):
     OVERHEAD = 'Overhead', 'Frais généraux'
 
 class CostScenario(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=150)
     period = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True)

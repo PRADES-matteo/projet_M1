@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un compte</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #f3f4f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .register-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+        .register-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+        }
+        .field-box {
+            margin-bottom: 1rem;
+        }
+        .field-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #374151;
+        }
+        .field-box input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+        }
+        .field-box input:focus {
+            outline: none;
+            border-color: #0f766e;
+        }
+        .field-box .helptext {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .errorlist {
+            margin: 0.25rem 0 0;
+            padding-left: 1rem;
+            color: #991b1b;
+            font-size: 0.85rem;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 0.7rem;
+            background: #0f766e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            margin-top: 0.5rem;
+        }
+        .submit-btn:hover {
+            background: #115e59;
+        }
+        .brand {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0f766e;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="brand">CoreUI</div>
+        <div class="register-title">Créer un compte</div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="field-box">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="submit-btn">Créer mon compte</button>
+
+            <div style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #6b7280;">
+                Déjà un compte ?
+                <a href="/accounts/login/" style="color: #0f766e; font-weight: 600; text-decoration: none;">
+                    Se connecter
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

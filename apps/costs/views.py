@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django.urls import reverse
 
@@ -11,6 +12,8 @@ from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm
 from .models import CostScenario, Product, CostLine, VariableCost, FixedCost, CostCenter, SeasonalityEntry, ScenarioVersion
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 
 
 def _decimal(value):
@@ -147,15 +150,8 @@ def _serialize_scenario_snapshot(scenario):
 def _restore_scenario_from_snapshot(scenario, snapshot):
     scenario_data = snapshot.get("scenario", {})
     for field in [
-        "name",
-        "period",
-        "description",
-        "method",
-        "input_mode",
-        "preset",
-        "ui_mode",
-        "use_reciprocal_allocation",
-        "use_seasonality",
+        "name", "period", "description", "method", "input_mode",
+        "preset", "ui_mode", "use_reciprocal_allocation", "use_seasonality",
     ]:
         if field in scenario_data:
             setattr(scenario, field, scenario_data[field])
@@ -226,17 +222,19 @@ def _restore_scenario_from_snapshot(scenario, snapshot):
         )
 
 
-
+@login_required
 def scenario_list(request):
     if request.method == "POST":
         form = CostScenarioForm(request.POST)
         if form.is_valid():
-            scenario = form.save()
+            scenario = form.save(commit=False)
+            scenario.user = request.user  # ← associe l'utilisateur
+            scenario.save()
             return redirect("scenario-detail", pk=scenario.pk)
     else:
         form = CostScenarioForm()
 
-    scenarios = CostScenario.objects.all().order_by("-created_at")
+    scenarios = CostScenario.objects.filter(user=request.user).order_by("-created_at")
 
     return render(
         request,
@@ -248,8 +246,13 @@ def scenario_list(request):
     )
 
 
+@login_required
 def scenario_detail(request, pk):
-    scenario = get_object_or_404(CostScenario, pk=pk)
+    scenario = get_object_or_404(
+        CostScenario.objects.prefetch_related("products", "cost_lines", "cost_lines__center"),
+        pk=pk,
+        user=request.user  # ← sécurise l'accès
+    )
     cost_lines = scenario.cost_lines.all()
 
     summary_rows = []
@@ -296,7 +299,6 @@ def scenario_detail(request, pk):
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
 
-    # Seasonality: ensure entries exist for months 1..12
     from .models import SeasonalityEntry
     existing = {e.month: e for e in scenario.seasonality.all()}
     seasonality_list = []
@@ -306,13 +308,18 @@ def scenario_detail(request, pk):
         else:
             entry = SeasonalityEntry.objects.create(scenario=scenario, month=m, percentage=0)
         est_rev = (total_revenue * (entry.percentage / Decimal('100.0'))).quantize(Decimal('0.01'))
-        seasonality_list.append({'month': m, 'month_name': calendar.month_name[m], 'percentage': entry.percentage, 'estimated_revenue': est_rev})
+        seasonality_list.append({
+            'month': m,
+            'month_name': calendar.month_name[m],
+            'percentage': entry.percentage,
+            'estimated_revenue': est_rev,
+        })
 
     context = {
         'scenario': scenario,
         'scenario_versions': scenario.versions.all(),
-        'all_scenarios': CostScenario.objects.all().order_by('name'),  # Include all scenarios
-        'current_scenario': scenario,  # Pass the current scenario
+        'all_scenarios': CostScenario.objects.filter(user=request.user).order_by('name'),  # ← filtré
+        'current_scenario': scenario,
         'variable_costs_total': variable_costs_total,
         'fixed_costs_total': fixed_costs_total,
         'summary_rows': summary_rows,
@@ -328,8 +335,9 @@ def scenario_detail(request, pk):
     return render(request, 'costs/scenario_detail.html', context)
 
 
+@login_required
 def edit_seasonality(request, scenario_id):
-    scenario = get_object_or_404(CostScenario, pk=scenario_id)
+    scenario = get_object_or_404(CostScenario, pk=scenario_id, user=request.user)
     if request.method == 'POST':
         for m in range(1, 13):
             key = f'month_{m}'
@@ -343,13 +351,12 @@ def edit_seasonality(request, scenario_id):
             entry.save()
         messages.success(request, 'Saisonnalité mise à jour.')
         return redirect('scenario-detail', pk=scenario_id)
-    else:
-        # redirect to scenario detail where form is embedded
-        return redirect('scenario-detail', pk=scenario_id)
+    return redirect('scenario-detail', pk=scenario_id)
 
 
+@login_required
 def save_scenario(request, pk):
-    scenario = get_object_or_404(CostScenario, pk=pk)
+    scenario = get_object_or_404(CostScenario, pk=pk, user=request.user)
     if request.method == "POST":
         snapshot = _serialize_scenario_snapshot(scenario)
         max_version = scenario.versions.aggregate(max_num=Max('version_number'))['max_num'] or 0
@@ -365,9 +372,10 @@ def save_scenario(request, pk):
     return redirect("scenario-detail", pk=pk)
 
 
+@login_required
 @transaction.atomic
 def restore_scenario_version(request, pk, version_id):
-    scenario = get_object_or_404(CostScenario, pk=pk)
+    scenario = get_object_or_404(CostScenario, pk=pk, user=request.user)
     version = get_object_or_404(ScenarioVersion, pk=version_id, scenario=scenario)
 
     if request.method == "POST":
@@ -377,8 +385,9 @@ def restore_scenario_version(request, pk, version_id):
     return redirect("scenario-detail", pk=pk)
 
 
+@login_required
 def compare_scenarios(request):
-    scenarios = CostScenario.objects.all().order_by('name')
+    scenarios = CostScenario.objects.filter(user=request.user).order_by('name')
     scenario_a_id = request.GET.get('scenario_a')
     scenario_b_id = request.GET.get('scenario_b')
     scenario_a = None
@@ -386,8 +395,8 @@ def compare_scenarios(request):
     comparison = None
 
     if scenario_a_id and scenario_b_id:
-        scenario_a = get_object_or_404(CostScenario, pk=scenario_a_id)
-        scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id)
+        scenario_a = get_object_or_404(CostScenario, pk=scenario_a_id, user=request.user)
+        scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id, user=request.user)
         auto_a = build_automatic_results(scenario_a)
         auto_b = build_automatic_results(scenario_b)
 
@@ -448,11 +457,17 @@ def compare_scenarios(request):
     )
 
 
+@login_required
 @transaction.atomic
 def duplicate_scenario(request, pk):
-    source = CostScenario.objects.prefetch_related("products", "cost_centers", "cost_lines").get(pk=pk)
+    source = get_object_or_404(
+        CostScenario.objects.prefetch_related("products", "cost_centers", "cost_lines"),
+        pk=pk,
+        user=request.user  # ← sécurise l'accès
+    )
 
     cloned = CostScenario.objects.create(
+        user=request.user,  # ← associe l'utilisateur
         name=f"{source.name} (copie)",
         period=source.period,
         description=source.description,
@@ -499,19 +514,23 @@ def duplicate_scenario(request, pk):
     return redirect("scenario-detail", pk=cloned.pk)
 
 
+@login_required
 def create_scenario(request):
     if request.method == "POST":
         form = CostScenarioForm(request.POST)
         if form.is_valid():
-            scenario = form.save()
+            scenario = form.save(commit=False)
+            scenario.user = request.user
+            scenario.save()
             return redirect("scenario-detail", pk=scenario.id)
     else:
         form = CostScenarioForm()
     return render(request, "costs/create_scenario.html", {"form": form})
 
 
+@login_required
 def add_product(request, scenario_id):
-    scenario = get_object_or_404(CostScenario, id=scenario_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     if request.method == "POST":
         form = ProductForm(request.POST, scenario=scenario)
         if form.is_valid():
@@ -525,8 +544,9 @@ def add_product(request, scenario_id):
     return render(request, "costs/add_product.html", {"form": form, "scenario": scenario})
 
 
+@login_required
 def edit_product(request, scenario_id, product_id):
-    scenario = get_object_or_404(CostScenario, id=scenario_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     product = get_object_or_404(Product, id=product_id, scenario=scenario)
 
     if request.method == "POST":
@@ -541,8 +561,9 @@ def edit_product(request, scenario_id, product_id):
     return render(request, "costs/edit_product.html", {"form": form, "scenario": scenario, "product": product})
 
 
+@login_required
 def delete_product(request, scenario_id, product_id):
-    scenario = get_object_or_404(CostScenario, id=scenario_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     product = get_object_or_404(Product, id=product_id, scenario=scenario)
 
     if request.method == "POST":
@@ -553,9 +574,10 @@ def delete_product(request, scenario_id, product_id):
     return redirect("scenario-detail", pk=scenario.id)
 
 
+@login_required
 def add_cost_line(request, scenario_id, product_id):
-    scenario = CostScenario.objects.get(id=scenario_id)
-    product = Product.objects.get(id=product_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    product = get_object_or_404(Product, id=product_id, scenario=scenario)
     if request.method == "POST":
         form = CostLineForm(request.POST, scenario=scenario)
         if form.is_valid():
@@ -569,8 +591,9 @@ def add_cost_line(request, scenario_id, product_id):
     return render(request, "costs/add_cost_line.html", {"form": form, "scenario": scenario, "product": product})
 
 
+@login_required
 def calculate_results(request, scenario_id):
-    scenario = CostScenario.objects.get(id=scenario_id)
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     lines = scenario.cost_lines.all()
     if scenario.method == "direct_costing":
         result = calculate_direct_costing(lines)
@@ -593,22 +616,26 @@ class VariableCostCreateView(CreateView):
     model = VariableCost
     form_class = VariableCostForm
     template_name = 'costs/variable_cost_form.html'
-    success_url = "/costs/{scenario_id}/"
 
     def form_valid(self, form):
-        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs['scenario_id'], user=self.request.user)
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
 
 
 class VariableCostUpdateView(UpdateView):
     model = VariableCost
     form_class = VariableCostForm
     template_name = 'costs/variable_cost_form.html'
-    success_url = "/costs/{scenario_id}/"
 
     def form_valid(self, form):
         form.instance.scenario = self.object.scenario
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
 
 
 class VariableCostDeleteView(DeleteView):
@@ -625,7 +652,7 @@ class FixedCostCreateView(CreateView):
     template_name = 'costs/fixed_cost_form.html'
 
     def form_valid(self, form):
-        form.instance.scenario = CostScenario.objects.get(pk=self.kwargs['scenario_id'])
+        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs['scenario_id'], user=self.request.user)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -651,3 +678,15 @@ class FixedCostDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("scenario-list")
+    else:
+        form = UserCreationForm()
+    return render(request, "registration/register.html", {"form": form})

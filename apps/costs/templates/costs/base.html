@@ -228,6 +228,24 @@
             {% endfor %}
         </div>
     </div>
+    <div style="padding: 1rem; border-top: 1px solid #e5e7eb; margin-top: auto;">
+        <form method="post" action="/accounts/logout/">
+            {% csrf_token %}
+            <button type="submit" style="
+                width: 100%;
+                padding: 0.6rem;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                cursor: pointer;
+                color: #374151;
+                text-align: left;
+                font-size: 0.9rem;
+            ">
+                Déconnexion — {{ request.user.username }}
+            </button>
+        </form>
+    </div>
 
 </div>
 
