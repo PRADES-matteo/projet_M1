@@ -249,7 +249,7 @@ def scenario_list(request):
 
 
 def scenario_detail(request, pk):
-    scenario = CostScenario.objects.prefetch_related("products", "cost_lines", "cost_lines__center").get(pk=pk)
+    scenario = get_object_or_404(CostScenario, pk=pk)
     cost_lines = scenario.cost_lines.all()
 
     summary_rows = []
@@ -311,7 +311,8 @@ def scenario_detail(request, pk):
     context = {
         'scenario': scenario,
         'scenario_versions': scenario.versions.all(),
-        'all_scenarios': CostScenario.objects.exclude(pk=scenario.pk).order_by('name'),
+        'all_scenarios': CostScenario.objects.all().order_by('name'),  # Include all scenarios
+        'current_scenario': scenario,  # Pass the current scenario
         'variable_costs_total': variable_costs_total,
         'fixed_costs_total': fixed_costs_total,
         'summary_rows': summary_rows,
