@@ -1,6 +1,4 @@
-{% extends "costs/base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h1>Créer un nouveau scénario</h1>
 <p>
   Renseignez les informations générales. Le mode de saisie des produits sera
@@ -55,22 +53,30 @@
   {% csrf_token %} {{ form.non_field_errors }}
   <div class="form-grid">
     <div class="field-box">
-      {{ form.name.label_tag }} {{ form.name }} {% if form.name.errors %}{{ form.name.errors }}{% endif %}
+      {{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}
     </div>
     <div class="field-box">
-      {{ form.period.label_tag }} {{ form.period }} {% if form.period.errors %}{{ form.period.errors }}{% endif %}
+      {{ form.period.label_tag }} {{ form.period }} {{ form.period.errors }}
     </div>
     <div class="field-box">
-      {{ form.method.label_tag }} {{ form.method }} {% if form.method.errors %}{{ form.method.errors }}{% endif %}
+      {{ form.method.label_tag }} {{ form.method }} {% if form.method.errors
+      %}{{ form.method.errors }}{% endif %}
       <small>{{ form.method.help_text }}</small>
     </div>
     <div class="field-box">
-      {{ form.preset.label_tag }} {{ form.preset }} {% if form.preset.errors %}{{ form.preset.errors }}{% endif %}
+      {{ form.preset.label_tag }} {{ form.preset }} {% if form.preset.errors
+      %}{{ form.preset.errors }}{% endif %}
       <small>{{ form.preset.help_text }}</small>
+    </div>
+    <div class="field-box">
+      {{ form.ui_mode.label_tag }} {{ form.ui_mode }} {% if form.ui_mode.errors
+      %}{{ form.ui_mode.errors }}{% endif %}
+      <small>{{ form.ui_mode.help_text }}</small>
     </div>
   </div>
   <div class="field-box" style="margin-top: 0.75rem">
-    {{ form.description.label_tag }} {{ form.description }} {% if form.description.errors %}{{ form.description.errors }}{% endif %}
+    {{ form.description.label_tag }} {{ form.description }} {% if
+    form.description.errors %}{{ form.description.errors }}{% endif %}
   </div>
   <div style="margin-top: 0.75rem">
     <button type="submit" class="btn btn-primary">Créer le scénario</button>
