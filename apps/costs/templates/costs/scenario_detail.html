@@ -478,10 +478,10 @@
               />
             </td>
             <td>
-              {{ s.estimated_revenue|floatformat:2 }}{% if s.cumulative_revenue
-              %} &nbsp;<small style="color: #6b7280"
-                >(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small
-              >{% endif %}
+              {{ s.estimated_revenue|floatformat:2 }}
+                {% if s.cumulative_revenue %}
+                    &nbsp;<small style="color: #6b7280">(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small>
+                {% endif %}
             </td>
           </tr>
           {% endfor %}
