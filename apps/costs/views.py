@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 from django.urls import reverse
 
 from django.contrib import messages
@@ -47,7 +47,22 @@ def build_automatic_results(scenario):
     mcv = total_revenue - total_variable_costs
     taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
     seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+    # Round threshold up to cents to avoid long fractional values
+    if seuil_rentabilite and seuil_rentabilite != Decimal("0.00"):
+        try:
+            seuil_rentabilite = seuil_rentabilite.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
+        except Exception:
+            from math import ceil
+            seuil_rentabilite = Decimal(str(ceil(float(seuil_rentabilite) * 100) / 100.0))
     point_mort = ((seuil_rentabilite / total_revenue) * Decimal("365.00")) if total_revenue and seuil_rentabilite else Decimal("0.00")
+    # Round up to the next whole day to avoid long fractional day numbers
+    if point_mort and point_mort != Decimal("0.00"):
+        try:
+            point_mort = point_mort.quantize(Decimal("1"), rounding=ROUND_CEILING)
+        except Exception:
+            # Fallback: cast to int ceiling
+            from math import ceil
+            point_mort = Decimal(str(ceil(float(point_mort))))
     marge_securite = total_revenue - seuil_rentabilite
     indice_securite = ((marge_securite / total_revenue) * Decimal("100.00")) if total_revenue else Decimal("0.00")
     resultat = mcv - total_fixed_costs
@@ -55,6 +70,12 @@ def build_automatic_results(scenario):
 
     marge_specifique = mcv - fixed_specific_costs
     seuil_rentabilite_specifique = (fixed_specific_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+    if seuil_rentabilite_specifique and seuil_rentabilite_specifique != Decimal("0.00"):
+        try:
+            seuil_rentabilite_specifique = seuil_rentabilite_specifique.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
+        except Exception:
+            from math import ceil
+            seuil_rentabilite_specifique = Decimal(str(ceil(float(seuil_rentabilite_specifique) * 100) / 100.0))
 
     return {
         "total_revenue": total_revenue,

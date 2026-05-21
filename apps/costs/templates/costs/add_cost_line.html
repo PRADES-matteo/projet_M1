@@ -27,7 +27,7 @@
                 {% endfor %}
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <a href="{% url 'add_product' scenario.id %}" class="text-decoration-none text-secondary">← Retour</a>
+                    <a href="{% url 'scenario-detail' pk=scenario.id %}" class="text-decoration-none text-secondary">← Retour au scénario</a>
                     <button type="submit" class="btn text-white" style="background-color: #0f766e;">Ajouter la ligne</button>
                 </div>
             </form>

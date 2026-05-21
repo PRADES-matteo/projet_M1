@@ -120,6 +120,16 @@ class CostLineForm(forms.ModelForm):
     class Meta:
         model = CostLine
         fields = ["label", "amount", "is_direct", "center"]
+        labels = {
+            "label": "Libellé",
+            "amount": "Montant",
+            "is_direct": "Direct (lié à l'unité)",
+            "center": "Centre de coût",
+        }
+        help_texts = {
+            "is_direct": "Cocher si ce coût varie directement avec le volume du produit.",
+            "center": "Sélectionnez le centre de coût associé (laisser vide si non applicable).",
+        }
 
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -154,6 +164,17 @@ class VariableCostForm(forms.ModelForm):
     class Meta:
         model = VariableCost
         fields = ["name", "category", "amount", "product"]
+        labels = {
+            "name": "Nom",
+            "category": "Catégorie",
+            "amount": "Montant",
+            "product": "Produit",
+        }
+        help_texts = {
+            "category": "Type de charge variable (Matériel, Main-d'œuvre, ...)",
+            "amount": "Montant total de la charge variable.",
+            "product": "Associez la charge à un produit si elle est spécifique.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -165,6 +186,17 @@ class FixedCostForm(forms.ModelForm):
     class Meta:
         model = FixedCost
         fields = ["name", "category", "amount", "is_common", "product"]
+        labels = {
+            "name": "Nom",
+            "category": "Catégorie",
+            "amount": "Montant",
+            "is_common": "Commune",
+            "product": "Produit",
+        }
+        help_texts = {
+            "is_common": "Décochez si ce coût est spécifique à un produit.",
+            "product": "Associez le coût fixe à un produit s'il est spécifique.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
