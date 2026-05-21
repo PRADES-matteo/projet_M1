@@ -69,6 +69,11 @@ python -m pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
 ```
+4.5 (optionnel) Créer un utilisateur de démonstration et peupler la base avec des scénarios réalistes :
+```powershell
+python manage.py createdemo
+```
+Identifiants générés : `demo` / `demo123`
 5. Lancer le serveur :
 ```powershell
 python manage.py runserver

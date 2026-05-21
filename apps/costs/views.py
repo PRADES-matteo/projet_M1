@@ -317,6 +317,22 @@ def scenario_detail(request, pk):
     seasonality_labels = [item['month_name'] for item in seasonality_list]
     seasonality_values = [float(item['percentage']) for item in seasonality_list]
 
+    # Compute automatic summary results (seuil_rentabilite, point_mort, ...)
+    automatic_results = build_automatic_results(scenario)
+    seuil = automatic_results.get('seuil_rentabilite') or Decimal('0.00')
+
+    # Mark the month where cumulative estimated revenue reaches the break-even threshold
+    cumulative = Decimal('0.00')
+    break_even_marked = False
+    for item in seasonality_list:
+        cumulative += Decimal(str(item.get('estimated_revenue') or 0))
+        item['cumulative_revenue'] = cumulative
+        if not break_even_marked and seuil and cumulative >= seuil:
+            item['is_break_even_month'] = True
+            break_even_marked = True
+        else:
+            item['is_break_even_month'] = False
+
     context = {
         'scenario': scenario,
         'scenario_versions': scenario.versions.all(),
@@ -398,6 +414,11 @@ def compare_scenarios(request):
     scenario_b = None
     comparison = None
 
+    # Provide a list for the second dropdown that excludes scenario_a when present
+    scenarios_b = scenarios
+    if scenario_a_id:
+        scenarios_b = scenarios.exclude(pk=scenario_a_id)
+
     if scenario_a_id and scenario_b_id:
         scenario_a = get_object_or_404(CostScenario, pk=scenario_a_id, user=request.user)
         scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id, user=request.user)
@@ -454,6 +475,7 @@ def compare_scenarios(request):
         "costs/scenario_compare.html",
         {
             "scenarios": scenarios,
+            "scenarios_b": scenarios_b,
             "scenario_a": scenario_a,
             "scenario_b": scenario_b,
             "comparison": comparison,

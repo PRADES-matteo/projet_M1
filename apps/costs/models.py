@@ -36,9 +36,9 @@ class CostScenario(models.Model):
         max_length=20,
         choices=[
             ("", "Aucun"),
-            ("small_business", "Petite entreprise"),
-            ("factory", "Usine"),
-            ("distribution", "Distribution"),
+            ("industriel", "Entreprise industrielle"),
+            ("commercial", "Entreprise commerciale"),
+            ("services", "Entreprise de services"),
         ],
         blank=True,
         null=True,

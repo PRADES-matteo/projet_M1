@@ -11,41 +11,15 @@
   <select name="scenario_a" required>
     <option value="">Choisir...</option>
     {% for s in scenarios %}
-    <option
-      value="{{ s.id }}"
-      {%
-      if
-      scenario_a
-      and
-      scenario_a.id=""
-      ="s.id"
-      %}selected{%
-      endif
-      %}
-    >
-      {{ s.name }}
-    </option>
+    <option value="{{ s.id }}" {% if scenario_a and scenario_a.id == s.id %}selected{% endif %}>{{ s.name }}</option>
     {% endfor %}
   </select>
 
   <label style="margin: 0 0.5rem">Scénario B</label>
   <select name="scenario_b" required>
     <option value="">Choisir...</option>
-    {% for s in scenarios %}
-    <option
-      value="{{ s.id }}"
-      {%
-      if
-      scenario_b
-      and
-      scenario_b.id=""
-      ="s.id"
-      %}selected{%
-      endif
-      %}
-    >
-      {{ s.name }}
-    </option>
+    {% for s in scenarios_b %}
+    <option value="{{ s.id }}" {% if scenario_b and scenario_b.id == s.id %}selected{% endif %}>{{ s.name }}</option>
     {% endfor %}
   </select>
 

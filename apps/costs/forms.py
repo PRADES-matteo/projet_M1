@@ -57,11 +57,13 @@ class CostScenarioForm(forms.ModelForm):
             "preset": "Préconfiguration adaptée à votre contexte.",
         }
 
-    def init(self, args, **kwargs):
-        super().init(args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         current_year = date.today().year
         year_choices = [(year, str(year)) for year in range(current_year - 2, current_year + 3)]
-        self.fields["period"].widget = forms.HiddenInput()
+        # keep the period field hidden (we control it via the JS buttons)
+        if "period" in self.fields:
+            self.fields["period"].widget = forms.HiddenInput()
         self.fields["period_year"].choices = year_choices
         self.fields["period_year"].initial = current_year
         if "preset" in self.fields:

@@ -174,7 +174,7 @@
     <table class="summary">
       <thead>
         <tr>
-          <th>Indicateur</th>
+          <th>Paramètre</th>
           {% for row in summary_rows %}
           <th>{{ row.product.name }}</th>
           {% endfor %}
@@ -424,6 +424,12 @@
 
 <div class="section-card">
   <h2>Saisonnalité</h2>
+  <div style="margin-bottom:0.5rem">
+    {% if automatic_results %}
+    <strong>Point mort (jours) :</strong> {{ automatic_results.point_mort|default:0 }}
+    <span style="color:#6b7280; margin-left:0.6rem">Seuil à atteindre: {{ automatic_results.seuil_rentabilite|default:0|floatformat:2 }}</span>
+    {% endif %}
+  </div>
   <form method="post" action="{% url 'edit_seasonality' scenario.id %}">
     {% csrf_token %}
     <div class="table-wrap">
@@ -437,8 +443,8 @@
         </thead>
         <tbody>
           {% for s in seasonality_list %}
-          <tr>
-            <td>{{ s.month_name }}</td>
+          <tr {% if s.is_break_even_month %}style="background:#fffbeb; border-left:4px solid #f59e0b"{% endif %}>
+            <td>{{ s.month_name }} {% if s.is_break_even_month %}<strong style="color:#b45309; margin-left:0.5rem">← Point mort atteint</strong>{% endif %}</td>
             <td>
               <input
                 type="number"
@@ -448,7 +454,7 @@
                 style="width: 100px"
               />
             </td>
-            <td>{{ s.estimated_revenue|floatformat:2 }}</td>
+            <td>{{ s.estimated_revenue|floatformat:2 }}{% if s.cumulative_revenue %} &nbsp;<small style="color:#6b7280">(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small>{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -519,7 +525,9 @@
     <select name="scenario_b" required>
       <option value="">Choisir un scénario à comparer</option>
       {% for other in all_scenarios %}
+      {% if other.id != scenario.id %}
       <option value="{{ other.id }}">{{ other.name }}</option>
+      {% endif %}
       {% endfor %}
     </select>
     <button type="submit" class="btn-action btn-secondary">Comparer</button>
