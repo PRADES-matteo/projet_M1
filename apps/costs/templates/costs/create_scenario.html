@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %}
+{% extends "costs/base.html" %} {% block content %}
 <h1>Créer un nouveau scénario</h1>
 <p>
   Renseignez les informations générales. Le mode de saisie des produits sera
@@ -49,6 +49,16 @@
   }
 </style>
 
+{% if form.errors %}
+<div class="alert alert-danger">
+    <ul>
+        {% for field, errors in form.errors.items %}
+            <li>{{ field }}: {{ errors|join:", " }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <form method="post" novalidate>
   {% csrf_token %} {{ form.non_field_errors }}
   <div class="form-grid">
@@ -68,11 +78,6 @@
       %}{{ form.preset.errors }}{% endif %}
       <small>{{ form.preset.help_text }}</small>
     </div>
-    <div class="field-box">
-      {{ form.ui_mode.label_tag }} {{ form.ui_mode }} {% if form.ui_mode.errors
-      %}{{ form.ui_mode.errors }}{% endif %}
-      <small>{{ form.ui_mode.help_text }}</small>
-    </div>
   </div>
   <div class="field-box" style="margin-top: 0.75rem">
     {{ form.description.label_tag }} {{ form.description }} {% if
@@ -81,6 +86,7 @@
   <div style="margin-top: 0.75rem">
     <button type="submit" class="btn btn-primary">Créer le scénario</button>
   </div>
+  
 </form>
 <a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
 {% endblock %}

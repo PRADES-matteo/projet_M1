@@ -72,6 +72,7 @@ class CostScenarioForm(forms.ModelForm):
                 self.fields["preset"].choices = [("", "Aucun")] + choices
             self.fields["preset"].required = False
             self.fields["preset"].initial = ""
+            
 
     def clean(self):
         cleaned_data = super().clean()
