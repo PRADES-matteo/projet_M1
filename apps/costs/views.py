@@ -258,6 +258,7 @@ def scenario_detail(request, pk):
     total_revenue = Decimal("0.00")
     total_variable = Decimal("0.00")
     total_fixed = Decimal("0.00")
+    total_units = Decimal("0.00")
 
     variable_costs_total = scenario.variable_costs.aggregate(total=Sum('amount'))['total'] or 0
     fixed_costs_total = scenario.fixed_costs.aggregate(total=Sum('amount'))['total'] or 0
@@ -294,9 +295,17 @@ def scenario_detail(request, pk):
         total_revenue += revenue
         total_variable += variable
         total_fixed += fixed
+        total_units += quantity
 
     total_contribution = total_revenue - total_variable
     total_result = total_contribution - total_fixed
+
+    # Calculate CMP (Coût Moyen Pondéré) per unit: variable unit cost + fixed allocation per unit
+    fixed_per_unit = (total_fixed / total_units) if total_units else Decimal("0.00")
+    for row in summary_rows:
+        row_cmp = row.get('variable_unit_cost', Decimal('0.00')) + fixed_per_unit
+        row['cmp'] = row_cmp
+    total_cmp = (total_variable + total_fixed) / total_units if total_units else Decimal('0.00')
 
     from .models import SeasonalityEntry
     existing = {e.month: e for e in scenario.seasonality.all()}
@@ -351,6 +360,8 @@ def scenario_detail(request, pk):
         'seasonality_labels': seasonality_labels,
         'seasonality_values': seasonality_values,
         'total_revenue': total_revenue,
+        'total_cmp': total_cmp,
+        'automatic_results': automatic_results,
     }
     return render(request, 'costs/scenario_detail.html', context)
 

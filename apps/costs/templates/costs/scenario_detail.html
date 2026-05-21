@@ -1,5 +1,4 @@
-{% extends "costs/base.html" %}
- {% block content %}
+{% extends "costs/base.html" %} {% block content %}
 <style>
   .topbar {
     background: #ffffff;
@@ -115,9 +114,9 @@
 
 {% if messages %}
 <div class="messages">
-    {% for message in messages %}
-    <div class="message {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
+  {% for message in messages %}
+  <div class="message {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
 </div>
 {% endif %}
 <section class="topbar">
@@ -202,6 +201,13 @@
           <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
           {% endfor %}
           <td>-</td>
+        </tr>
+        <tr>
+          <td>CMP (Coût moyen pondéré)</td>
+          {% for row in summary_rows %}
+          <td>{{ row.cmp|floatformat:2 }}</td>
+          {% endfor %}
+          <td>{{ total_cmp|floatformat:2 }}</td>
         </tr>
         <tr>
           <td>Chiffre d'affaires</td>
@@ -424,10 +430,14 @@
 
 <div class="section-card">
   <h2>Saisonnalité</h2>
-  <div style="margin-bottom:0.5rem">
+  <div style="margin-bottom: 0.5rem">
     {% if automatic_results %}
-    <strong>Point mort (jours) :</strong> {{ automatic_results.point_mort|default:0 }}
-    <span style="color:#6b7280; margin-left:0.6rem">Seuil à atteindre: {{ automatic_results.seuil_rentabilite|default:0|floatformat:2 }}</span>
+    <strong>Point mort (jours) :</strong> {{
+    automatic_results.point_mort|default:0 }}
+    <span style="color: #6b7280; margin-left: 0.6rem"
+      >Seuil à atteindre: {{
+      automatic_results.seuil_rentabilite|default:0|floatformat:2 }}</span
+    >
     {% endif %}
   </div>
   <form method="post" action="{% url 'edit_seasonality' scenario.id %}">
@@ -443,8 +453,21 @@
         </thead>
         <tbody>
           {% for s in seasonality_list %}
-          <tr {% if s.is_break_even_month %}style="background:#fffbeb; border-left:4px solid #f59e0b"{% endif %}>
-            <td>{{ s.month_name }} {% if s.is_break_even_month %}<strong style="color:#b45309; margin-left:0.5rem">← Point mort atteint</strong>{% endif %}</td>
+          <tr
+            {%
+            if
+            s.is_break_even_month
+            %}style="background:#fffbeb; border-left:4px solid #f59e0b"
+            {%
+            endif
+            %}
+          >
+            <td>
+              {{ s.month_name }} {% if s.is_break_even_month %}<strong
+                style="color: #b45309; margin-left: 0.5rem"
+                >← Point mort atteint</strong
+              >{% endif %}
+            </td>
             <td>
               <input
                 type="number"
@@ -454,7 +477,12 @@
                 style="width: 100px"
               />
             </td>
-            <td>{{ s.estimated_revenue|floatformat:2 }}{% if s.cumulative_revenue %} &nbsp;<small style="color:#6b7280">(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small>{% endif %}</td>
+            <td>
+              {{ s.estimated_revenue|floatformat:2 }}{% if s.cumulative_revenue
+              %} &nbsp;<small style="color: #6b7280"
+                >(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small
+              >{% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -476,26 +504,32 @@
     <canvas id="seasonalityChart"></canvas>
   </div>
 
-  {{ seasonality_labels|json_script:"seasonality-labels-data" }}
-  {{ seasonality_values|json_script:"seasonality-values-data" }}
+  {{ seasonality_labels|json_script:"seasonality-labels-data" }} {{
+  seasonality_values|json_script:"seasonality-values-data" }}
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const labels = JSON.parse(document.getElementById('seasonality-labels-data').textContent);
-    const data = JSON.parse(document.getElementById('seasonality-values-data').textContent);
-    const ctx = document.getElementById('seasonalityChart');
+    const labels = JSON.parse(
+      document.getElementById("seasonality-labels-data").textContent,
+    );
+    const data = JSON.parse(
+      document.getElementById("seasonality-values-data").textContent,
+    );
+    const ctx = document.getElementById("seasonalityChart");
     if (ctx) {
       new Chart(ctx, {
-        type: 'bar',
+        type: "bar",
         data: {
           labels: labels,
-          datasets: [{
-            label: 'Pourcentage des ventes',
-            data: data,
-            backgroundColor: 'rgba(15,118,110,0.6)'
-          }]
+          datasets: [
+            {
+              label: "Pourcentage des ventes",
+              data: data,
+              backgroundColor: "rgba(15,118,110,0.6)",
+            },
+          ],
         },
-        options: {scales: {y: {beginAtZero: true, max: 100}}}
+        options: { scales: { y: { beginAtZero: true, max: 100 } } },
       });
     }
   </script>
@@ -524,11 +558,9 @@
     <input type="hidden" name="scenario_a" value="{{ scenario.id }}" />
     <select name="scenario_b" required>
       <option value="">Choisir un scénario à comparer</option>
-      {% for other in all_scenarios %}
-      {% if other.id != scenario.id %}
+      {% for other in all_scenarios %} {% if other.id != scenario.id %}
       <option value="{{ other.id }}">{{ other.name }}</option>
-      {% endif %}
-      {% endfor %}
+      {% endif %} {% endfor %}
     </select>
     <button type="submit" class="btn-action btn-secondary">Comparer</button>
   </form>
