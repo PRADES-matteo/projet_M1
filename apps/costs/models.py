@@ -56,6 +56,8 @@ class Product(models.Model):
     name = models.CharField(max_length=150)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=14, decimal_places=2)
+    stock_initial = models.IntegerField(default=0, verbose_name="Stock initial")
+    stock_final = models.IntegerField(default=0, verbose_name="Stock final visé")
 
     def __str__(self):
         return self.name

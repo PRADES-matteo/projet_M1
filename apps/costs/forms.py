@@ -135,17 +135,19 @@ class CostLineForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "quantity", "unit_price"]
+        # AJOUTEZ "stock_initial" et "stock_final" ICI :
+        fields = ["name", "quantity", "unit_price", "stock_initial", "stock_final"]
         labels = {
             "name": "Nom du produit",
-            "quantity": "Quantité",
+            "quantity": "Quantité vendue prévue",
             "unit_price": "Prix de vente unitaire",
+            "stock_initial": "Stock initial (unités)",
+            "stock_final": "Stock final visé (unités)",
         }
 
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.scenario = scenario
-        
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
 
