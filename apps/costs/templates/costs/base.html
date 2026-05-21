@@ -265,7 +265,8 @@
                                 href="{% url 'scenario-detail' scenario.pk %}"
                                 hx-get="{% url 'scenario-detail' scenario.pk %}"
                                 hx-target="#panel"
-                                hx-swap="innerHTML"
+                                hx-select="#panel"
+                                hx-swap="outerHTML"
                                 style="text-decoration: none; color: inherit; flex: 1; min-width: 0;"
                             >
                                 <div class="scenario-name">{{ scenario.name }}</div>
@@ -307,7 +308,8 @@
                             href="{% url 'scenario-detail' scenario.pk %}"
                             hx-get="{% url 'scenario-detail' scenario.pk %}"
                             hx-target="#panel"
-                            hx-swap="innerHTML"
+                            hx-select="#panel"
+                            hx-swap="outerHTML"
                             style="text-decoration: none; color: inherit; display: block;"
                         >
                             <div class="scenario-period">{{ scenario.period }}</div>
