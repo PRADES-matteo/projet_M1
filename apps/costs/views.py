@@ -519,13 +519,17 @@ def duplicate_scenario(request, pk):
 
 @login_required
 def create_scenario(request):
+    print("Requête POST reçue")
     if request.method == "POST":
+        print(request.POST)
         form = CostScenarioForm(request.POST)
         if form.is_valid():
             scenario = form.save(commit=False)
             scenario.user = request.user
             scenario.save()
             return redirect("scenario-detail", pk=scenario.id)
+        else:
+            print(form.errors)
     else:
         form = CostScenarioForm()
     return render(request, "costs/create_scenario.html", {"form": form})
