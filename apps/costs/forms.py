@@ -125,6 +125,11 @@ class CostLineForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if scenario:
             self.fields.pop("center")
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            else:
+                field.widget.attrs['class'] = 'form-control'
 
 
 class ProductForm(forms.ModelForm):
@@ -140,6 +145,9 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.scenario = scenario
+        
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
 
 
 class VariableCostForm(forms.ModelForm):
@@ -147,8 +155,23 @@ class VariableCostForm(forms.ModelForm):
         model = VariableCost
         fields = ["name", "category", "amount", "product"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-select' if isinstance(field.widget, forms.Select) else 'form-control'
+
 
 class FixedCostForm(forms.ModelForm):
     class Meta:
         model = FixedCost
         fields = ["name", "category", "amount", "is_common", "product"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select'
+            else:
+                field.widget.attrs['class'] = 'form-control'

@@ -1,21 +1,40 @@
 {% extends "costs/base.html" %}
 
 {% block content %}
-<h1>Ajouter un produit au scénario : {{ scenario.name }}</h1>
-<p>Renseignez les données produit.</p>
-<form method="post" novalidate>
-  {% csrf_token %} {{ form.non_field_errors }}
-  <p>{{ form.name.label_tag }}<br />{{ form.name }} {{ form.name.errors }}</p>
-  <p>
-    {{ form.quantity.label_tag }}<br />{{ form.quantity }} {{
-    form.quantity.errors }}
-  </p>
-  <p>
-    {{ form.unit_price.label_tag }}<br />{{ form.unit_price }} {{
-    form.unit_price.errors }}
-  </p>
+<div class="container mt-4 mb-5" style="max-width: 600px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background-color: #0f766e;">
+            <h5 class="mb-0">Ajouter un produit (Scénario : {{ scenario.name }})</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %} 
+                {{ form.non_field_errors }}
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.name.label }}</label>
+                    {{ form.name }} 
+                    <div class="text-danger small">{{ form.name.errors }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
+                    {{ form.quantity }} 
+                    <div class="text-danger small">{{ form.quantity.errors }}</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">{{ form.unit_price.label }}</label>
+                    {{ form.unit_price }} 
+                    <div class="text-danger small">{{ form.unit_price.errors }}</div>
+                </div>
 
-  <button type="submit" class="btn btn-primary">Ajouter le produit</button>
-</form>
-<a href="{% url 'scenario-detail' scenario.id %}">Retour au scénario</a>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'scenario-detail' scenario.id %}" class="text-decoration-none text-secondary">← Retour au scénario</a>
+                    <button type="submit" class="btn text-white" style="background-color: #0f766e;" >Ajouter le produit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
