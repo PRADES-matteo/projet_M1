@@ -256,12 +256,14 @@
     quantité produite, quantité vendue, stock initial, stock final, CMP et coût
     variable unitaire.
   </p>
-  <div class="industrial-tags">
+    <div class="industrial-tags">
     <span class="industrial-tag">Quantité produite</span>
     <span class="industrial-tag">Quantité vendue</span>
+    {% if scenario.preset != 'services' %}
     <span class="industrial-tag">Stock initial</span>
     <span class="industrial-tag">Stock final</span>
     <span class="industrial-tag">CMP</span>
+    {% endif %}
     <span class="industrial-tag">Coût variable unitaire</span>
   </div>
 </div>
@@ -275,12 +277,14 @@
     Les indicateurs clés pour le commerce : Champ, quantité vendue, prix
     d'achat, prix de vente, CMP et marge unitaire sont mis en évidence ci-dessous.
   </p>
-  <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
     <span class="commercial-tag">Champ</span>
     <span class="commercial-tag">Quantité vendue</span>
     <span class="commercial-tag">Prix d'achat</span>
     <span class="commercial-tag">Prix de vente</span>
+    {% if scenario.preset != 'services' %}
     <span class="commercial-tag">CMP</span>
+    {% endif %}
     <span class="commercial-tag">Marge unitaire</span>
   </div>
 </div>
@@ -325,6 +329,7 @@
         {% endfor %}
         <td>-</td>
       </tr>
+      {% if scenario.preset != 'services' %}
       <tr class="{% if scenario.preset == 'commercial' %}commercial-highlight-cmp{% elif scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}">
         <td>CMP (Coût moyen pondéré)</td>
         {% for row in summary_rows %}
@@ -332,6 +337,7 @@
         {% endfor %}
         <td>{{ total_cmp|floatformat:2 }}</td>
       </tr>
+      {% endif %}
       {% if scenario.preset == 'commercial' %}
       <tr class="commercial-highlight-margin">
         <td>Marge unitaire</td>

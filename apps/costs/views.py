@@ -82,6 +82,7 @@ def build_automatic_results(scenario):
         "total_variable_costs": total_variable_costs,
         "total_fixed_costs": total_fixed_costs,
         'commercial_mode': scenario.preset == 'commercial',
+        'services_mode': scenario.preset == 'services',
         "fixed_specific_costs": fixed_specific_costs,
         "mcv": mcv,
         "taux_marge": taux_marge,
@@ -681,11 +682,8 @@ def calculate_results(request, scenario_id):
     automatic_results = build_automatic_results(scenario)
     industrial_mode = scenario.preset == "industriel"
     total_units = _decimal(scenario.products.aggregate(total_units=Sum("quantity"))["total_units"])
-    total_cmp = (
-        (automatic_results["total_variable_costs"] + automatic_results["total_fixed_costs"]) / total_units
-        if total_units
-        else Decimal("0.00")
-    )
+    total_cmp = (automatic_results["total_variable_costs"] + automatic_results["total_fixed_costs"]) / total_units if total_units else Decimal("0.00")
+    services_mode = scenario.preset == 'services'
 
     seasonality_list = []
     seasonality_labels = []
@@ -721,6 +719,7 @@ def calculate_results(request, scenario_id):
             "automatic_results": automatic_results,
             "total_cmp": total_cmp,
             "industrial_mode": industrial_mode,
+            "services_mode": services_mode,
             "seasonality_list": seasonality_list,
             "seasonality_labels": seasonality_labels,
             "stock_evolution_values": stock_evolution_values,
