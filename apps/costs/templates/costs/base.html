@@ -278,32 +278,34 @@
           <div class="scenario-title">Mes scénarios</div>
           <div class="scenario-list" id="scenario-sidebar-list">
             {% for scenario in all_scenarios %}
-            <a
-              href="{% url 'scenario-detail' scenario.pk %}"
-              hx-boost="true"
-              hx-target="#panel"
-              hx-swap="outerHTML"
+            <div
               class="scenario-item {% if current_scenario and current_scenario.pk == scenario.pk %}active{% endif %}"
               style="
-                text-decoration: none;
-                color: inherit;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 0.5rem;
               "
             >
-              <div style="flex: 1; min-width: 0">
+              <a
+                href="{% url 'scenario-detail' scenario.pk %}"
+                style="
+                  flex: 1;
+                  min-width: 0;
+                  text-decoration: none;
+                  color: inherit;
+                  display: block;
+                "
+              >
                 <div class="scenario-name">{{ scenario.name }}</div>
                 <div class="scenario-period">{{ scenario.period }}</div>
-              </div>
+              </a>
 
               <form
                 method="post"
                 action="{% url 'delete-scenario' scenario.id %}"
                 onsubmit="return confirm('Supprimer ce scénario ?');"
-                style="flex-shrink: 0"
-                onclick="event.stopPropagation()"
+                style="flex-shrink: 0; margin: 0"
               >
                 {% csrf_token %}
                 <button
@@ -342,7 +344,7 @@
                   </svg>
                 </button>
               </form>
-            </a>
+            </div>
             {% empty %}
             <div style="color: #6b7280; font-size: 0.9rem">
               Aucun scénario enregistré.

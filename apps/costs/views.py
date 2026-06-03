@@ -672,6 +672,39 @@ def calculate_results(request, scenario_id):
         result = calculate_center_analysis(lines)
 
     automatic_results = build_automatic_results(scenario)
+    industrial_mode = scenario.preset == "industriel"
+    total_units = _decimal(scenario.products.aggregate(total_units=Sum("quantity"))["total_units"])
+    total_cmp = (
+        (automatic_results["total_variable_costs"] + automatic_results["total_fixed_costs"]) / total_units
+        if total_units
+        else Decimal("0.00")
+    )
+
+    seasonality_list = []
+    seasonality_labels = []
+    stock_evolution_values = []
+    if industrial_mode:
+        from .models import SeasonalityEntry
+        existing = {entry.month: entry for entry in scenario.seasonality.all()}
+        cumulative_share = Decimal("0.00")
+        for month in range(1, 13):
+            entry = existing.get(month)
+            if entry is None:
+                entry = SeasonalityEntry.objects.create(scenario=scenario, month=month, percentage=0)
+            percentage = _decimal(entry.percentage)
+            cumulative_share += percentage
+            remaining_stock_index = max(Decimal("0.00"), Decimal("100.00") - cumulative_share)
+            seasonality_list.append(
+                {
+                    "month": month,
+                    "month_name": calendar.month_name[month],
+                    "percentage": percentage,
+                    "remaining_stock_index": remaining_stock_index,
+                }
+            )
+            seasonality_labels.append(calendar.month_name[month])
+            stock_evolution_values.append(float(remaining_stock_index))
+
     return render(
         request,
         "costs/results.html",
@@ -679,6 +712,11 @@ def calculate_results(request, scenario_id):
             "scenario": scenario,
             "result": result,
             "automatic_results": automatic_results,
+            "total_cmp": total_cmp,
+            "industrial_mode": industrial_mode,
+            "seasonality_list": seasonality_list,
+            "seasonality_labels": seasonality_labels,
+            "stock_evolution_values": stock_evolution_values,
         },
     )
 

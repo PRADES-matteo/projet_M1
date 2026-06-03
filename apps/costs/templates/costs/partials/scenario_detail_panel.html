@@ -134,6 +134,50 @@
     flex-wrap: wrap;
     margin-top: 1rem;
   }
+
+  .industrial-callout {
+    background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
+    border: 1px solid #99f6e4;
+    border-radius: 14px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .industrial-callout h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: #115e59;
+  }
+
+  .industrial-callout p {
+    margin: 0 0 0.75rem;
+    color: #134e4a;
+  }
+
+  .industrial-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .industrial-tag {
+    background: #ffffff;
+    border: 1px solid #5eead4;
+    color: #115e59;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  tr.industrial-highlight td {
+    background: #f0fdfa;
+  }
+
+  tr.industrial-highlight-cmp td {
+    background: #ccfbf1;
+    font-weight: 700;
+  }
 </style>
 
 <div class="topbar">
@@ -172,6 +216,23 @@
 
 {% if scenario.description %}
 <p style="color: #374151">{{ scenario.description }}</p>
+{% endif %} {% if scenario.preset == "industriel" %}
+<div class="industrial-callout">
+  <h3>Template entreprise industrielle activé</h3>
+  <p>
+    Les indicateurs à surveiller en priorité sont mis en évidence ci-dessous :
+    quantité produite, quantité vendue, stock initial, stock final, CMP et coût
+    variable unitaire.
+  </p>
+  <div class="industrial-tags">
+    <span class="industrial-tag">Quantité produite</span>
+    <span class="industrial-tag">Quantité vendue</span>
+    <span class="industrial-tag">Stock initial</span>
+    <span class="industrial-tag">Stock final</span>
+    <span class="industrial-tag">CMP</span>
+    <span class="industrial-tag">Coût variable unitaire</span>
+  </div>
+</div>
 {% endif %}
 
 <div class="section-title">Vision d'ensemble Direct Costing</div>
@@ -189,8 +250,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Quantité</td>
+      <tr
+        class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
+      >
+        <td>
+          {% if scenario.preset == 'industriel' %}Quantité produite / vendue{%
+          else %}Quantité{% endif %}
+        </td>
         {% for row in summary_rows %}
         <td>{{ row.quantity|floatformat:0 }}</td>
         {% endfor %}
@@ -203,14 +269,18 @@
         {% endfor %}
         <td>-</td>
       </tr>
-      <tr>
+      <tr
+        class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
+      >
         <td>CV unitaire</td>
         {% for row in summary_rows %}
         <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
         {% endfor %}
         <td>-</td>
       </tr>
-      <tr>
+      <tr
+        class="{% if scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}"
+      >
         <td>CMP (Coût moyen pondéré)</td>
         {% for row in summary_rows %}
         <td>{{ row.cmp|floatformat:2 }}</td>
@@ -267,7 +337,10 @@
       <tr>
         <th>Nom du produit</th>
         <th>Prix de vente unitaire</th>
-        <th>Quantité vendue prévue</th>
+        <th>
+          {% if scenario.preset == 'industriel' %}Quantité produite / vendue
+          prévue{% else %}Quantité vendue prévue{% endif %}
+        </th>
         <th>Chiffre d'affaires</th>
         <th>Actions</th>
       </tr>

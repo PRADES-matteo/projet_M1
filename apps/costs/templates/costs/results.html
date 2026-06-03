@@ -6,12 +6,19 @@
     gap: 1rem;
     margin: 1rem 0 1.5rem;
   }
+  .kpi-grid.industrial-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
   .kpi-card {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 0.75rem;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  }
+  .kpi-card.industrial {
+    border-color: #99f6e4;
+    background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
   }
   .kpi-label {
     font-size: 0.85rem;
@@ -29,6 +36,36 @@
     border-radius: 16px;
     padding: 0.8rem;
     margin-top: 0.8rem;
+  }
+  .industrial-banner {
+    background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
+    border: 1px solid #99f6e4;
+    border-radius: 16px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .industrial-banner h2 {
+    margin: 0 0 0.35rem;
+    color: #115e59;
+  }
+  .industrial-banner p {
+    margin: 0;
+    color: #134e4a;
+  }
+  .industrial-callouts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .industrial-pill {
+    background: #fff;
+    border: 1px solid #5eead4;
+    color: #115e59;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.88rem;
+    font-weight: 600;
   }
   .table-wrap {
     overflow-x: auto;
@@ -53,6 +90,9 @@
     gap: 1rem;
     margin-top: 1rem;
   }
+  .chart-grid.industrial-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
   .chart-panel {
     min-height: 280px;
     display: flex;
@@ -75,21 +115,39 @@
     max-height: 290px;
     margin: 0 auto;
   }
+  .chart-panel.chart-line canvas {
+    width: 100% !important;
+    height: 280px !important;
+  }
 </style>
 
 <h1>Résultats automatiques - {{ scenario.name }}</h1>
 <p>Méthode : {{ scenario.get_method_display }}</p>
 
-<div class="kpi-grid">
-  <div class="kpi-card">
+
+
+<div class="kpi-grid {% if industrial_mode %}industrial-grid{% endif %}">
+  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Chiffre d'affaires total</div>
     <div class="kpi-value">
       {{ automatic_results.total_revenue|floatformat:2 }}
     </div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+    <div class="kpi-label">CV total</div>
+    <div class="kpi-value">{{ automatic_results.total_variable_costs|floatformat:2 }}</div>
+  </div>
+  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+    <div class="kpi-label">CMP</div>
+    <div class="kpi-value">{{ total_cmp|floatformat:2 }}</div>
+  </div>
+  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Marge sur coût variable</div>
     <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
+  </div>
+  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+    <div class="kpi-label">Résultat</div>
+    <div class="kpi-value">{{ automatic_results.resultat|floatformat:2 }}</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Taux de marge</div>
@@ -140,21 +198,29 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
           <td>Chiffre d'affaires total</td>
           <td>{{ automatic_results.total_revenue|floatformat:2 }}</td>
         </tr>
-        <tr>
-          <td>Charges variables</td>
+        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>CV total</td>
           <td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td>
+        </tr>
+        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>CMP</td>
+          <td>{{ total_cmp|floatformat:2 }}</td>
+        </tr>
+        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>MCV</td>
+          <td>{{ automatic_results.mcv|floatformat:2 }}</td>
+        </tr>
+        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>Résultat</td>
+          <td>{{ automatic_results.resultat|floatformat:2 }}</td>
         </tr>
         <tr>
           <td>Charges fixes totales</td>
           <td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>MCV</td>
-          <td>{{ automatic_results.mcv|floatformat:2 }}</td>
         </tr>
         <tr>
           <td>Taux de marge</td>
@@ -247,22 +313,36 @@
 </div>
 
 <div class="section-card">
-  <h2>Graphiques simples</h2>
+  <h2>{% if industrial_mode %}Graphiques industriels{% else %}Graphiques simples{% endif %}</h2>
 
   {% if automatic_results.has_chart_data %}
-  <div class="chart-grid">
-    <div class="section-card chart-panel chart-bar">
-      <h3>Vue synthétique</h3>
-      <canvas id="kpiChart"></canvas>
-    </div>
+  <div class="chart-grid {% if industrial_mode %}industrial-grid{% endif %}">
     <div class="section-card chart-panel chart-doughnut">
       <h3>Répartition des charges</h3>
       <canvas id="mixChart"></canvas>
     </div>
+    {% if industrial_mode %}
+    <div class="section-card chart-panel chart-line">
+      <h3>Évolution du stock</h3>
+      <canvas id="stockChart"></canvas>
+    </div>
+    <div class="section-card chart-panel chart-doughnut">
+      <h3>Coûts fixes / variables</h3>
+      <canvas id="splitChart"></canvas>
+    </div>
+    {% else %}
+    <div class="section-card chart-panel chart-bar">
+      <h3>Vue synthétique</h3>
+      <canvas id="kpiChart"></canvas>
+    </div>
+    {% endif %}
   </div>
   <p style="margin-top: 0.75rem; color: #6b7280; font-size: 0.92rem">
-    Légende: le graphique de gauche compare les principaux montants, celui de
-    droite compare charges variables et charges fixes.
+    {% if industrial_mode %}
+    Le stock affiché est un indice théorique basé sur la saisonnalité disponible.
+    {% else %}
+    Le graphique de gauche compare les principaux montants, celui de droite compare charges variables et charges fixes.
+    {% endif %}
   </p>
   {% else %}
   <div
@@ -287,8 +367,11 @@
 <script>
   const kpiCtx = document.getElementById('kpiChart');
   const mixCtx = document.getElementById('mixChart');
+  const stockCtx = document.getElementById('stockChart');
+  const splitCtx = document.getElementById('splitChart');
+  const industrialMode = {{ industrial_mode|yesno:"true,false" }};
 
-  if (kpiCtx) {
+  if (kpiCtx && !industrialMode) {
       new Chart(kpiCtx, {
           type: 'bar',
           data: {
@@ -324,6 +407,47 @@
             }
       });
   }
+
+          if (industrialMode && stockCtx) {
+            new Chart(stockCtx, {
+              type: 'line',
+              data: {
+                labels: {{ seasonality_labels|safe }},
+                datasets: [{
+                  label: 'Indice de stock restant',
+                  data: {{ stock_evolution_values|safe }},
+                  borderColor: '#0f766e',
+                  backgroundColor: 'rgba(15, 118, 110, 0.12)',
+                  tension: 0.3,
+                  fill: true
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 100 } }
+              }
+            });
+          }
+
+          if (industrialMode && splitCtx) {
+            new Chart(splitCtx, {
+              type: 'doughnut',
+              data: {
+                labels: ['Charges fixes', 'Charges variables'],
+                datasets: [{
+                  data: [{{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}],
+                  backgroundColor: ['#0f766e', '#2563eb']
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } }
+              }
+            });
+          }
 </script>
 {% endif %}
 
