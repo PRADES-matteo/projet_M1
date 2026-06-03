@@ -52,6 +52,47 @@
     margin: 0;
     color: #134e4a;
   }
+  .commercial-banner {
+    background: linear-gradient(135deg, #fff7ed 0%, #fffaf0 100%);
+    border: 1px solid #fb923c;
+    border-radius: 16px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .commercial-banner h2 { margin: 0 0 0.35rem; color: #b45309; }
+  .commercial-banner p { margin: 0; color: #92400e; }
+  .kpi-card.commercial { border-color: #fb923c; background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%); }
+  .kpi-card.featured-commercial {
+    border-color: #fb923c;
+    background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+    box-shadow: 0 12px 28px rgba(251, 146, 60, 0.18);
+  }
+  .kpi-card.featured-commercial .kpi-label {
+    color: #b45309;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .kpi-card.featured-commercial .kpi-value {
+    color: #9a3412;
+  }
+  .featured-row-commercial {
+    background: linear-gradient(90deg, #fff7ed, #fffaf0);
+    border-left: 4px solid #fb923c;
+    font-weight: 700;
+  }
+  .commercial-banner {
+    background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+    border: 1px solid #fcd34d;
+    border-radius: 16px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .commercial-banner h2 {
+    margin: 0 0 0.35rem;
+    color: #92400e;
+  }
+  .commercial-banner p { margin: 0; color: #78350f; }
   .industrial-callouts {
     display: flex;
     flex-wrap: wrap;
@@ -119,6 +160,34 @@
     width: 100% !important;
     height: 280px !important;
   }
+  .back-to-scenario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    padding: 0.72rem 1.05rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+  .back-to-scenario:hover {
+    transform: translateY(-1px);
+  }
+  .back-to-scenario.commercial {
+    color: #9a3412;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border-color: #fb923c;
+    box-shadow: 0 10px 22px rgba(251, 146, 60, 0.16);
+  }
+  .back-to-scenario.industrial {
+    color: #115e59;
+    background: linear-gradient(135deg, #ecfeff 0%, #d9fdf7 100%);
+    border-color: #99f6e4;
+    box-shadow: 0 10px 22px rgba(45, 212, 191, 0.16);
+  }
 </style>
 
 <h1>Résultats automatiques - {{ scenario.name }}</h1>
@@ -126,42 +195,43 @@
 
 
 
+
 <div class="kpi-grid {% if industrial_mode %}industrial-grid{% endif %}">
-  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+  <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Chiffre d'affaires total</div>
     <div class="kpi-value">
       {{ automatic_results.total_revenue|floatformat:2 }}
     </div>
   </div>
-  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
-    <div class="kpi-label">CV total</div>
+  <div class="kpi-card {% if commercial_mode %}commercial{% elif industrial_mode %}industrial{% endif %}">
+    <div class="kpi-label">{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</div>
     <div class="kpi-value">{{ automatic_results.total_variable_costs|floatformat:2 }}</div>
   </div>
-  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+  <div class="kpi-card {% if commercial_mode %}commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">CMP</div>
     <div class="kpi-value">{{ total_cmp|floatformat:2 }}</div>
   </div>
-  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
-    <div class="kpi-label">Marge sur coût variable</div>
+  <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif industrial_mode %}industrial{% endif %}">
+    <div class="kpi-label">{% if commercial_mode %}Marge commerciale{% else %}Marge sur coût variable{% endif %}</div>
     <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
   </div>
-  <div class="kpi-card {% if industrial_mode %}industrial{% endif %}">
+  <div class="kpi-card {% if commercial_mode %}commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Résultat</div>
     <div class="kpi-value">{{ automatic_results.resultat|floatformat:2 }}</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Taux de marge</div>
     <div class="kpi-value">
       {{ automatic_results.taux_marge|floatformat:2 }}%
     </div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Seuil de rentabilité</div>
     <div class="kpi-value">
-      {{ automatic_results.seuil_rentabilite|floatformat:2 }}
+      {{ automatic_results.seuil_rentabilite|floatformat:2 }} €
     </div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Point mort</div>
     <div class="kpi-value">
       {{ automatic_results.point_mort|floatformat:0 }} jours
@@ -198,23 +268,23 @@
         </tr>
       </thead>
       <tbody>
-        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+        <tr {% if industrial_mode or commercial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
           <td>Chiffre d'affaires total</td>
           <td>{{ automatic_results.total_revenue|floatformat:2 }}</td>
         </tr>
-        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
-          <td>CV total</td>
+        <tr {% if industrial_mode or commercial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</td>
           <td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td>
         </tr>
-        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+        <tr {% if industrial_mode or commercial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
           <td>CMP</td>
           <td>{{ total_cmp|floatformat:2 }}</td>
         </tr>
-        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
-          <td>MCV</td>
+        <tr {% if industrial_mode or commercial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+          <td>{% if commercial_mode %}Marge commerciale{% else %}MCV{% endif %}</td>
           <td>{{ automatic_results.mcv|floatformat:2 }}</td>
         </tr>
-        <tr {% if industrial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
+        <tr {% if industrial_mode or commercial_mode %}style="background:#f0fdfa;font-weight:700"{% endif %}>
           <td>Résultat</td>
           <td>{{ automatic_results.resultat|floatformat:2 }}</td>
         </tr>
@@ -226,11 +296,11 @@
           <td>Taux de marge</td>
           <td>{{ automatic_results.taux_marge|floatformat:2 }}%</td>
         </tr>
-        <tr>
+        <tr class="{% if commercial_mode %}featured-row-commercial{% endif %}">
           <td>Seuil de rentabilité</td>
           <td>{{ automatic_results.seuil_rentabilite|floatformat:2 }}</td>
         </tr>
-        <tr>
+        <tr class="{% if commercial_mode %}featured-row-commercial{% endif %}">
           <td>Point mort</td>
           <td>{{ automatic_results.point_mort|floatformat:0 }} jours</td>
         </tr>
@@ -370,25 +440,28 @@
   const stockCtx = document.getElementById('stockChart');
   const splitCtx = document.getElementById('splitChart');
   const industrialMode = {{ industrial_mode|yesno:"true,false" }};
+  const commercialMode = {{ commercial_mode|yesno:"true,false" }};
 
-  if (kpiCtx && !industrialMode) {
+    if (kpiCtx && !industrialMode) {
+      const kpiLabels = commercialMode ? ['Revente', 'Achats', 'CF', 'Marge commerciale'] : ['CA', 'CV', 'CF', 'MCV'];
+      const kpiData = commercialMode ? [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}] : [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}];
       new Chart(kpiCtx, {
-          type: 'bar',
-          data: {
-              labels: ['CA', 'CV', 'CF', 'MCV'],
-              datasets: [{
-                  label: 'Montant',
-                  data: [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}],
-                  backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#16a34a']
-              }]
-          },
-          options: {
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-          }
+        type: 'bar',
+        data: {
+          labels: kpiLabels,
+          datasets: [{
+            label: 'Montant',
+            data: kpiData,
+            backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#16a34a']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
       });
-  }
+    }
 
   if (mixCtx) {
       new Chart(mixCtx, {
@@ -451,5 +524,12 @@
 </script>
 {% endif %}
 
-<p><a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a></p>
+<p>
+  <a
+    href="{% url 'scenario-detail' scenario.id %}"
+    class="back-to-scenario {% if commercial_mode %}commercial{% else %}industrial{% endif %}"
+  >
+    Retour à la page détail du scénario
+  </a>
+</p>
 {% endblock %}

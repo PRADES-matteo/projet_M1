@@ -81,6 +81,7 @@ def build_automatic_results(scenario):
         "total_revenue": total_revenue,
         "total_variable_costs": total_variable_costs,
         "total_fixed_costs": total_fixed_costs,
+        'commercial_mode': scenario.preset == 'commercial',
         "fixed_specific_costs": fixed_specific_costs,
         "mcv": mcv,
         "taux_marge": taux_marge,
@@ -326,6 +327,11 @@ def scenario_detail(request, pk):
     for row in summary_rows:
         row_cmp = row.get('variable_unit_cost', Decimal('0.00')) + fixed_per_unit
         row['cmp'] = row_cmp
+        # For commercial template: marge unitaire = prix de vente - cmp
+        try:
+            row['unit_margin'] = (row.get('unit_price', Decimal('0.00')) - row_cmp)
+        except Exception:
+            row['unit_margin'] = Decimal('0.00')
     total_cmp = (total_variable + total_fixed) / total_units if total_units else Decimal('0.00')
 
     from .models import SeasonalityEntry
@@ -383,6 +389,7 @@ def scenario_detail(request, pk):
         'total_revenue': total_revenue,
         'total_cmp': total_cmp,
         'automatic_results': automatic_results,
+        'commercial_mode': scenario.preset == 'commercial',
     }
     return render(request, 'costs/scenario_detail.html', context)
 
@@ -717,6 +724,7 @@ def calculate_results(request, scenario_id):
             "seasonality_list": seasonality_list,
             "seasonality_labels": seasonality_labels,
             "stock_evolution_values": stock_evolution_values,
+                "commercial_mode": scenario.preset == 'commercial',
         },
     )
 

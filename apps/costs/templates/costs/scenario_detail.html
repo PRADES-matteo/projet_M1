@@ -147,6 +147,43 @@
     background: #ccfbf1;
     font-weight: 700;
   }
+  /* Commercial (orange) identity */
+  .commercial-callout {
+    background: linear-gradient(135deg, #fff7ed 0%, #fffaf0 100%);
+    border: 1px solid #fb923c;
+    border-radius: 14px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .commercial-callout h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: #b45309;
+  }
+  .commercial-callout p {
+    margin: 0 0 0.75rem;
+    color: #92400e;
+  }
+  .commercial-tag {
+    background: #ffffff;
+    border: 1px solid #fb923c;
+    color: #b45309;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  tr.commercial-highlight td {
+    background: #fff7ed;
+  }
+  tr.commercial-highlight-cmp td {
+    background: #ffedd5;
+    font-weight: 800;
+  }
+  tr.commercial-highlight-margin td {
+    background: #fff1e6;
+    font-weight: 700;
+  }
 </style>
 
 {% if messages %}
@@ -210,6 +247,15 @@
   </p>
 </div>
 {% endif %}
+{% if scenario.preset == 'commercial' %}
+<div class="commercial-callout">
+  <h3>Template Entreprise commerciale activé</h3>
+  <p>
+    Les indicateurs clés pour le commerce : quantité vendue, prix d'achat,
+    prix de vente, CMP et marge unitaire sont mis en évidence ci-dessous.
+  </p>
+</div>
+{% endif %}
 
 <div class="section-card">
   <h2>Vision d'ensemble Direct Costing</h2>
@@ -227,11 +273,10 @@
       </thead>
       <tbody>
         <tr
-          class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
+          class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
         >
           <td>
-            {% if scenario.preset == 'industriel' %}Quantité produite / vendue{%
-            else %}Quantité{% endif %}
+            {% if scenario.preset == 'industriel' %}Quantité produite / vendue{% elif scenario.preset == 'commercial' %}Quantité vendue{% else %}Quantité{% endif %}
           </td>
           {% for row in summary_rows %}
           <td>{{ row.quantity|floatformat:0 }}</td>
@@ -239,23 +284,23 @@
           <td>-</td>
         </tr>
         <tr>
-          <td>Prix unitaire</td>
+          <td>{% if scenario.preset == 'commercial' %}Prix de vente{% else %}Prix unitaire{% endif %}</td>
           {% for row in summary_rows %}
           <td>{{ row.unit_price|floatformat:2 }}</td>
           {% endfor %}
           <td>-</td>
         </tr>
         <tr
-          class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
+          class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
         >
-          <td>CV unitaire</td>
+          <td>{% if scenario.preset == 'commercial' %}Prix d'achat{% else %}CV unitaire{% endif %}</td>
           {% for row in summary_rows %}
           <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
           {% endfor %}
           <td>-</td>
         </tr>
         <tr
-          class="{% if scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}"
+          class="{% if scenario.preset == 'commercial' %}commercial-highlight-cmp{% elif scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}"
         >
           <td>CMP (Coût moyen pondéré)</td>
           {% for row in summary_rows %}
@@ -263,6 +308,16 @@
           {% endfor %}
           <td>{{ total_cmp|floatformat:2 }}</td>
         </tr>
+        {% if scenario.preset == 'commercial' %}
+        <tr class="commercial-highlight-margin">
+          <td>Marge unitaire</td>
+          {% for row in summary_rows %}
+          <td>{{ row.unit_margin|floatformat:2 }}</td>
+          {% endfor %}
+          <td>-</td>
+        </tr>
+        {% endif %}
+        
         <tr>
           <td>Chiffre d'affaires</td>
           {% for row in summary_rows %}

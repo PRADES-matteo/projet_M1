@@ -178,6 +178,38 @@
     background: #ccfbf1;
     font-weight: 700;
   }
+  .commercial-callout {
+    background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+    border: 1px solid #fcd34d;
+    border-radius: 14px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .commercial-callout h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: #92400e;
+  }
+  .commercial-callout p {
+    margin: 0 0 0.75rem;
+    color: #78350f;
+  }
+  .commercial-tag {
+    background: #ffffff;
+    border: 1px solid #fbbf24;
+    color: #92400e;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  tr.commercial-highlight td {
+    background: #fff7ed;
+  }
+  tr.commercial-highlight-margin td {
+    background: #fff1e6;
+    font-weight: 700;
+  }
 </style>
 
 <div class="topbar">
@@ -233,6 +265,25 @@
     <span class="industrial-tag">Coût variable unitaire</span>
   </div>
 </div>
+
+{% endif %}
+
+{% if scenario.preset == 'commercial' %}
+<div class="commercial-callout">
+  <h3>Template Entreprise commerciale activé</h3>
+  <p>
+    Les indicateurs clés pour le commerce : Champ, quantité vendue, prix
+    d'achat, prix de vente, CMP et marge unitaire sont mis en évidence ci-dessous.
+  </p>
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+    <span class="commercial-tag">Champ</span>
+    <span class="commercial-tag">Quantité vendue</span>
+    <span class="commercial-tag">Prix d'achat</span>
+    <span class="commercial-tag">Prix de vente</span>
+    <span class="commercial-tag">CMP</span>
+    <span class="commercial-tag">Marge unitaire</span>
+  </div>
+</div>
 {% endif %}
 
 <div class="section-title">Vision d'ensemble Direct Costing</div>
@@ -250,9 +301,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr
-        class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
-      >
+      <tr class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}">
         <td>
           {% if scenario.preset == 'industriel' %}Quantité produite / vendue{%
           else %}Quantité{% endif %}
@@ -263,30 +312,35 @@
         <td>-</td>
       </tr>
       <tr>
-        <td>Prix unitaire</td>
+        <td>{% if scenario.preset == 'commercial' %}Prix de vente{% else %}Prix unitaire{% endif %}</td>
         {% for row in summary_rows %}
         <td>{{ row.unit_price|floatformat:2 }}</td>
         {% endfor %}
         <td>-</td>
       </tr>
-      <tr
-        class="{% if scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
-      >
-        <td>CV unitaire</td>
+      <tr class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}">
+        <td>{% if scenario.preset == 'commercial' %}Prix d'achat{% else %}CV unitaire{% endif %}</td>
         {% for row in summary_rows %}
         <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
         {% endfor %}
         <td>-</td>
       </tr>
-      <tr
-        class="{% if scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}"
-      >
+      <tr class="{% if scenario.preset == 'commercial' %}commercial-highlight-cmp{% elif scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}">
         <td>CMP (Coût moyen pondéré)</td>
         {% for row in summary_rows %}
         <td>{{ row.cmp|floatformat:2 }}</td>
         {% endfor %}
         <td>{{ total_cmp|floatformat:2 }}</td>
       </tr>
+      {% if scenario.preset == 'commercial' %}
+      <tr class="commercial-highlight-margin">
+        <td>Marge unitaire</td>
+        {% for row in summary_rows %}
+        <td>{{ row.unit_margin|floatformat:2 }}</td>
+        {% endfor %}
+        <td>-</td>
+      </tr>
+      {% endif %}
       <tr>
         <td>Chiffre d'affaires</td>
         {% for row in summary_rows %}
