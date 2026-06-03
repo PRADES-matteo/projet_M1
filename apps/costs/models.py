@@ -66,6 +66,14 @@ class Product(models.Model):
     def total_revenue(self):
         return self.quantity * self.unit_price
 
+    @property
+    def production_volume(self):
+        """
+        Calcule le volume de production nécessaire.
+        Production = Ventes + Stock Final - Stock Initial
+        """
+        return self.quantity + self.stock_final - self.stock_initial
+
 
 class CostCenter(models.Model):
     scenario = models.ForeignKey(CostScenario, on_delete=models.CASCADE, related_name="cost_centers")

@@ -210,13 +210,6 @@
           <td>{{ total_cmp|floatformat:2 }}</td>
         </tr>
         <tr>
-          <td>Chiffre d'affaires</td>
-          {% for row in summary_rows %}
-          <td>{{ row.revenue|floatformat:2 }}</td>
-          {% endfor %}
-          <td>{{ summary_totals.revenue|floatformat:2 }}</td>
-        </tr>
-        <tr>
           <td>Coût variable total</td>
           {% for row in summary_rows %}
           <td>{{ row.variable|floatformat:2 }}</td>
@@ -263,7 +256,6 @@
           <th>Stock initial</th>
           <th>Quantité vendue prévue</th>
           <th>Stock final visé</th>
-          <th>Chiffre d'affaires (auto)</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -275,10 +267,8 @@
           <td>{{ product.stock_initial }}</td>
           <td>{{ product.quantity|floatformat:0 }}</td>
           <td>{{ product.stock_final }}</td>
-          <td>{{ product.total_revenue|floatformat:2 }}</td>
           <td>
-            <a
-              href="{% url 'edit_product' scenario.id product.id %}"
+              <a href="{% url 'edit_product' scenario.id product.id %}"
               class="btn-action btn-light"
               >Modifier</a
             >
@@ -481,23 +471,9 @@
                 style="width: 100px"
               />
             </td>
-            <td>
-              {{ s.estimated_revenue|floatformat:2 }}
-              {% if s.cumulative_revenue %}
-                &nbsp;<small style="color: #6b7280">(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small>
-              {% endif %}
-            </td>
           </tr>
           {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>Total CA</td>
-            <td></td>
-            <td>{{ total_revenue|floatformat:2 }}</td>
-          </tr>
-        </tfoot>
-      </table>
+        </tbody
     </div>
     <button class="btn-action" type="submit">
       Enregistrer la saisonnalité

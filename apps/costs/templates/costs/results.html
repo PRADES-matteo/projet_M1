@@ -82,50 +82,30 @@
 
 <div class="kpi-grid">
   <div class="kpi-card">
-    <div class="kpi-label">Chiffre d'affaires total</div>
+    <div class="kpi-label">Coût de production total</div>
     <div class="kpi-value">
-      {{ automatic_results.total_revenue|floatformat:2 }}
+      {{ automatic_results.total_production_cost|floatformat:2 }}
     </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-label">Marge sur coût variable</div>
-    <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
+    <div class="kpi-label">Marge brute</div>
+    <div class="kpi-value">{{ automatic_results.gross_margin|floatformat:2 }}</div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-label">Taux de marge</div>
+    <div class="kpi-label">Coût des ventes</div>
     <div class="kpi-value">
-      {{ automatic_results.taux_marge|floatformat:2 }}%
+      {{ automatic_results.cost_of_goods_sold|floatformat:2 }}
     </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-label">Seuil de rentabilité</div>
+    <div class="kpi-label">CUMP</div>
     <div class="kpi-value">
-      {{ automatic_results.seuil_rentabilite|floatformat:2 }}
+      {{ automatic_results.cump|floatformat:2 }}
     </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-label">Point mort</div>
-    <div class="kpi-value">
-      {{ automatic_results.point_mort|floatformat:0 }} jours
-    </div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Indice de sécurité</div>
-    <div class="kpi-value">
-      {{ automatic_results.indice_securite|floatformat:2 }}%
-    </div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Marge de sécurité</div>
-    <div class="kpi-value">
-      {{ automatic_results.marge_securite|floatformat:2 }}
-    </div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Levier opérationnel</div>
-    <div class="kpi-value">
-      {{ automatic_results.levier_operationnel|floatformat:2 }}
-    </div>
+    <div class="kpi-label">Résultat</div>
+    <div class="kpi-value">{{ automatic_results.resultat|floatformat:2 }}</div>
   </div>
 </div>
 
@@ -140,10 +120,6 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Chiffre d'affaires total</td>
-          <td>{{ automatic_results.total_revenue|floatformat:2 }}</td>
-        </tr>
         <tr>
           <td>Charges variables</td>
           <td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td>
@@ -292,11 +268,11 @@
       new Chart(kpiCtx, {
           type: 'bar',
           data: {
-              labels: ['CA', 'CV', 'CF', 'MCV'],
+              labels: ['Coût des Ventes', 'Marge Brute'],
               datasets: [{
                   label: 'Montant',
-                  data: [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}],
-                  backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#16a34a']
+                  data: [{{ automatic_results.cost_of_goods_sold|unlocalize }}, {{ automatic_results.gross_margin|unlocalize }}],
+                  backgroundColor: ['#f59e0b', '#16a34a']
               }]
           },
           options: {
