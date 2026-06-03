@@ -210,6 +210,13 @@
           <td>{{ total_cmp|floatformat:2 }}</td>
         </tr>
         <tr>
+          <td>Chiffre d'affaires</td>
+          {% for row in summary_rows %}
+          <td>{{ row.revenue|floatformat:2 }}</td>
+          {% endfor %}
+          <td>{{ summary_totals.revenue|floatformat:2 }}</td>
+        </tr>
+        <tr>
           <td>Coût variable total</td>
           {% for row in summary_rows %}
           <td>{{ row.variable|floatformat:2 }}</td>
