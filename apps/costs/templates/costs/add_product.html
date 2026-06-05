@@ -11,25 +11,17 @@
                 {% csrf_token %} 
                 {{ form.non_field_errors }}
                 
+                {% for field in form %}
                 <div class="mb-3">
-                    <label class="form-label fw-bold">{{ form.name.label }}</label>
-                    {{ form.name }} 
-                    <div class="text-danger small">{{ form.name.errors }}</div>
+                    <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+                    {% endif %}
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
-                    {{ form.quantity }} 
-                    <div class="text-danger small">{{ form.quantity.errors }}</div>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-bold">{{ form.unit_price.label }}</label>
-                    {{ form.unit_price }} 
-                    <div class="text-danger small">{{ form.unit_price.errors }}</div>
-                </div>
+                {% endfor %}
 
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center mt-4">
                     <a href="{% url 'scenario-detail' scenario.id %}" class="text-decoration-none text-secondary">← Retour au scénario</a>
                     <button type="submit" class="btn text-white" style="background-color: #0f766e;" >Ajouter le produit</button>
                 </div>

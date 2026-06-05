@@ -28,23 +28,40 @@ def build_automatic_results(scenario):
     fixed_costs = list(scenario.fixed_costs.select_related("product"))
 
     total_revenue = Decimal("0.00")
-    total_variable_costs = Decimal("0.00")
+    total_variable_costs_production = Decimal("0.00")
     total_fixed_costs = Decimal("0.00")
-    fixed_specific_costs = Decimal("0.00")
+    total_production_volume = 0
 
+    # Calculer le volume de production total et les revenus
     for product in products:
         total_revenue += _decimal(product.total_revenue)
+        total_production_volume += product.production_volume
 
+    # Calculer les coûts variables associés à la production
+    # On fait l'hypothèse que les coûts variables fournis sont pour la production nécessaire
     for cost in variable_costs:
-        total_variable_costs += _decimal(cost.amount)
+        total_variable_costs_production += _decimal(cost.amount)
 
+    # Coûts fixes totaux
     for cost in fixed_costs:
-        amount = _decimal(cost.amount)
-        total_fixed_costs += amount
-        if not cost.is_common:
-            fixed_specific_costs += amount
+        total_fixed_costs += _decimal(cost.amount)
 
-    mcv = total_revenue - total_variable_costs
+    # Coût de production total
+    total_production_cost = total_variable_costs_production + total_fixed_costs
+
+    # Coût Unitaire Moyen Pondéré (CUMP) de production
+    cump = total_production_cost / total_production_volume if total_production_volume > 0 else Decimal("0.00")
+
+    # Coût de production des produits vendus (Coût des Ventes)
+    cost_of_goods_sold = Decimal("0.00")
+    for product in products:
+        cost_of_goods_sold += cump * product.quantity
+
+    # Marge sur Coût de Production des produits vendus
+    gross_margin = total_revenue - cost_of_goods_sold
+    
+    # Les autres indicateurs peuvent être adaptés si nécessaire, mais le focus est sur le coût de production
+    mcv = total_revenue - total_variable_costs_production # A adapter si les CV sont par produit vendu
     taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
     seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
     # Round threshold up to cents to avoid long fractional values
@@ -65,36 +82,27 @@ def build_automatic_results(scenario):
             point_mort = Decimal(str(ceil(float(point_mort))))
     marge_securite = total_revenue - seuil_rentabilite
     indice_securite = ((marge_securite / total_revenue) * Decimal("100.00")) if total_revenue else Decimal("0.00")
-    resultat = mcv - total_fixed_costs
+    resultat = gross_margin # Le résultat est maintenant basé sur la marge brute
     levier_operationnel = (mcv / resultat) if resultat else Decimal("0.00")
 
-    marge_specifique = mcv - fixed_specific_costs
-    seuil_rentabilite_specifique = (fixed_specific_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
-    if seuil_rentabilite_specifique and seuil_rentabilite_specifique != Decimal("0.00"):
-        try:
-            seuil_rentabilite_specifique = seuil_rentabilite_specifique.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
-        except Exception:
-            from math import ceil
-            seuil_rentabilite_specifique = Decimal(str(ceil(float(seuil_rentabilite_specifique) * 100) / 100.0))
 
     return {
         "total_revenue": total_revenue,
-        "total_variable_costs": total_variable_costs,
+        "total_variable_costs": total_variable_costs_production,
         "total_fixed_costs": total_fixed_costs,
-        'commercial_mode': scenario.preset == 'commercial',
-        'services_mode': scenario.preset == 'services',
-        "fixed_specific_costs": fixed_specific_costs,
-        "mcv": mcv,
+        "total_production_cost": total_production_cost,
+        "cump": cump,
+        "cost_of_goods_sold": cost_of_goods_sold,
+        "gross_margin": gross_margin,
+        "mcv": mcv, # Maintenu pour info, mais la marge brute est plus pertinente
         "taux_marge": taux_marge,
         "seuil_rentabilite": seuil_rentabilite,
         "point_mort": point_mort,
         "indice_securite": indice_securite,
         "marge_securite": marge_securite,
         "levier_operationnel": levier_operationnel,
-        "marge_specifique": marge_specifique,
-        "seuil_rentabilite_specifique": seuil_rentabilite_specifique,
         "resultat": resultat,
-        "has_chart_data": any(value != 0 for value in [total_revenue, total_variable_costs, total_fixed_costs]),
+        "has_chart_data": any(value != 0 for value in [total_revenue, total_variable_costs_production, total_fixed_costs]),
     }
 
 

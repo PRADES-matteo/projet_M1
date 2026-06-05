@@ -364,18 +364,19 @@
 </div>
 
 <div class="section-card">
-  <h2>Produits</h2>
+  <h2>Produits et Stocks</h2>
   <div class="table-wrap">
     <table class="summary">
       <thead>
         <tr>
           <th>Nom du produit</th>
           <th>Prix de vente unitaire</th>
+          <th>Stock initial</th>
           <th>
             {% if scenario.preset == 'industriel' %}Quantité produite / vendue
             prévue{% else %}Quantité vendue prévue{% endif %}
           </th>
-          <th>Chiffre d'affaires (auto)</th>
+          <th>Stock final visé</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -384,11 +385,11 @@
         <tr>
           <td>{{ product.name }}</td>
           <td>{{ product.unit_price|floatformat:2 }}</td>
+          <td>{{ product.stock_initial }}</td>
           <td>{{ product.quantity|floatformat:0 }}</td>
-          <td>{{ product.total_revenue|floatformat:2 }}</td>
+          <td>{{ product.stock_final }}</td>
           <td>
-            <a
-              href="{% url 'edit_product' scenario.id product.id %}"
+              <a href="{% url 'edit_product' scenario.id product.id %}"
               class="btn-action btn-light"
               >Modifier</a
             >
@@ -413,7 +414,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5">Aucun produit saisi.</td>
+          <td colspan="7">Aucun produit saisi.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -594,15 +595,7 @@
             </td>
           </tr>
           {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>Total CA</td>
-            <td></td>
-            <td>{{ total_revenue|floatformat:2 }}</td>
-          </tr>
-        </tfoot>
-      </table>
+        </tbody
     </div>
     <button class="btn-action" type="submit">
       Enregistrer la saisonnalité
@@ -725,10 +718,10 @@
 
 <div class="section-card">
   <h2>Actions</h2>
-  <a href="{% url 'calculate_results' scenario.id %}" class="btn btn-success"
+  <a href="{% url 'calculate_results' scenario.id %}" class="btn-action" style="background-color: #059669;"
     >Calculer les résultats</a
   >
-  <a href="{% url 'scenario-list' %}" class="btn btn-secondary"
+  <a href="{% url 'scenario-list' %}" class="btn-action btn-secondary"
     >Retour à la liste des scénarios</a
   >
 </div>

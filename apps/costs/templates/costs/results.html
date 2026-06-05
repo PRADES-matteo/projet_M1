@@ -216,7 +216,7 @@
   <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif services_mode %}featured-services{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Chiffre d'affaires total</div>
     <div class="kpi-value">
-      {{ automatic_results.total_revenue|floatformat:2 }}
+      {{ automatic_results.total_production_cost|floatformat:2 }}
     </div>
   </div>
   <div class="kpi-card {% if commercial_mode %}commercial{% elif services_mode %}featured-services{% elif industrial_mode %}industrial{% endif %}">
@@ -240,13 +240,13 @@
   <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif services_mode %}featured-services{% elif industrial_mode %}industrial{% endif %}">
     <div class="kpi-label">Taux de marge</div>
     <div class="kpi-value">
-      {{ automatic_results.taux_marge|floatformat:2 }}%
+      {{ automatic_results.cost_of_goods_sold|floatformat:2 }}
     </div>
   </div>
   <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif services_mode %}featured-services{% elif industrial_mode %}industrial{% endif %}">
-    <div class="kpi-label">Seuil de rentabilité</div>
+    <div class="kpi-label">CUMP</div>
     <div class="kpi-value">
-      {{ automatic_results.seuil_rentabilite|floatformat:2 }} €
+      {{ automatic_results.cump|floatformat:2 }} €
     </div>
   </div>
   <div class="kpi-card {% if commercial_mode %}commercial featured-commercial{% elif services_mode %}featured-services{% elif industrial_mode %}industrial{% endif %}">
