@@ -1,4 +1,6 @@
-{% extends "costs/base.html" %} {% load l10n %} {% block content %}
+{% extends "costs/base.html" %}
+{% load l10n %}
+{% block content %}
 <style>
   .kpi-grid {
     display: grid;
@@ -13,115 +15,40 @@
     border-radius: 16px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   }
-  .kpi-card {
-    padding: 0.9rem;
-  }
-  .section-card {
-    padding: 0.9rem;
-    margin-top: 0.9rem;
-  }
-  .kpi-label {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 0.35rem;
-  }
-  .kpi-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #0f172a;
-  }
-  .featured-commercial {
-    border-color: #fb923c;
-    background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
-  }
-  .table-wrap {
-    overflow-x: auto;
-  }
-  table.summary {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  .kpi-card { padding: 0.9rem; }
+  .section-card { padding: 0.9rem; margin-top: 0.9rem; }
+  .kpi-label { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.35rem; }
+  .kpi-value { font-size: 1.4rem; font-weight: 700; color: #0f172a; }
+  .featured-commercial { border-color: #fb923c; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%); }
+  .table-wrap { overflow-x: auto; }
+  table.summary { width: 100%; border-collapse: collapse; }
   table.summary th,
-  table.summary td {
-    border: 1px solid #e5e7eb;
-    padding: 0.55rem 0.7rem;
-    text-align: right;
-  }
+  table.summary td { border: 1px solid #e5e7eb; padding: 0.55rem 0.7rem; text-align: right; }
   table.summary th:first-child,
-  table.summary td:first-child {
-    text-align: left;
-  }
-  .chart-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  .chart-panel {
-    min-height: 280px;
-    display: flex;
-    flex-direction: column;
-  }
-  .chart-panel h3 {
-    margin-top: 0;
-  }
+  table.summary td:first-child { text-align: left; }
+  .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .chart-panel { min-height: 280px; display: flex; flex-direction: column; }
+  .chart-panel h3 { margin-top: 0; }
   .chart-panel.chart-bar canvas,
-  .chart-panel.chart-line canvas {
-    width: 100% !important;
-    height: 280px !important;
-  }
-  .chart-panel.chart-doughnut {
-    aspect-ratio: 1 / 1;
-  }
-  .chart-panel.chart-doughnut canvas {
-    width: 290px !important;
-    height: 290px !important;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-  .featured-row-services {
-    background: linear-gradient(90deg, #f5f3ff, #faf5ff);
-    border-left: 4px solid #7c3aed;
-    font-weight: 700;
-  }
-  .featured-row-commercial {
-    background: linear-gradient(90deg, #fff7ed, #fffaf0);
-    border-left: 4px solid #fb923c;
-    font-weight: 700;
-  }
+  .chart-panel.chart-line canvas { width: 100% !important; height: 280px !important; }
+  .chart-panel.chart-doughnut { aspect-ratio: 1 / 1; }
+  .chart-panel.chart-doughnut canvas { width: 290px !important; height: 290px !important; max-width: 100%; margin: 0 auto; }
+  .featured-row-services { background: linear-gradient(90deg, #f5f3ff, #faf5ff); border-left: 4px solid #7c3aed; font-weight: 700; }
+  .featured-row-commercial { background: linear-gradient(90deg, #fff7ed, #fffaf0); border-left: 4px solid #fb923c; font-weight: 700; }
   .back-to-scenario {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    margin-top: 1rem;
-    padding: 0.72rem 1.05rem;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 700;
-    border: 1px solid transparent;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1rem;
+    padding: 0.72rem 1.05rem; border-radius: 999px; text-decoration: none; font-weight: 700;
+    border: 1px solid transparent; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
   }
-  .back-to-scenario:hover {
-    transform: translateY(-1px);
-  }
-  .back-to-scenario.commercial {
-    color: #9a3412;
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    border-color: #fb923c;
-  }
-  .back-to-scenario.industrial {
-    color: #115e59;
-    background: linear-gradient(135deg, #ecfeff 0%, #d9fdf7 100%);
-    border-color: #99f6e4;
-  }
+  .back-to-scenario:hover { transform: translateY(-1px); }
+  .back-to-scenario.commercial { color: #9a3412; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-color: #fb923c; }
+  .back-to-scenario.industrial { color: #115e59; background: linear-gradient(135deg, #ecfeff 0%, #d9fdf7 100%); border-color: #99f6e4; }
 </style>
 
 <h1>Résultats automatiques - {{ scenario.name }}</h1>
 <p>Méthode : {{ scenario.get_method_display }}</p>
 
 {% if scenario.method == "direct_costing_advanced" %}
-
 <div class="section-card">
   <h2>Résultats par produit</h2>
   <div class="table-wrap">
@@ -147,9 +74,7 @@
           <td>{{ row.marge_specifique|floatformat:2 }}</td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="6">Aucun produit saisi.</td>
-        </tr>
+        <tr><td colspan="6">Aucun produit saisi.</td></tr>
         {% endfor %}
       </tbody>
       <tfoot>
@@ -165,44 +90,6 @@
     </table>
   </div>
 </div>
-
-{% if advanced_direct_costing.product_rows %}
-<div class="section-card" style="border-left: 4px solid #115e59; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%);">
-  <h2 style="margin-top: 0; color: #115e59; font-size: 1.1rem;"> Lecture métier</h2>
-  <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
-    <li style="display: flex; align-items: baseline; gap: 0.5rem;">
-      <span style="font-size: 1.2rem;"></span>
-      <span>
-        <strong>Produit le plus rentable :</strong>
-        {{ advanced_direct_costing.best_product_name }}
-        <span style="color: #16a34a; font-weight: 700; margin-left: 0.3rem;">
-          ({{ advanced_direct_costing.best_product_marge|floatformat:2 }} €)
-        </span>
-      </span>
-    </li>
-    <li style="display: flex; align-items: baseline; gap: 0.5rem;">
-      <span style="font-size: 1.2rem;"></span>
-      <span>
-        <strong>Produit le moins rentable :</strong>
-        {{ advanced_direct_costing.worst_product_name }}
-        <span style="color: #dc2626; font-weight: 700; margin-left: 0.3rem;">
-          ({{ advanced_direct_costing.worst_product_marge|floatformat:2 }} €)
-        </span>
-      </span>
-    </li>
-    <li style="display: flex; align-items: baseline; gap: 0.5rem;">
-      <span style="font-size: 1.2rem;"></span>
-      <span>
-        <strong>Contribution principale au résultat :</strong>
-        {{ advanced_direct_costing.main_contributor_name }}
-        <span style="color: #2563eb; font-weight: 700; margin-left: 0.3rem;">
-          ({{ advanced_direct_costing.main_contributor_pct|floatformat:1 }} % de la MSCV totale)
-        </span>
-      </span>
-    </li>
-  </ul>
-</div>
-{% endif %}
 
 <div class="section-card">
   <h2>Charges fixes communes</h2>
@@ -223,9 +110,7 @@
           <td>{{ cost.amount|floatformat:2 }}</td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="3">Aucune charge fixe commune.</td>
-        </tr>
+        <tr><td colspan="3">Aucune charge fixe commune.</td></tr>
         {% endfor %}
       </tbody>
       <tfoot>
@@ -255,9 +140,7 @@
     </div>
   </div>
 </div>
-
 {% else %}
-
 <div class="kpi-grid">
   <div class="kpi-card {% if commercial_mode %}featured-commercial{% endif %}">
     <div class="kpi-label">Chiffre d'affaires total</div>
@@ -311,63 +194,20 @@
   <h2>Tableau récapitulatif</h2>
   <div class="table-wrap">
     <table class="summary">
-      <thead>
-        <tr>
-          <th>Indicateur</th>
-          <th>Valeur</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Indicateur</th><th>Valeur</th></tr></thead>
       <tbody>
-        <tr>
-          <td>Chiffre d'affaires total</td>
-          <td>{{ automatic_results.total_revenue|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</td>
-          <td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td>
-        </tr>
-        {% if not services_mode %}
-        <tr>
-          <td>CMP</td>
-          <td>{{ total_cmp|floatformat:2 }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-          <td>{% if commercial_mode %}Marge commerciale{% else %}MCV{% endif %}</td>
-          <td>{{ automatic_results.mcv|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>Résultat</td>
-          <td>{{ automatic_results.resultat|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>Charges fixes totales</td>
-          <td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>Taux de marge</td>
-          <td>{{ automatic_results.taux_marge|floatformat:2 }}%</td>
-        </tr>
-        <tr>
-          <td>Seuil de rentabilité</td>
-          <td>{{ automatic_results.seuil_rentabilite|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>Point mort</td>
-          <td>{{ automatic_results.point_mort|floatformat:0 }} jours</td>
-        </tr>
-        <tr>
-          <td>Indice de sécurité</td>
-          <td>{{ automatic_results.indice_securite|floatformat:2 }}%</td>
-        </tr>
-        <tr>
-          <td>Marge de sécurité</td>
-          <td>{{ automatic_results.marge_securite|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <td>Levier opérationnel</td>
-          <td>{{ automatic_results.levier_operationnel|floatformat:2 }}</td>
-        </tr>
+        <tr><td>Chiffre d'affaires total</td><td>{{ automatic_results.total_revenue|floatformat:2 }}</td></tr>
+        <tr><td>{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</td><td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td></tr>
+        {% if not services_mode %}<tr><td>CMP</td><td>{{ total_cmp|floatformat:2 }}</td></tr>{% endif %}
+        <tr><td>{% if commercial_mode %}Marge commerciale{% else %}MCV{% endif %}</td><td>{{ automatic_results.mcv|floatformat:2 }}</td></tr>
+        <tr><td>Résultat</td><td>{{ automatic_results.resultat|floatformat:2 }}</td></tr>
+        <tr><td>Charges fixes totales</td><td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td></tr>
+        <tr><td>Taux de marge</td><td>{{ automatic_results.taux_marge|floatformat:2 }}%</td></tr>
+        <tr><td>Seuil de rentabilité</td><td>{{ automatic_results.seuil_rentabilite|floatformat:2 }}</td></tr>
+        <tr><td>Point mort</td><td>{{ automatic_results.point_mort|floatformat:0 }} jours</td></tr>
+        <tr><td>Indice de sécurité</td><td>{{ automatic_results.indice_securite|floatformat:2 }}%</td></tr>
+        <tr><td>Marge de sécurité</td><td>{{ automatic_results.marge_securite|floatformat:2 }}</td></tr>
+        <tr><td>Levier opérationnel</td><td>{{ automatic_results.levier_operationnel|floatformat:2 }}</td></tr>
       </tbody>
     </table>
   </div>
@@ -389,18 +229,10 @@
   </ul>
   <div class="table-wrap">
     <table class="summary">
-      <thead>
-        <tr>
-          <th>Centre</th>
-          <th>Total</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Centre</th><th>Total</th></tr></thead>
       <tbody>
         {% for center, total in result.total_by_center.items %}
-        <tr>
-          <td>{{ center }}</td>
-          <td>{{ total }}</td>
-        </tr>
+        <tr><td>{{ center }}</td><td>{{ total }}</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -433,9 +265,9 @@
     {% endif %}
   </div>
   {% else %}
-  <div class="section-card" style="background: #f9fafb; border-style: dashed; text-align: center; padding: 2rem;">
+  <div class="section-card" style="background:#f9fafb;border-style:dashed;text-align:center;padding:2rem;">
     <strong>Aucune donnée suffisante pour afficher les graphiques.</strong>
-    <div style="margin-top: 0.5rem; color: #6b7280">Ajoutez des produits et des charges pour générer la visualisation.</div>
+    <div style="margin-top:0.5rem;color:#6b7280">Ajoutez des produits et des charges pour générer la visualisation.</div>
   </div>
   {% endif %}
 </div>
@@ -469,12 +301,10 @@
   }
 </script>
 {% endif %}
-
 {% endif %}
 
 <p>
-  <a href="{% url 'scenario-detail' scenario.id %}"
-     class="back-to-scenario {% if commercial_mode %}commercial{% else %}industrial{% endif %}">
+  <a href="{% url 'scenario-detail' scenario.id %}" class="back-to-scenario {% if commercial_mode %}commercial{% else %}industrial{% endif %}">
     Retour à la page détail du scénario
   </a>
 </p>
