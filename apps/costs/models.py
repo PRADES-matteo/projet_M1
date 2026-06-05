@@ -53,7 +53,7 @@ class CostScenario(models.Model):
 
 class Product(models.Model):
     scenario = models.ForeignKey(CostScenario, on_delete=models.CASCADE, related_name="products")
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=25)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=14, decimal_places=2)
 

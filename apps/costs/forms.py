@@ -30,6 +30,12 @@ class CostScenarioForm(forms.ModelForm):
     class Meta:
         model = CostScenario
         fields = ["name", "period", "description", "method", "preset"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "maxlength": "25",
+                "placeholder": "Max 25 caractères",
+            }),
+        }
         labels = {
             "name": "Nom du scénario",
             "period": "Période",
