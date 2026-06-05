@@ -1,0 +1,183 @@
+{% extends "costs/base.html" %}
+{% load dict_filters %}
+{% block content %}
+
+<style>
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+    .table-wrap {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        margin-top: 1rem;
+    }
+    table.summary {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        background: white;
+    }
+    table.summary th, table.summary td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+        white-space: nowrap;
+    }
+    table.summary th { background: #f3f4f6; font-weight: 700; }
+    table.summary tfoot td { background: #f9fafb; font-weight: 700; }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        background: #0f766e;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.7rem;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.88rem;
+        transition: 0.2s;
+    }
+    .btn-action:hover { opacity: 0.88; color: #fff; }
+    .btn-light { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    .btn-light:hover { color: #111827; }
+    .positive { color: #065f46; font-weight: 600; }
+    .negative { color: #991b1b; font-weight: 600; }
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 0.75rem;
+    }
+</style>
+
+<div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+    <div>
+        <h1 style="margin:0; font-size:1.4rem; color:#111827;">Résultats — Centres d'analyse</h1>
+        <p style="margin:0.25rem 0 0; color:#6b7280;">{{ scenario.name }}</p>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action btn-light">← Centres</a>
+        <a href="{% url 'scenario-detail' scenario.pk %}" class="btn-action btn-light">Vue scénario</a>
+    </div>
+</div>
+
+<!-- Tableau de répartition -->
+<div class="card-custom">
+    <p class="section-title">Tableau de répartition des charges</p>
+    <div class="table-wrap">
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th>Centre</th>
+                    <th>Type</th>
+                    <th style="text-align:right;">Charges primaires</th>
+                    <th style="text-align:right;">Charges secondaires</th>
+                    <th>Unité d'œuvre</th>
+                    <th style="text-align:right;">Total UO</th>
+                    <th style="text-align:right;">Taux de cession</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for center in results.centers %}
+                <tr>
+                    <td>{{ center.name }}</td>
+                    <td>{% if center.is_auxiliary %}<span style="color:#92400e; font-weight:600;">Auxiliaire</span>{% else %}<span style="color:#065f46; font-weight:600;">Principal</span>{% endif %}</td>
+                    <td style="text-align:right;">{{ results.primary_costs|dict_get:center.id|floatformat:2 }}</td>
+                    <td style="text-align:right;">{{ results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
+                    <td>{{ center.unit_of_work|default:"—" }}</td>
+                    <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:4 }}{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Résultats par produit -->
+<div class="card-custom">
+    <p class="section-title">Coût de revient par produit</p>
+    <div class="table-wrap">
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th style="text-align:right;">Quantité</th>
+                    <th style="text-align:right;">Prix unitaire</th>
+                    <th style="text-align:right;">Chiffre d'affaires</th>
+                    <th style="text-align:right;">Coût de revient total</th>
+                    <th style="text-align:right;">Coût unitaire</th>
+                    <th style="text-align:right;">Résultat</th>
+                    <th style="text-align:right;">Taux de profit (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results.product_results %}
+                <tr>
+                    <td>{{ row.product.name }}</td>
+                    <td style="text-align:right;">{{ row.product.quantity }}</td>
+                    <td style="text-align:right;">{{ row.product.unit_price|floatformat:2 }}</td>
+                    <td style="text-align:right;">{{ row.revenue|floatformat:2 }}</td>
+                    <td style="text-align:right;">{{ row.total_cost|floatformat:2 }}</td>
+                    <td style="text-align:right;">{{ row.unit_cost|floatformat:2 }}</td>
+                    <td style="text-align:right;" class="{% if row.profit >= 0 %}positive{% else %}negative{% endif %}">
+                        {{ row.profit|floatformat:2 }}
+                    </td>
+                    <td style="text-align:right;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">
+                        {{ row.profitability_rate|floatformat:2 }} %
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Détail par centre pour chaque produit -->
+<div class="card-custom">
+    <p class="section-title">Détail de l'imputation par centre</p>
+    {% for row in results.product_results %}
+    <div style="margin-bottom:1.25rem;">
+        <h3 style="font-size:1rem; margin:0 0 0.5rem; color:#0f766e;">{{ row.product.name }}</h3>
+        {% if row.center_detail %}
+        <div class="table-wrap" style="margin-top:0;">
+            <table class="summary">
+                <thead>
+                    <tr>
+                        <th>Centre</th>
+                        <th style="text-align:right;">UO consommées</th>
+                        <th style="text-align:right;">Taux de cession</th>
+                        <th style="text-align:right;">Coût imputé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in row.center_detail %}
+                    <tr>
+                        <td>{{ detail.center.name }}</td>
+                        <td style="text-align:right;">{{ detail.units_used|floatformat:2 }}</td>
+                        <td style="text-align:right;">{{ detail.taux|floatformat:4 }}</td>
+                        <td style="text-align:right;">{{ detail.cost|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">Total</td>
+                        <td style="text-align:right;">{{ row.total_cost|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:#6b7280; font-size:0.9rem;">Aucune unité d'œuvre saisie pour ce produit.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

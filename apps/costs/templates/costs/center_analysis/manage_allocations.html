@@ -1,0 +1,132 @@
+{% extends "costs/base.html" %}
+{% block content %}
+
+<style>
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+    .table-wrap {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        margin-top: 1rem;
+    }
+    table.summary {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        background: white;
+    }
+    table.summary th, table.summary td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+    }
+    table.summary thead { background: #f3f4f6; font-weight: 700; }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        background: #0f766e;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.7rem;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.88rem;
+        transition: 0.2s;
+    }
+    .btn-action:hover { opacity: 0.88; color: #fff; }
+    .btn-light { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    .btn-light:hover { color: #111827; }
+    .warning-box {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        color: #92400e;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+    }
+    .field-box label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    .errorlist { color: #991b1b; padding-left: 1rem; font-size: 0.85rem; }
+</style>
+
+<div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+    <div>
+        <h1 style="margin:0; font-size:1.4rem; color:#111827;">Répartitions — {{ center.name }}</h1>
+        <p style="margin:0.25rem 0 0; color:#6b7280;">Centre auxiliaire · {{ scenario.name }}</p>
+    </div>
+    <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action btn-light">← Retour aux centres</a>
+</div>
+
+<div class="card-custom">
+    <h2 style="margin:0 0 1rem; font-size:1.1rem;">Ajouter une répartition</h2>
+    <form method="post" style="display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap;">
+        {% csrf_token %}
+        <div class="field-box">
+            {{ form.to_center.label_tag }}
+            {{ form.to_center }}
+            {{ form.to_center.errors }}
+        </div>
+        <div class="field-box">
+            {{ form.percentage.label_tag }}
+            {{ form.percentage }}
+            {{ form.percentage.errors }}
+        </div>
+        <button type="submit" class="btn-action" style="margin-bottom:0.1rem;">Ajouter</button>
+    </form>
+
+    {% if total_pct > 100 %}
+    <div class="warning-box">⚠ Total actuel : {{ total_pct }}% — dépasse 100%, vérifiez vos répartitions.</div>
+    {% elif total_pct == 100 %}
+    <div style="background:#d1fae5; border:1px solid #6ee7b7; border-radius:10px; padding:0.7rem 1rem; color:#065f46; font-size:0.9rem; margin-top:0.75rem;">
+        ✓ Total : {{ total_pct }}% — répartition complète.
+    </div>
+    {% else %}
+    <div style="color:#6b7280; font-size:0.9rem; margin-top:0.75rem;">Total actuel : {{ total_pct }}% / 100%</div>
+    {% endif %}
+</div>
+
+<div class="card-custom">
+    <h2 style="margin:0 0 1rem; font-size:1.1rem;">Répartitions définies</h2>
+    {% if allocations %}
+    <div class="table-wrap">
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th>Vers le centre</th>
+                    <th>Pourcentage</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alloc in allocations %}
+                <tr>
+                    <td>{{ alloc.to_center.name }}</td>
+                    <td>{{ alloc.percentage }}%</td>
+                    <td>
+                        <form method="post" action="{% url 'delete_allocation' scenario.id alloc.id %}" style="display:inline;" onsubmit="return confirm('Supprimer cette répartition ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-light">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:#6b7280;">Aucune répartition définie.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
