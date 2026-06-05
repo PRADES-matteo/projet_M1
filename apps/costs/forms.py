@@ -183,6 +183,14 @@ class VariableCostForm(forms.ModelForm):
 
 
 class FixedCostForm(forms.ModelForm):
+    is_common = forms.TypedChoiceField(
+        label="Type",
+        choices=[("true", "Commune"), ("false", "Spécifique")],
+        coerce=lambda value: value == "true",
+        widget=forms.RadioSelect,
+        required=True,
+    )
+
     class Meta:
         model = FixedCost
         fields = ["name", "category", "amount", "is_common", "product"]
@@ -190,20 +198,33 @@ class FixedCostForm(forms.ModelForm):
             "name": "Nom",
             "category": "Catégorie",
             "amount": "Montant",
-            "is_common": "Commune",
             "product": "Produit",
         }
         help_texts = {
-            "is_common": "Décochez si ce coût est spécifique à un produit.",
-            "product": "Associez le coût fixe à un produit s'il est spécifique.",
+            "is_common": "Cochez pour une charge commune, décochez pour une charge spécifique.",
+            "product": "Associez le coût fixe à un produit uniquement s'il est spécifique.",
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.scenario = scenario
+        self.fields["is_common"].initial = "true" if getattr(self.instance, "is_common", True) else "false"
         for field_name, field in self.fields.items():
-            if isinstance(field.widget, forms.CheckboxInput):
+            if isinstance(field.widget, forms.RadioSelect):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs['class'] = 'form-check-input'
             elif isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = 'form-select'
             else:
                 field.widget.attrs['class'] = 'form-control'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_common = cleaned_data.get("is_common")
+        product = cleaned_data.get("product")
+
+        if not is_common and not product:
+            self.add_error("product", "Sélectionnez un produit pour une charge spécifique.")
+
+        return cleaned_data

@@ -495,7 +495,7 @@
           <th>Nom</th>
           <th>Catégorie</th>
           <th>Montant</th>
-          {% if scenario.method != 'direct_costing' %}
+          {% if scenario.method == 'direct_costing_advanced' %}
           <th>Commune / Spécifique</th>
           <th>Produit associé</th>
           {% endif %}
@@ -508,7 +508,7 @@
           <td>{{ cost.name }}</td>
           <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
-          {% if scenario.method != 'direct_costing' %}
+          {% if scenario.method == 'direct_costing_advanced' %}
           <td>{% if cost.is_common %}Commune{% else %}Spécifique{% endif %}</td>
           <td>{{ cost.product.name|default:"N/A" }}</td>
           {% endif %}
@@ -533,14 +533,14 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}6{% endif %}">Aucune charge fixe saisie.</td>
+          <td colspan="{% if scenario.method == 'direct_costing_advanced' %}6{% else %}4{% endif %}">Aucune charge fixe saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="2">Total</td>
-          <td colspan="{% if scenario.method == 'direct_costing' %}2{% else %}4{% endif %}">{{ fixed_costs_total|floatformat:2 }}</td>
+          <td colspan="{% if scenario.method == 'direct_costing_advanced' %}4{% else %}2{% endif %}">{{ fixed_costs_total|floatformat:2 }}</td>
         </tr>
       </tfoot>
     </table>
