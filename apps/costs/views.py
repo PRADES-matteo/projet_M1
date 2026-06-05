@@ -8,8 +8,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.db.models import Sum, Max
 import calendar
-from .forms import CostScenarioForm, ProductForm, CostLineForm, VariableCostForm, FixedCostForm
-from .models import CostScenario, Product, CostLine, VariableCost, FixedCost, CostCenter, SeasonalityEntry, ScenarioVersion
+from .forms import (
+    CostScenarioForm, ProductForm, CostLineForm, VariableCostForm, FixedCostForm,
+    CostCenterForm, CostCenterAllocationForm, ProductCenterUsageForm,
+)
+from .models import (
+    CostScenario, Product, CostLine, VariableCost, FixedCost,
+    CostCenter, CostCenterAllocation, ProductCenterUsage,
+    SeasonalityEntry, ScenarioVersion,
+)
 from .services.direct_costing import calculate_direct_costing
 from .services.center_analysis import calculate_center_analysis
 from django.contrib.auth import login
@@ -36,12 +43,10 @@ def build_automatic_results(scenario):
     for product in products:
         total_revenue += _decimal(product.total_revenue)
         total_production_volume += product.production_volume
-
     # Calculer les coûts variables associés à la production
     # On fait l'hypothèse que les coûts variables fournis sont pour la production nécessaire
     for cost in variable_costs:
         total_variable_costs_production += _decimal(cost.amount)
-
     # Coûts fixes totaux
     for cost in fixed_costs:
         total_fixed_costs += _decimal(cost.amount)
@@ -64,7 +69,6 @@ def build_automatic_results(scenario):
     mcv = total_revenue - total_variable_costs_production # A adapter si les CV sont par produit vendu
     taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
     seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
-    # Round threshold up to cents to avoid long fractional values
     if seuil_rentabilite and seuil_rentabilite != Decimal("0.00"):
         try:
             seuil_rentabilite = seuil_rentabilite.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
@@ -72,12 +76,10 @@ def build_automatic_results(scenario):
             from math import ceil
             seuil_rentabilite = Decimal(str(ceil(float(seuil_rentabilite) * 100) / 100.0))
     point_mort = ((seuil_rentabilite / total_revenue) * Decimal("365.00")) if total_revenue and seuil_rentabilite else Decimal("0.00")
-    # Round up to the next whole day to avoid long fractional day numbers
     if point_mort and point_mort != Decimal("0.00"):
         try:
             point_mort = point_mort.quantize(Decimal("1"), rounding=ROUND_CEILING)
         except Exception:
-            # Fallback: cast to int ceiling
             from math import ceil
             point_mort = Decimal(str(ceil(float(point_mort))))
     marge_securite = total_revenue - seuil_rentabilite
@@ -85,16 +87,14 @@ def build_automatic_results(scenario):
     resultat = gross_margin # Le résultat est maintenant basé sur la marge brute
     levier_operationnel = (mcv / resultat) if resultat else Decimal("0.00")
 
-
     return {
         "total_revenue": total_revenue,
         "total_variable_costs": total_variable_costs_production,
         "total_fixed_costs": total_fixed_costs,
-        "total_production_cost": total_production_cost,
-        "cump": cump,
-        "cost_of_goods_sold": cost_of_goods_sold,
-        "gross_margin": gross_margin,
-        "mcv": mcv, # Maintenu pour info, mais la marge brute est plus pertinente
+        "commercial_mode": scenario.preset == "commercial",
+        "services_mode": scenario.preset == "services",
+        "fixed_specific_costs": fixed_specific_costs,
+        "mcv": mcv,
         "taux_marge": taux_marge,
         "seuil_rentabilite": seuil_rentabilite,
         "point_mort": point_mort,
@@ -124,6 +124,8 @@ def _serialize_scenario_snapshot(scenario):
                 "code": center.code,
                 "name": center.name,
                 "is_auxiliary": center.is_auxiliary,
+                "unit_of_work": center.unit_of_work,
+                "total_units": str(center.total_units),
             }
             for center in scenario.cost_centers.all()
         ],
@@ -179,10 +181,7 @@ def _serialize_scenario_snapshot(scenario):
 @transaction.atomic
 def _restore_scenario_from_snapshot(scenario, snapshot):
     scenario_data = snapshot.get("scenario", {})
-    for field in [
-        "name", "period", "description", "method", "input_mode",
-        "preset", "use_reciprocal_allocation", "use_seasonality",
-    ]:
+    for field in ["name", "period", "description", "method", "input_mode", "preset", "use_reciprocal_allocation", "use_seasonality"]:
         if field in scenario_data:
             setattr(scenario, field, scenario_data[field])
     scenario.save()
@@ -201,6 +200,8 @@ def _restore_scenario_from_snapshot(scenario, snapshot):
             code=center_data.get("code", ""),
             name=center_data.get("name", ""),
             is_auxiliary=center_data.get("is_auxiliary", False),
+            unit_of_work=center_data.get("unit_of_work", ""),
+            total_units=center_data.get("total_units", "0"),
         )
         center_id_map[center_data.get("id")] = new_center
 
@@ -258,32 +259,22 @@ def scenario_list(request):
         form = CostScenarioForm(request.POST)
         if form.is_valid():
             scenario = form.save(commit=False)
-            scenario.user = request.user  # ← associe l'utilisateur
+            scenario.user = request.user
             scenario.save()
             return redirect("scenario-detail", pk=scenario.pk)
     else:
         form = CostScenarioForm()
 
     scenarios = CostScenario.objects.filter(user=request.user).order_by("-created_at")
-
-    return render(
-        request,
-        "costs/scenario_list.html",
-        {
-            "scenarios": scenarios,
-            "form": form
-        }
-    )
+    return render(request, "costs/scenario_list.html", {"scenarios": scenarios, "form": form})
 
 
 @login_required
 def scenario_detail(request, pk):
     scenario = get_object_or_404(
         CostScenario.objects.prefetch_related("products", "cost_lines", "cost_lines__center"),
-        pk=pk,
-        user=request.user  # ← sécurise l'accès
+        pk=pk, user=request.user,
     )
-    cost_lines = scenario.cost_lines.all()
 
     summary_rows = []
     total_revenue = Decimal("0.00")
@@ -291,8 +282,8 @@ def scenario_detail(request, pk):
     total_fixed = Decimal("0.00")
     total_units = Decimal("0.00")
 
-    variable_costs_total = scenario.variable_costs.aggregate(total=Sum('amount'))['total'] or 0
-    fixed_costs_total = scenario.fixed_costs.aggregate(total=Sum('amount'))['total'] or 0
+    variable_costs_total = scenario.variable_costs.aggregate(total=Sum("amount"))["total"] or 0
+    fixed_costs_total = scenario.fixed_costs.aggregate(total=Sum("amount"))["total"] or 0
 
     for product in scenario.products.all():
         quantity = Decimal(product.quantity)
@@ -328,22 +319,16 @@ def scenario_detail(request, pk):
         total_fixed += fixed
         total_units += quantity
 
-    total_contribution = total_revenue - total_variable
-    total_result = total_contribution - total_fixed
-
-    # Calculate CMP (Coût Moyen Pondéré) per unit: variable unit cost + fixed allocation per unit
     fixed_per_unit = (total_fixed / total_units) if total_units else Decimal("0.00")
     for row in summary_rows:
-        row_cmp = row.get('variable_unit_cost', Decimal('0.00')) + fixed_per_unit
-        row['cmp'] = row_cmp
-        # For commercial template: marge unitaire = prix de vente - cmp
+        row_cmp = row.get("variable_unit_cost", Decimal("0.00")) + fixed_per_unit
+        row["cmp"] = row_cmp
         try:
-            row['unit_margin'] = (row.get('unit_price', Decimal('0.00')) - row_cmp)
+            row["unit_margin"] = row.get("unit_price", Decimal("0.00")) - row_cmp
         except Exception:
-            row['unit_margin'] = Decimal('0.00')
-    total_cmp = (total_variable + total_fixed) / total_units if total_units else Decimal('0.00')
+            row["unit_margin"] = Decimal("0.00")
+    total_cmp = (total_variable + total_fixed) / total_units if total_units else Decimal("0.00")
 
-    from .models import SeasonalityEntry
     existing = {e.month: e for e in scenario.seasonality.all()}
     seasonality_list = []
     for m in range(1, 13):
@@ -351,75 +336,83 @@ def scenario_detail(request, pk):
             entry = existing[m]
         else:
             entry = SeasonalityEntry.objects.create(scenario=scenario, month=m, percentage=0)
-        est_rev = (total_revenue * (entry.percentage / Decimal('100.0'))).quantize(Decimal('0.01'))
+        est_rev = (total_revenue * (entry.percentage / Decimal("100.0"))).quantize(Decimal("0.01"))
         seasonality_list.append({
-            'month': m,
-            'month_name': calendar.month_name[m],
-            'percentage': entry.percentage,
-            'estimated_revenue': est_rev,
+            "month": m,
+            "month_name": calendar.month_name[m],
+            "percentage": entry.percentage,
+            "estimated_revenue": est_rev,
         })
 
-    seasonality_labels = [item['month_name'] for item in seasonality_list]
-    seasonality_values = [float(item['percentage']) for item in seasonality_list]
+    seasonality_labels = [item["month_name"] for item in seasonality_list]
+    seasonality_values = [float(item["percentage"]) for item in seasonality_list]
 
-    # Compute automatic summary results (seuil_rentabilite, point_mort, ...)
     automatic_results = build_automatic_results(scenario)
-    seuil = automatic_results.get('seuil_rentabilite') or Decimal('0.00')
+    seuil = automatic_results.get("seuil_rentabilite") or Decimal("0.00")
 
-    # Mark the month where cumulative estimated revenue reaches the break-even threshold
-    cumulative = Decimal('0.00')
+    cumulative = Decimal("0.00")
     break_even_marked = False
     for item in seasonality_list:
-        cumulative += Decimal(str(item.get('estimated_revenue') or 0))
-        item['cumulative_revenue'] = cumulative
+        cumulative += Decimal(str(item.get("estimated_revenue") or 0))
+        item["cumulative_revenue"] = cumulative
         if not break_even_marked and seuil and cumulative >= seuil:
-            item['is_break_even_month'] = True
+            item["is_break_even_month"] = True
             break_even_marked = True
         else:
-            item['is_break_even_month'] = False
+            item["is_break_even_month"] = False
+
+    # Données pour la méthode des centres d'analyse
+    centers = scenario.cost_centers.all()
+    center_analysis_results = None
+    if scenario.method == "center_analysis" and centers.exists():
+        from .services.center_analysis_full import calculate_center_analysis_full
+        center_analysis_results = calculate_center_analysis_full(scenario)
 
     context = {
-        'scenario': scenario,
-        'scenario_versions': scenario.versions.all(),
-        'all_scenarios': CostScenario.objects.filter(user=request.user).order_by('name'),  # ← filtré
-        'current_scenario': scenario,
-        'variable_costs_total': variable_costs_total,
-        'fixed_costs_total': fixed_costs_total,
-        'summary_rows': summary_rows,
-        'summary_totals': {
-            'revenue': total_revenue,
-            'variable': total_variable,
-            'contribution': total_revenue - total_variable,
-            'fixed': total_fixed,
+        "scenario": scenario,
+        "scenario_versions": scenario.versions.all(),
+        "all_scenarios": CostScenario.objects.filter(user=request.user).order_by("name"),
+        "current_scenario": scenario,
+        "variable_costs_total": variable_costs_total,
+        "fixed_costs_total": fixed_costs_total,
+        "summary_rows": summary_rows,
+        "summary_totals": {
+            "revenue": total_revenue,
+            "variable": total_variable,
+            "contribution": total_revenue - total_variable,
+            "fixed": total_fixed,
         },
-        'seasonality_list': seasonality_list,
-        'seasonality_labels': seasonality_labels,
-        'seasonality_values': seasonality_values,
-        'total_revenue': total_revenue,
-        'total_cmp': total_cmp,
-        'automatic_results': automatic_results,
-        'commercial_mode': scenario.preset == 'commercial',
+        "seasonality_list": seasonality_list,
+        "seasonality_labels": seasonality_labels,
+        "seasonality_values": seasonality_values,
+        "total_revenue": total_revenue,
+        "total_cmp": total_cmp,
+        "automatic_results": automatic_results,
+        "commercial_mode": scenario.preset == "commercial",
+        # Centres d'analyse
+        "centers": centers,
+        "center_analysis_results": center_analysis_results,
     }
-    return render(request, 'costs/scenario_detail.html', context)
+    return render(request, "costs/scenario_detail.html", context)
 
 
 @login_required
 def edit_seasonality(request, scenario_id):
     scenario = get_object_or_404(CostScenario, pk=scenario_id, user=request.user)
-    if request.method == 'POST':
+    if request.method == "POST":
         for m in range(1, 13):
-            key = f'month_{m}'
-            val = request.POST.get(key, '0')
+            key = f"month_{m}"
+            val = request.POST.get(key, "0")
             try:
                 pct = Decimal(val)
             except Exception:
-                pct = Decimal('0')
+                pct = Decimal("0")
             entry, _ = SeasonalityEntry.objects.get_or_create(scenario=scenario, month=m)
             entry.percentage = pct
             entry.save()
-        messages.success(request, 'Saisonnalité mise à jour.')
-        return redirect('scenario-detail', pk=scenario_id)
-    return redirect('scenario-detail', pk=scenario_id)
+        messages.success(request, "Saisonnalité mise à jour.")
+        return redirect("scenario-detail", pk=scenario_id)
+    return redirect("scenario-detail", pk=scenario_id)
 
 
 @login_required
@@ -427,9 +420,9 @@ def save_scenario(request, pk):
     scenario = get_object_or_404(CostScenario, pk=pk, user=request.user)
     if request.method == "POST":
         snapshot = _serialize_scenario_snapshot(scenario)
-        max_version = scenario.versions.aggregate(max_num=Max('version_number'))['max_num'] or 0
+        max_version = scenario.versions.aggregate(max_num=Max("version_number"))["max_num"] or 0
         next_version = max_version + 1
-        label = request.POST.get('version_label', '').strip()
+        label = request.POST.get("version_label", "").strip()
         ScenarioVersion.objects.create(
             scenario=scenario,
             version_number=next_version,
@@ -445,24 +438,20 @@ def save_scenario(request, pk):
 def restore_scenario_version(request, pk, version_id):
     scenario = get_object_or_404(CostScenario, pk=pk, user=request.user)
     version = get_object_or_404(ScenarioVersion, pk=version_id, scenario=scenario)
-
     if request.method == "POST":
         _restore_scenario_from_snapshot(scenario, version.snapshot)
         messages.success(request, f"Scénario restauré depuis la version v{version.version_number}.")
-
     return redirect("scenario-detail", pk=pk)
 
 
 @login_required
 def compare_scenarios(request):
-    scenarios = CostScenario.objects.filter(user=request.user).order_by('name')
-    scenario_a_id = request.GET.get('scenario_a')
-    scenario_b_id = request.GET.get('scenario_b')
+    scenarios = CostScenario.objects.filter(user=request.user).order_by("name")
+    scenario_a_id = request.GET.get("scenario_a")
+    scenario_b_id = request.GET.get("scenario_b")
     scenario_a = None
     scenario_b = None
     comparison = None
-
-    # Provide a list for the second dropdown that excludes scenario_a when present
     scenarios_b = scenarios
     if scenario_a_id:
         scenarios_b = scenarios.exclude(pk=scenario_a_id)
@@ -472,63 +461,23 @@ def compare_scenarios(request):
         scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id, user=request.user)
         auto_a = build_automatic_results(scenario_a)
         auto_b = build_automatic_results(scenario_b)
-
         comparison = [
-            {
-                "label": "Chiffre d'affaires",
-                "value_a": auto_a["total_revenue"],
-                "value_b": auto_b["total_revenue"],
-                "delta": auto_a["total_revenue"] - auto_b["total_revenue"],
-            },
-            {
-                "label": "Charges variables",
-                "value_a": auto_a["total_variable_costs"],
-                "value_b": auto_b["total_variable_costs"],
-                "delta": auto_a["total_variable_costs"] - auto_b["total_variable_costs"],
-            },
-            {
-                "label": "Charges fixes",
-                "value_a": auto_a["total_fixed_costs"],
-                "value_b": auto_b["total_fixed_costs"],
-                "delta": auto_a["total_fixed_costs"] - auto_b["total_fixed_costs"],
-            },
-            {
-                "label": "MCV",
-                "value_a": auto_a["mcv"],
-                "value_b": auto_b["mcv"],
-                "delta": auto_a["mcv"] - auto_b["mcv"],
-            },
-            {
-                "label": "Taux de marge (%)",
-                "value_a": auto_a["taux_marge"],
-                "value_b": auto_b["taux_marge"],
-                "delta": auto_a["taux_marge"] - auto_b["taux_marge"],
-            },
-            {
-                "label": "Seuil de rentabilité",
-                "value_a": auto_a["seuil_rentabilite"],
-                "value_b": auto_b["seuil_rentabilite"],
-                "delta": auto_a["seuil_rentabilite"] - auto_b["seuil_rentabilite"],
-            },
-            {
-                "label": "Résultat",
-                "value_a": auto_a["resultat"],
-                "value_b": auto_b["resultat"],
-                "delta": auto_a["resultat"] - auto_b["resultat"],
-            },
+            {"label": "Chiffre d'affaires", "value_a": auto_a["total_revenue"], "value_b": auto_b["total_revenue"], "delta": auto_a["total_revenue"] - auto_b["total_revenue"]},
+            {"label": "Charges variables", "value_a": auto_a["total_variable_costs"], "value_b": auto_b["total_variable_costs"], "delta": auto_a["total_variable_costs"] - auto_b["total_variable_costs"]},
+            {"label": "Charges fixes", "value_a": auto_a["total_fixed_costs"], "value_b": auto_b["total_fixed_costs"], "delta": auto_a["total_fixed_costs"] - auto_b["total_fixed_costs"]},
+            {"label": "MCV", "value_a": auto_a["mcv"], "value_b": auto_b["mcv"], "delta": auto_a["mcv"] - auto_b["mcv"]},
+            {"label": "Taux de marge (%)", "value_a": auto_a["taux_marge"], "value_b": auto_b["taux_marge"], "delta": auto_a["taux_marge"] - auto_b["taux_marge"]},
+            {"label": "Seuil de rentabilité", "value_a": auto_a["seuil_rentabilite"], "value_b": auto_b["seuil_rentabilite"], "delta": auto_a["seuil_rentabilite"] - auto_b["seuil_rentabilite"]},
+            {"label": "Résultat", "value_a": auto_a["resultat"], "value_b": auto_b["resultat"], "delta": auto_a["resultat"] - auto_b["resultat"]},
         ]
 
-    return render(
-        request,
-        "costs/scenario_compare.html",
-        {
-            "scenarios": scenarios,
-            "scenarios_b": scenarios_b,
-            "scenario_a": scenario_a,
-            "scenario_b": scenario_b,
-            "comparison": comparison,
-        },
-    )
+    return render(request, "costs/scenario_compare.html", {
+        "scenarios": scenarios,
+        "scenarios_b": scenarios_b,
+        "scenario_a": scenario_a,
+        "scenario_b": scenario_b,
+        "comparison": comparison,
+    })
 
 
 @login_required
@@ -536,12 +485,10 @@ def compare_scenarios(request):
 def duplicate_scenario(request, pk):
     source = get_object_or_404(
         CostScenario.objects.prefetch_related("products", "cost_centers", "cost_lines"),
-        pk=pk,
-        user=request.user  # ← sécurise l'accès
+        pk=pk, user=request.user,
     )
-
     cloned = CostScenario.objects.create(
-        user=request.user,  # ← associe l'utilisateur
+        user=request.user,
         name=f"{source.name} (copie)",
         period=source.period,
         description=source.description,
@@ -554,11 +501,13 @@ def duplicate_scenario(request, pk):
 
     center_map = {}
     for center in source.cost_centers.all():
-        new_center = center.__class__.objects.create(
+        new_center = CostCenter.objects.create(
             scenario=cloned,
             code=center.code,
             name=center.name,
             is_auxiliary=center.is_auxiliary,
+            unit_of_work=center.unit_of_work,
+            total_units=center.total_units,
         )
         center_map[center.id] = new_center
 
@@ -589,17 +538,13 @@ def duplicate_scenario(request, pk):
 
 @login_required
 def create_scenario(request):
-    print("Requête POST reçue")
     if request.method == "POST":
-        print(request.POST)
         form = CostScenarioForm(request.POST)
         if form.is_valid():
             scenario = form.save(commit=False)
             scenario.user = request.user
             scenario.save()
             return redirect("scenario-detail", pk=scenario.id)
-        else:
-            print(form.errors)
     else:
         form = CostScenarioForm()
     return render(request, "costs/create_scenario.html", {"form": form})
@@ -607,12 +552,12 @@ def create_scenario(request):
 
 @login_required
 def delete_scenario(request, pk):
-    scenario = get_object_or_404(CostScenario, pk=pk)
+    scenario = get_object_or_404(CostScenario, pk=pk, user=request.user)
     if request.method == "POST":
         scenario.delete()
-        messages.success(request, f"Le scénario '{scenario.name}' a été supprimé avec succès.")
-        return redirect('scenario-list')
-    return redirect('scenario-list')
+        messages.success(request, f"Le scénario '{scenario.name}' a été supprimé.")
+        return redirect("scenario-list")
+    return redirect("scenario-list")
 
 
 @login_required
@@ -624,7 +569,7 @@ def add_product(request, scenario_id):
             product = form.save(commit=False)
             product.scenario = scenario
             product.save()
-            messages.success(request, f'Le produit « {product.name} » a été ajouté avec succès.')
+            messages.success(request, f"Le produit « {product.name} » a été ajouté.")
             return redirect("scenario-detail", pk=scenario.id)
     else:
         form = ProductForm(scenario=scenario)
@@ -635,16 +580,14 @@ def add_product(request, scenario_id):
 def edit_product(request, scenario_id, product_id):
     scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     product = get_object_or_404(Product, id=product_id, scenario=scenario)
-
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product, scenario=scenario)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Le produit « {product.name} » a été modifié.')
+            messages.success(request, f"Le produit « {product.name} » a été modifié.")
             return redirect("scenario-detail", pk=scenario.id)
     else:
         form = ProductForm(instance=product, scenario=scenario)
-
     return render(request, "costs/edit_product.html", {"form": form, "scenario": scenario, "product": product})
 
 
@@ -652,12 +595,10 @@ def edit_product(request, scenario_id, product_id):
 def delete_product(request, scenario_id, product_id):
     scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     product = get_object_or_404(Product, id=product_id, scenario=scenario)
-
     if request.method == "POST":
         product_name = product.name
         product.delete()
-        messages.success(request, f'Le produit « {product_name} » a été supprimé.')
-
+        messages.success(request, f"Le produit « {product_name} » a été supprimé.")
     return redirect("scenario-detail", pk=scenario.id)
 
 
@@ -691,13 +632,12 @@ def calculate_results(request, scenario_id):
     industrial_mode = scenario.preset == "industriel"
     total_units = _decimal(scenario.products.aggregate(total_units=Sum("quantity"))["total_units"])
     total_cmp = (automatic_results["total_variable_costs"] + automatic_results["total_fixed_costs"]) / total_units if total_units else Decimal("0.00")
-    services_mode = scenario.preset == 'services'
+    services_mode = scenario.preset == "services"
 
     seasonality_list = []
     seasonality_labels = []
     stock_evolution_values = []
     if industrial_mode:
-        from .models import SeasonalityEntry
         existing = {entry.month: entry for entry in scenario.seasonality.all()}
         cumulative_share = Decimal("0.00")
         for month in range(1, 13):
@@ -707,101 +647,286 @@ def calculate_results(request, scenario_id):
             percentage = _decimal(entry.percentage)
             cumulative_share += percentage
             remaining_stock_index = max(Decimal("0.00"), Decimal("100.00") - cumulative_share)
-            seasonality_list.append(
-                {
-                    "month": month,
-                    "month_name": calendar.month_name[month],
-                    "percentage": percentage,
-                    "remaining_stock_index": remaining_stock_index,
-                }
-            )
+            seasonality_list.append({
+                "month": month,
+                "month_name": calendar.month_name[month],
+                "percentage": percentage,
+                "remaining_stock_index": remaining_stock_index,
+            })
             seasonality_labels.append(calendar.month_name[month])
             stock_evolution_values.append(float(remaining_stock_index))
 
-    return render(
-        request,
-        "costs/results.html",
-        {
-            "scenario": scenario,
-            "result": result,
-            "automatic_results": automatic_results,
-            "total_cmp": total_cmp,
-            "industrial_mode": industrial_mode,
-            "services_mode": services_mode,
-            "seasonality_list": seasonality_list,
-            "seasonality_labels": seasonality_labels,
-            "stock_evolution_values": stock_evolution_values,
-                "commercial_mode": scenario.preset == 'commercial',
-        },
-    )
+    return render(request, "costs/results.html", {
+        "scenario": scenario,
+        "result": result,
+        "automatic_results": automatic_results,
+        "total_cmp": total_cmp,
+        "industrial_mode": industrial_mode,
+        "services_mode": services_mode,
+        "seasonality_list": seasonality_list,
+        "seasonality_labels": seasonality_labels,
+        "stock_evolution_values": stock_evolution_values,
+        "commercial_mode": scenario.preset == "commercial",
+    })
 
+
+# ============================================================
+# CENTRES D'ANALYSE
+# ============================================================
+
+@login_required
+def manage_cost_centers(request, scenario_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    centers = scenario.cost_centers.all()
+
+    if request.method == "POST":
+        form = CostCenterForm(request.POST)
+        if form.is_valid():
+            center = form.save(commit=False)
+            center.scenario = scenario
+            center.save()
+            messages.success(request, f"Centre '{center.name}' ajouté.")
+            return redirect("manage_cost_centers", scenario_id=scenario_id)
+    else:
+        form = CostCenterForm()
+
+    return render(request, "costs/center_analysis/manage_centers.html", {
+        "scenario": scenario,
+        "centers": centers,
+        "form": form,
+    })
+
+
+@login_required
+def edit_cost_center(request, scenario_id, center_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    center = get_object_or_404(CostCenter, id=center_id, scenario=scenario)
+
+    if request.method == "POST":
+        form = CostCenterForm(request.POST, instance=center)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Centre '{center.name}' modifié.")
+            return redirect("manage_cost_centers", scenario_id=scenario_id)
+    else:
+        form = CostCenterForm(instance=center)
+
+    return render(request, "costs/center_analysis/edit_center.html", {
+        "scenario": scenario,
+        "center": center,
+        "form": form,
+    })
+
+
+@login_required
+def delete_cost_center(request, scenario_id, center_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    center = get_object_or_404(CostCenter, id=center_id, scenario=scenario)
+    if request.method == "POST":
+        center.delete()
+        messages.success(request, "Centre supprimé.")
+    return redirect("manage_cost_centers", scenario_id=scenario_id)
+
+
+@login_required
+def manage_allocations(request, scenario_id, center_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    center = get_object_or_404(CostCenter, id=center_id, scenario=scenario)
+    allocations = center.allocations_out.select_related("to_center").all()
+
+    if request.method == "POST":
+        form = CostCenterAllocationForm(request.POST, scenario=scenario, from_center=center)
+        if form.is_valid():
+            alloc = form.save(commit=False)
+            alloc.scenario = scenario
+            alloc.from_center = center
+            alloc.save()
+            messages.success(request, "Répartition ajoutée.")
+            return redirect("manage_allocations", scenario_id=scenario_id, center_id=center_id)
+    else:
+        form = CostCenterAllocationForm(scenario=scenario, from_center=center)
+
+    total_pct = sum(a.percentage for a in allocations)
+
+    return render(request, "costs/center_analysis/manage_allocations.html", {
+        "scenario": scenario,
+        "center": center,
+        "allocations": allocations,
+        "total_pct": total_pct,
+        "form": form,
+    })
+
+
+@login_required
+def delete_allocation(request, scenario_id, allocation_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    allocation = get_object_or_404(CostCenterAllocation, id=allocation_id, scenario=scenario)
+    if request.method == "POST":
+        center_id = allocation.from_center_id
+        allocation.delete()
+        messages.success(request, "Répartition supprimée.")
+        return redirect("manage_allocations", scenario_id=scenario_id, center_id=center_id)
+    return redirect("manage_cost_centers", scenario_id=scenario_id)
+
+
+@login_required
+def manage_center_charges(request, scenario_id, center_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    center = get_object_or_404(CostCenter, id=center_id, scenario=scenario)
+    cost_lines = center.cost_lines.all()
+
+    if request.method == "POST":
+        form = CostLineForm(request.POST, scenario=scenario)
+        if form.is_valid():
+            line = form.save(commit=False)
+            line.scenario = scenario
+            line.center = center
+            line.save()
+            messages.success(request, "Charge ajoutée.")
+            return redirect("manage_center_charges", scenario_id=scenario_id, center_id=center_id)
+    else:
+        form = CostLineForm(scenario=scenario)
+
+    total = sum(l.amount for l in cost_lines)
+
+    return render(request, "costs/center_analysis/manage_charges.html", {
+        "scenario": scenario,
+        "center": center,
+        "cost_lines": cost_lines,
+        "total": total,
+        "form": form,
+    })
+
+
+@login_required
+def delete_center_charge(request, scenario_id, center_id, line_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    line = get_object_or_404(CostLine, id=line_id, scenario=scenario)
+    if request.method == "POST":
+        line.delete()
+        messages.success(request, "Charge supprimée.")
+    return redirect("manage_center_charges", scenario_id=scenario_id, center_id=center_id)
+
+
+@login_required
+def manage_product_usages(request, scenario_id):
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    principal_centers = scenario.cost_centers.filter(is_auxiliary=False)
+    products = scenario.products.all()
+
+    if request.method == "POST":
+        for center in principal_centers:
+            for product in products:
+                key = f"usage_{center.id}_{product.id}"
+                value = request.POST.get(key, "0")
+                try:
+                    units = Decimal(value)
+                except Exception:
+                    units = Decimal("0")
+                ProductCenterUsage.objects.update_or_create(
+                    product=product,
+                    center=center,
+                    defaults={"units_used": units},
+                )
+        messages.success(request, "Unités d'œuvre enregistrées.")
+        return redirect("manage_product_usages", scenario_id=scenario_id)
+
+    usages = {}
+    for product in products:
+        usages[product.id] = {}
+        for center in principal_centers:
+            usage = ProductCenterUsage.objects.filter(product=product, center=center).first()
+            usages[product.id][center.id] = usage.units_used if usage else Decimal("0")
+
+    return render(request, "costs/center_analysis/manage_usages.html", {
+        "scenario": scenario,
+        "principal_centers": principal_centers,
+        "products": products,
+        "usages": usages,
+    })
+
+
+@login_required
+def center_analysis_results(request, scenario_id):
+    from .services.center_analysis_full import calculate_center_analysis_full
+    scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
+    results = calculate_center_analysis_full(scenario)
+    return render(request, "costs/center_analysis/results.html", {
+        "scenario": scenario,
+        "results": results,
+    })
+
+
+# ============================================================
+# CLASS-BASED VIEWS
+# ============================================================
 
 class VariableCostCreateView(CreateView):
     model = VariableCost
     form_class = VariableCostForm
-    template_name = 'costs/variable_cost_form.html'
+    template_name = "costs/variable_cost_form.html"
 
     def form_valid(self, form):
-        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs['scenario_id'], user=self.request.user)
+        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs["scenario_id"], user=self.request.user)
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 class VariableCostUpdateView(UpdateView):
     model = VariableCost
     form_class = VariableCostForm
-    template_name = 'costs/variable_cost_form.html'
+    template_name = "costs/variable_cost_form.html"
 
     def form_valid(self, form):
         form.instance.scenario = self.object.scenario
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 class VariableCostDeleteView(DeleteView):
     model = VariableCost
-    template_name = 'costs/variable_cost_confirm_delete.html'
+    template_name = "costs/variable_cost_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 class FixedCostCreateView(CreateView):
     model = FixedCost
     form_class = FixedCostForm
-    template_name = 'costs/fixed_cost_form.html'
+    template_name = "costs/fixed_cost_form.html"
 
     def form_valid(self, form):
-        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs['scenario_id'], user=self.request.user)
+        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs["scenario_id"], user=self.request.user)
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 class FixedCostUpdateView(UpdateView):
     model = FixedCost
     form_class = FixedCostForm
-    template_name = 'costs/fixed_cost_form.html'
+    template_name = "costs/fixed_cost_form.html"
 
     def form_valid(self, form):
         form.instance.scenario = self.object.scenario
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 class FixedCostDeleteView(DeleteView):
     model = FixedCost
-    template_name = 'costs/fixed_cost_confirm_delete.html'
+    template_name = "costs/fixed_cost_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse('scenario-detail', kwargs={'pk': self.object.scenario.pk})
+        return reverse("scenario-detail", kwargs={"pk": self.object.scenario.pk})
 
 
 def register(request):

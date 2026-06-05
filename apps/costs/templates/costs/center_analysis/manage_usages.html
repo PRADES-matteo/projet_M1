@@ -1,0 +1,129 @@
+{% extends "costs/base.html" %}
+{% load dict_filters %}
+{% block content %}
+
+<style>
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .table-wrap {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        margin-top: 1rem;
+    }
+    table.usages {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        background: white;
+    }
+    table.usages th, table.usages td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+    }
+    table.usages thead { background: #f3f4f6; font-weight: 700; }
+    table.usages input[type=number] {
+        width: 90px;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-align: right;
+    }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        background: #0f766e;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.7rem;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.88rem;
+        transition: 0.2s;
+    }
+    .btn-action:hover { opacity: 0.88; color: #fff; }
+    .btn-light { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    .btn-light:hover { color: #111827; }
+    .hint {
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        color: #134e4a;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+    <div>
+        <h1 style="margin:0; font-size:1.4rem; color:#111827;">Unités d'œuvre par produit</h1>
+        <p style="margin:0.25rem 0 0; color:#6b7280;">{{ scenario.name }}</p>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action btn-light">← Centres</a>
+        <a href="{% url 'center_analysis_results' scenario.id %}" class="btn-action" style="background:#7c3aed;">Résultats</a>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="hint">
+        Saisissez le nombre d'unités d'œuvre consommées par chaque produit dans chaque centre principal.
+    </div>
+
+    {% if principal_centers and products %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-wrap">
+            <table class="usages">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        {% for center in principal_centers %}
+                        <th>
+                            {{ center.name }}
+                            {% if center.unit_of_work %}
+                            <br><small style="font-weight:400; color:#6b7280;">{{ center.unit_of_work }}</small>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td style="font-weight:600;">{{ product.name }}</td>
+                        {% for center in principal_centers %}
+                        <td>
+                            <input
+                                type="number"
+                                name="usage_{{ center.id }}_{{ product.id }}"
+                                value="{{ usages|dict_get:product.id|dict_get:center.id|default:'0' }}"
+                                step="0.01"
+                                min="0"
+                            >
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top:1rem;">
+            <button type="submit" class="btn-action">Enregistrer</button>
+        </div>
+    </form>
+    {% elif not principal_centers %}
+    <p style="color:#6b7280;">Aucun centre principal défini. <a href="{% url 'manage_cost_centers' scenario.id %}">Créer des centres d'analyse</a></p>
+    {% elif not products %}
+    <p style="color:#6b7280;">Aucun produit défini pour ce scénario.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

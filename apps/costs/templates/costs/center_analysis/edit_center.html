@@ -1,0 +1,93 @@
+{% extends "costs/base.html" %}
+{% block content %}
+
+<style>
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        max-width: 700px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+        align-items: start;
+    }
+    .field-box label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    .field-box small {
+        display: block;
+        color: #6b7280;
+        margin-top: 0.2rem;
+        font-size: 0.8rem;
+    }
+    .errorlist { color: #991b1b; padding-left: 1rem; font-size: 0.85rem; }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        background: #0f766e;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.4rem 0.7rem;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.88rem;
+        transition: 0.2s;
+    }
+    .btn-action:hover { opacity: 0.88; color: #fff; }
+    .btn-light { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    .btn-light:hover { color: #111827; }
+</style>
+
+<div style="margin-bottom:1.5rem;">
+    <h1 style="margin:0; font-size:1.4rem; color:#111827;">Modifier le centre</h1>
+    <p style="margin:0.25rem 0 0; color:#6b7280;">{{ center.name }} — {{ scenario.name }}</p>
+</div>
+
+<div class="card-custom">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="field-box">
+                {{ form.code.label_tag }}
+                {{ form.code }}
+                {{ form.code.errors }}
+            </div>
+            <div class="field-box">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+            <div class="field-box">
+                {{ form.unit_of_work.label_tag }}
+                {{ form.unit_of_work }}
+                <small>{{ form.unit_of_work.help_text }}</small>
+                {{ form.unit_of_work.errors }}
+            </div>
+            <div class="field-box">
+                {{ form.total_units.label_tag }}
+                {{ form.total_units }}
+                {{ form.total_units.errors }}
+            </div>
+            <div class="field-box" style="display:flex; align-items:center; gap:0.5rem; padding-top:1.5rem;">
+                {{ form.is_auxiliary }}
+                <label for="{{ form.is_auxiliary.id_for_label }}" style="font-weight:600; margin:0;">
+                    {{ form.is_auxiliary.label }}
+                </label>
+            </div>
+        </div>
+        <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+            <button type="submit" class="btn-action">Enregistrer</button>
+            <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action btn-light">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

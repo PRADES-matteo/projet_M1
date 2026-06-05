@@ -196,11 +196,12 @@
 
         <div class="form-grid">
 
-            <div class="field-box">
-                {{ form.name.label_tag }}
-                {{ form.name }}
-                {% if form.name.errors %}<div class="errorlist" data-error-for="name">{{ form.name.errors }}</div>{% endif %}
-            </div>
+          <div class="field-box">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            <small id="name-counter" style="color:#6b7280; margin-top:0.2rem; display:block;">0 / 25</small>
+            {% if form.name.errors %}<div class="errorlist" data-error-for="name">{{ form.name.errors }}</div>{% endif %}
+        </div>
 
             <div class="field-box">
                 {{ form.method.label_tag }}
@@ -513,6 +514,18 @@
 
     wireDynamicErrors();
   })();
+</script>
+
+<script>
+  const nameInput = document.getElementById('id_name');
+  const counter = document.getElementById('name-counter');
+  if (nameInput && counter) {
+      nameInput.addEventListener('input', function () {
+          const len = this.value.length;
+          counter.textContent = `${len} / 25`;
+          counter.style.color = len >= 25 ? '#dc2626' : '#6b7280';
+      });
+  }
 </script>
 
 {% endblock %}
