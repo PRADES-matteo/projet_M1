@@ -595,7 +595,15 @@
             </td>
           </tr>
           {% endfor %}
-        </tbody
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total CA</td>
+            <td></td>
+            <td>{{ total_revenue|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
     <button class="btn-action" type="submit">
       Enregistrer la saisonnalité
