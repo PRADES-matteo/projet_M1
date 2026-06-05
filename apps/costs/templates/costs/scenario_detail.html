@@ -1,4 +1,6 @@
-{% extends "costs/base.html" %} {% block content %}
+{% extends "costs/base.html" %}
+
+{% block content %}
 <style>
   .topbar {
     background: #ffffff;
@@ -544,12 +546,8 @@
   <h2>Saisonnalité</h2>
   <div style="margin-bottom: 0.5rem">
     {% if automatic_results %}
-    <strong>Point mort (jours) :</strong> {{
-    automatic_results.point_mort|default:0 }}
-    <span style="color: #6b7280; margin-left: 0.6rem"
-      >Seuil à atteindre: {{
-      automatic_results.seuil_rentabilite|default:0|floatformat:2 }} €</span
-    >
+    <div><strong>Point mort (jours) :</strong> {{ automatic_results.point_mort|default:0|floatformat:0 }}</div>
+    <div style="color: #6b7280; margin-top: 0.25rem">Seuil à atteindre: {{ automatic_results.seuil_rentabilite|default:0|floatformat:2 }}&nbsp;€</div>
     {% endif %}
   </div>
   <form method="post" action="{% url 'edit_seasonality' scenario.id %}">
@@ -615,8 +613,12 @@
     <canvas id="seasonalityChart"></canvas>
   </div>
 
-  {{ seasonality_labels|json_script:"seasonality-labels-data" }} {{
-  seasonality_values|json_script:"seasonality-values-data" }}
+  {% if seasonality_labels %}
+  {{ seasonality_labels|json_script:"seasonality-labels-data" }}
+  {% endif %}
+  {% if seasonality_values %}
+  {{ seasonality_values|json_script:"seasonality-values-data" }}
+  {% endif %}
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
