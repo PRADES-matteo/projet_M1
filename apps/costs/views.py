@@ -98,6 +98,82 @@ def build_automatic_results(scenario):
     }
 
 
+def build_advanced_direct_costing_results(scenario):
+    products = list(scenario.products.all())
+    variable_costs = list(scenario.variable_costs.select_related("product"))
+    fixed_costs = list(scenario.fixed_costs.select_related("product"))
+
+    common_fixed_costs = Decimal("0.00")
+    common_fixed_cost_lines = []
+    fixed_costs_by_product = {product.id: Decimal("0.00") for product in products}
+    variable_costs_by_product = {product.id: Decimal("0.00") for product in products}
+
+    for cost in variable_costs:
+        if cost.product_id:
+            variable_costs_by_product[cost.product_id] = variable_costs_by_product.get(cost.product_id, Decimal("0.00")) + _decimal(cost.amount)
+
+    for cost in fixed_costs:
+        amount = _decimal(cost.amount)
+        if cost.is_common or not cost.product_id:
+            common_fixed_costs += amount
+            common_fixed_cost_lines.append(cost)
+        else:
+            fixed_costs_by_product[cost.product_id] = fixed_costs_by_product.get(cost.product_id, Decimal("0.00")) + amount
+
+    product_rows = []
+    total_revenue = Decimal("0.00")
+    total_variable_costs = Decimal("0.00")
+    total_mscv = Decimal("0.00")
+    total_specific_fixed_costs = Decimal("0.00")
+    total_marge_specifique = Decimal("0.00")
+
+    for product in products:
+        revenue = _decimal(product.total_revenue)
+        variable_cost = variable_costs_by_product.get(product.id, Decimal("0.00"))
+        fixed_specific_cost = fixed_costs_by_product.get(product.id, Decimal("0.00"))
+        mscv = revenue - variable_cost
+        marge_specifique = mscv - fixed_specific_cost
+
+        product_rows.append({
+            "product": product,
+            "revenue": revenue,
+            "variable_cost": variable_cost,
+            "mscv": mscv,
+            "fixed_specific_cost": fixed_specific_cost,
+            "marge_specifique": marge_specifique,
+        })
+
+        total_revenue += revenue
+        total_variable_costs += variable_cost
+        total_mscv += mscv
+        total_specific_fixed_costs += fixed_specific_cost
+        total_marge_specifique += marge_specifique
+
+    global_result = total_marge_specifique - common_fixed_costs
+    best_row = max(product_rows, key=lambda r: r["marge_specifique"]) if product_rows else None
+    worst_row = min(product_rows, key=lambda r: r["marge_specifique"]) if product_rows else None
+    main_row = max(product_rows, key=lambda r: r["mscv"]) if product_rows else None
+
+    return {
+        "product_rows": product_rows,
+        "common_fixed_cost_lines": common_fixed_cost_lines,
+        "common_fixed_costs": common_fixed_costs,
+        "total_revenue": total_revenue,
+        "total_variable_costs": total_variable_costs,
+        "total_mscv": total_mscv,
+        "total_specific_fixed_costs": total_specific_fixed_costs,
+        "total_marge_specifique": total_marge_specifique,
+        "global_result": global_result,
+        # Lecture métier
+        "best_product_name": best_row["product"].name if best_row else "—",
+        "best_product_marge": best_row["marge_specifique"] if best_row else Decimal("0"),
+        "worst_product_name": worst_row["product"].name if worst_row else "—",
+        "worst_product_marge": worst_row["marge_specifique"] if worst_row else Decimal("0"),
+        "main_contributor_name": main_row["product"].name if main_row else "—",
+        "main_contributor_pct": (main_row["mscv"] / total_mscv * Decimal("100")).quantize(Decimal("0.1")) if main_row and total_mscv else Decimal("0"),
+    }
+
+
 def _serialize_scenario_snapshot(scenario):
     return {
         "scenario": {
@@ -674,12 +750,15 @@ def add_cost_line(request, scenario_id, product_id):
 def calculate_results(request, scenario_id):
     scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     lines = scenario.cost_lines.all()
-    if scenario.method == "direct_costing":
+    if scenario.method in {"direct_costing", "direct_costing_advanced"}:
         result = calculate_direct_costing(lines)
     else:
         result = calculate_center_analysis(lines)
 
     automatic_results = build_automatic_results(scenario)
+    advanced_direct_costing = None
+    if scenario.method == "direct_costing_advanced":
+        advanced_direct_costing = build_advanced_direct_costing_results(scenario)
     industrial_mode = scenario.preset == "industriel"
     total_units = _decimal(scenario.products.aggregate(total_units=Sum("quantity"))["total_units"])
     total_cmp = (automatic_results["total_variable_costs"] + automatic_results["total_fixed_costs"]) / total_units if total_units else Decimal("0.00")
@@ -724,6 +803,7 @@ def calculate_results(request, scenario_id):
             "seasonality_labels": seasonality_labels,
             "stock_evolution_values": stock_evolution_values,
                 "commercial_mode": scenario.preset == 'commercial',
+            "advanced_direct_costing": advanced_direct_costing,
         },
     )
 

@@ -1,6 +1,4 @@
-{% extends "costs/base.html" %}
-
-{% block content %}
+{% extends "costs/base.html" %} {% block content %}
 <style>
   .topbar {
     background: #ffffff;
@@ -8,6 +6,8 @@
     border-radius: 14px;
     padding: 1rem;
     margin-bottom: 1rem;
+    display: grid;
+    gap: 0.8rem;
   }
   .topbar-head {
     display: flex;
@@ -112,89 +112,42 @@
     padding: 0.45rem 0.55rem;
     min-width: 200px;
   }
-  .industrial-callout {
-    background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
-    border: 1px solid #99f6e4;
-    border-radius: 14px;
-    padding: 1rem;
-    margin: 1rem 0;
+  .print-only {
+    display: none;
   }
-  .industrial-callout h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1rem;
-    color: #115e59;
-  }
-  .industrial-callout p {
-    margin: 0 0 0.75rem;
-    color: #134e4a;
-  }
-  .industrial-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .industrial-tag {
-    background: #ffffff;
-    border: 1px solid #5eead4;
-    color: #115e59;
-    border-radius: 999px;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.88rem;
-    font-weight: 600;
-  }
-  tr.industrial-highlight td {
-    background: #f0fdfa;
-  }
-  tr.industrial-highlight-cmp td {
-    background: #ccfbf1;
-    font-weight: 700;
-  }
-  /* Commercial (orange) identity */
-  .commercial-callout {
-    background: linear-gradient(135deg, #fff7ed 0%, #fffaf0 100%);
-    border: 1px solid #fb923c;
-    border-radius: 14px;
-    padding: 1rem;
-    margin: 1rem 0;
-  }
-  .commercial-callout h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1rem;
-    color: #b45309;
-  }
-  .commercial-callout p {
-    margin: 0 0 0.75rem;
-    color: #92400e;
-  }
-  .commercial-tag {
-    background: #ffffff;
-    border: 1px solid #fb923c;
-    color: #b45309;
-    border-radius: 999px;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.88rem;
-    font-weight: 700;
-  }
-  tr.commercial-highlight td {
-    background: #fff7ed;
-  }
-  tr.commercial-highlight-cmp td {
-    background: #ffedd5;
-    font-weight: 800;
-  }
-  tr.commercial-highlight-margin td {
-    background: #fff1e6;
-    font-weight: 700;
+  @media print {
+    body {
+      background: #fff !important;
+    }
+    .topbar,
+    .actions,
+    .section-card:not(.printable),
+    .inline-form,
+    button,
+    .btn-action,
+    .btn,
+    form,
+    a[href]:not(.print-link) {
+      display: none !important;
+    }
+    .section-card.printable {
+      display: block !important;
+      box-shadow: none !important;
+      border-color: #d1d5db !important;
+      margin-top: 0 !important;
+    }
+    .section-card.printable h2,
+    .section-card.printable h3,
+    .section-card.printable p,
+    .section-card.printable table {
+      color: #000 !important;
+    }
+    .print-only {
+      display: block !important;
+    }
   }
 </style>
 
-{% if messages %}
-<div class="messages">
-  {% for message in messages %}
-  <div class="message {{ message.tags }}">{{ message }}</div>
-  {% endfor %}
-</div>
-{% endif %}
 <section class="topbar">
   <div class="topbar-head">
     <div class="topbar-title">
@@ -236,37 +189,27 @@
   </div>
 </section>
 
-{% if description %}
+<div class="print-only section-card printable" style="margin-top: 0">
+  <h2>Export PDF - Synthèse du scénario</h2>
+  <p style="margin: 0.25rem 0 0">
+    Scénario: {{ scenario.name }} - Méthode: {{ scenario.get_method_display }}
+  </p>
+</div>
+
+{% if scenario.description %}
 <div class="section-card">
   <p style="margin-top: 0">{{ scenario.description }}</p>
 </div>
-{% endif %} {% if scenario.preset == "industriel" %}
-<div class="industrial-callout">
-  <h3>Template entreprise industrielle activé</h3>
-  <p>
-    Les indicateurs à surveiller en priorité sont mis en évidence ci-dessous :
-    quantité produite, quantité vendue, CMP et coût variable unitaire.
-  </p>
-</div>
-{% endif %}
-{% if scenario.preset == 'commercial' %}
-<div class="commercial-callout">
-  <h3>Template Entreprise commerciale activé</h3>
-  <p>
-    Les indicateurs clés pour le commerce : quantité vendue, prix d'achat,
-    prix de vente, CMP et marge unitaire sont mis en évidence ci-dessous.
-  </p>
-</div>
 {% endif %}
 
-<div class="section-card">
+<div class="section-card printable">
   <h2>Vision d'ensemble Direct Costing</h2>
   <div class="table-wrap">
     {% if summary_rows %}
     <table class="summary">
       <thead>
         <tr>
-          <th>Paramètre</th>
+          <th>Indicateur</th>
           {% for row in summary_rows %}
           <th>{{ row.product.name }}</th>
           {% endfor %}
@@ -274,52 +217,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
-        >
-          <td>
-            {% if scenario.preset == 'industriel' %}Quantité produite / vendue{% elif scenario.preset == 'commercial' %}Quantité vendue{% else %}Quantité{% endif %}
-          </td>
+        <tr>
+          <td>Quantité</td>
           {% for row in summary_rows %}
           <td>{{ row.quantity|floatformat:0 }}</td>
           {% endfor %}
           <td>-</td>
         </tr>
         <tr>
-          <td>{% if scenario.preset == 'commercial' %}Prix de vente{% else %}Prix unitaire{% endif %}</td>
+          <td>Prix unitaire</td>
           {% for row in summary_rows %}
           <td>{{ row.unit_price|floatformat:2 }}</td>
           {% endfor %}
           <td>-</td>
         </tr>
-        <tr
-          class="{% if scenario.preset == 'commercial' %}commercial-highlight{% elif scenario.preset == 'industriel' %}industrial-highlight{% endif %}"
-        >
-          <td>{% if scenario.preset == 'commercial' %}Prix d'achat{% else %}CV unitaire{% endif %}</td>
+        <tr>
+          <td>CV unitaire</td>
           {% for row in summary_rows %}
           <td>{{ row.variable_unit_cost|floatformat:2 }}</td>
           {% endfor %}
           <td>-</td>
         </tr>
-        <tr
-          class="{% if scenario.preset == 'commercial' %}commercial-highlight-cmp{% elif scenario.preset == 'industriel' %}industrial-highlight-cmp{% endif %}"
-        >
-          <td>CMP (Coût moyen pondéré)</td>
-          {% for row in summary_rows %}
-          <td>{{ row.cmp|floatformat:2 }}</td>
-          {% endfor %}
-          <td>{{ total_cmp|floatformat:2 }}</td>
-        </tr>
-        {% if scenario.preset == 'commercial' %}
-        <tr class="commercial-highlight-margin">
-          <td>Marge unitaire</td>
-          {% for row in summary_rows %}
-          <td>{{ row.unit_margin|floatformat:2 }}</td>
-          {% endfor %}
-          <td>-</td>
-        </tr>
-        {% endif %}
-        
         <tr>
           <td>Chiffre d'affaires</td>
           {% for row in summary_rows %}
@@ -371,10 +289,7 @@
         <tr>
           <th>Nom du produit</th>
           <th>Prix de vente unitaire</th>
-          <th>
-            {% if scenario.preset == 'industriel' %}Quantité produite / vendue
-            prévue{% else %}Quantité vendue prévue{% endif %}
-          </th>
+          <th>Quantité vendue prévue</th>
           <th>Chiffre d'affaires (auto)</th>
           <th>Actions</th>
         </tr>
@@ -433,9 +348,7 @@
           <th>Nom</th>
           <th>Catégorie</th>
           <th>Montant</th>
-          {% if scenario.method != 'direct_costing' %}
           <th>Produit associé</th>
-          {% endif %}
           <th>Actions</th>
         </tr>
       </thead>
@@ -445,9 +358,7 @@
           <td>{{ cost.name }}</td>
           <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
-          {% if scenario.method != 'direct_costing' %}
           <td>{{ cost.product.name|default:"N/A" }}</td>
-          {% endif %}
           <td>
             <a
               href="{% url 'edit_variable_cost' cost.id %}"
@@ -469,7 +380,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}5{% endif %}">Aucune charge variable saisie.</td>
+          <td colspan="5">Aucune charge variable saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -495,10 +406,8 @@
           <th>Nom</th>
           <th>Catégorie</th>
           <th>Montant</th>
-          {% if scenario.method == 'direct_costing_advanced' %}
           <th>Commune / Spécifique</th>
           <th>Produit associé</th>
-          {% endif %}
           <th>Actions</th>
         </tr>
       </thead>
@@ -508,10 +417,8 @@
           <td>{{ cost.name }}</td>
           <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
-          {% if scenario.method == 'direct_costing_advanced' %}
           <td>{% if cost.is_common %}Commune{% else %}Spécifique{% endif %}</td>
           <td>{{ cost.product.name|default:"N/A" }}</td>
-          {% endif %}
           <td>
             <a
               href="{% url 'edit_fixed_cost' cost.id %}"
@@ -533,14 +440,14 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if scenario.method == 'direct_costing_advanced' %}6{% else %}4{% endif %}">Aucune charge fixe saisie.</td>
+          <td colspan="6">Aucune charge fixe saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="2">Total</td>
-          <td colspan="{% if scenario.method == 'direct_costing_advanced' %}4{% else %}2{% endif %}">{{ fixed_costs_total|floatformat:2 }}</td>
+          <td colspan="4">{{ fixed_costs_total|floatformat:2 }}</td>
         </tr>
       </tfoot>
     </table>
@@ -550,14 +457,9 @@
   >
 </div>
 
-<div class="section-card">
+<div class="section-card printable">
+  {% if seasonality_list %}
   <h2>Saisonnalité</h2>
-  <div style="margin-bottom: 0.5rem">
-    {% if automatic_results %}
-    <div><strong>Point mort (jours) :</strong> {{ automatic_results.point_mort|default:0|floatformat:0 }}</div>
-    <div style="color: #6b7280; margin-top: 0.25rem">Seuil à atteindre: {{ automatic_results.seuil_rentabilite|default:0|floatformat:2 }}&nbsp;€</div>
-    {% endif %}
-  </div>
   <form method="post" action="{% url 'edit_seasonality' scenario.id %}">
     {% csrf_token %}
     <div class="table-wrap">
@@ -571,21 +473,8 @@
         </thead>
         <tbody>
           {% for s in seasonality_list %}
-          <tr
-            {%
-            if
-            s.is_break_even_month
-            %}style="background:#fffbeb; border-left:4px solid #f59e0b"
-            {%
-            endif
-            %}
-          >
-            <td>
-              {{ s.month_name }} {% if s.is_break_even_month %}<strong
-                style="color: #b45309; margin-left: 0.5rem"
-                >← Point mort atteint</strong
-              >{% endif %}
-            </td>
+          <tr>
+            <td>{{ s.month_name }}</td>
             <td>
               <input
                 type="number"
@@ -595,11 +484,7 @@
                 style="width: 100px"
               />
             </td>
-            <td>
-              {{ s.estimated_revenue|floatformat:2 }}{% if s.cumulative_revenue %} &nbsp;<small style="color: #6b7280"
-                >(Cumul: {{ s.cumulative_revenue|floatformat:2 }})</small
-              >{% endif %}
-            </td>
+            <td>{{ s.estimated_revenue|floatformat:2 }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -621,21 +506,23 @@
     <canvas id="seasonalityChart"></canvas>
   </div>
 
-  {% if seasonality_labels %}
-  {{ seasonality_labels|json_script:"seasonality-labels-data" }}
-  {% endif %}
-  {% if seasonality_values %}
-  {{ seasonality_values|json_script:"seasonality-values-data" }}
-  {% endif %}
+  <div
+    id="seasonality-data"
+    data-labels="{{ seasonality_labels|join:'||' }}"
+    data-values="{{ seasonality_values|join:',' }}"
+    hidden
+  ></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const labels = JSON.parse(
-      document.getElementById("seasonality-labels-data").textContent,
-    );
-    const data = JSON.parse(
-      document.getElementById("seasonality-values-data").textContent,
-    );
+    const seasonalityData = document.getElementById("seasonality-data");
+    const labels = (seasonalityData.dataset.labels || "")
+      .split("||")
+      .filter(Boolean);
+    const data = (seasonalityData.dataset.values || "")
+      .split(",")
+      .filter(Boolean)
+      .map(Number);
     const ctx = document.getElementById("seasonalityChart");
     if (ctx) {
       new Chart(ctx, {
@@ -654,6 +541,7 @@
       });
     }
   </script>
+  {% endif %}
 </div>
 
 <div class="section-card">
@@ -679,9 +567,9 @@
     <input type="hidden" name="scenario_a" value="{{ scenario.id }}" />
     <select name="scenario_b" required>
       <option value="">Choisir un scénario à comparer</option>
-      {% for other in all_scenarios %} {% if other.id != scenario.id %}
+      {% for other in all_scenarios %}
       <option value="{{ other.id }}">{{ other.name }}</option>
-      {% endif %} {% endfor %}
+      {% endfor %}
     </select>
     <button type="submit" class="btn-action btn-secondary">Comparer</button>
   </form>
