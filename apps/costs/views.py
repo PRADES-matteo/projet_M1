@@ -37,6 +37,7 @@ def build_automatic_results(scenario):
     total_revenue = Decimal("0.00")
     total_variable_costs_production = Decimal("0.00")
     total_fixed_costs = Decimal("0.00")
+    fixed_specific_costs = Decimal("0.00")
     total_production_volume = 0
 
     # Calculer le volume de production total et les revenus
@@ -49,7 +50,10 @@ def build_automatic_results(scenario):
         total_variable_costs_production += _decimal(cost.amount)
     # Coûts fixes totaux
     for cost in fixed_costs:
+        amount = _decimal(cost.amount)
         total_fixed_costs += _decimal(cost.amount)
+        if not cost.is_common:
+            fixed_specific_costs += amount
 
     # Coût de production total
     total_production_cost = total_variable_costs_production + total_fixed_costs
