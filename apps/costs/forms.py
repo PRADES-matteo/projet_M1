@@ -1,7 +1,7 @@
 from django import forms
 from datetime import date
 
-from .models import CostCenter, CostLine, CostScenario, Product, VariableCost, FixedCost
+from .models import CostCenter, CostCenterAllocation, CostLine, CostScenario, Product, ProductCenterUsage, VariableCost, FixedCost
 
 
 class CostScenarioForm(forms.ModelForm):
@@ -13,18 +13,9 @@ class CostScenarioForm(forms.ModelForm):
         ("Personnalisé", "Personnalisé"),
     ]
     MONTH_CHOICES = [
-        (1, "Janvier"),
-        (2, "Février"),
-        (3, "Mars"),
-        (4, "Avril"),
-        (5, "Mai"),
-        (6, "Juin"),
-        (7, "Juillet"),
-        (8, "Août"),
-        (9, "Septembre"),
-        (10, "Octobre"),
-        (11, "Novembre"),
-        (12, "Décembre"),
+        (1, "Janvier"), (2, "Février"), (3, "Mars"), (4, "Avril"),
+        (5, "Mai"), (6, "Juin"), (7, "Juillet"), (8, "Août"),
+        (9, "Septembre"), (10, "Octobre"), (11, "Novembre"), (12, "Décembre"),
     ]
     QUARTER_CHOICES = [("T1", "T1"), ("T2", "T2"), ("T3", "T3"), ("T4", "T4")]
     SEMESTER_CHOICES = [("S1", "S1"), ("S2", "S2")]
@@ -38,13 +29,7 @@ class CostScenarioForm(forms.ModelForm):
 
     class Meta:
         model = CostScenario
-        fields = [
-            "name",
-            "period",
-            "description",
-            "method",
-            "preset",
-        ]
+        fields = ["name", "period", "description", "method", "preset"]
         labels = {
             "name": "Nom du scénario",
             "period": "Période",
@@ -72,7 +57,6 @@ class CostScenarioForm(forms.ModelForm):
             self.fields["preset"].required = False
             self.fields["preset"].initial = ""
 
-
     def clean(self):
         cleaned_data = super().clean()
         period = cleaned_data.get("period")
@@ -89,16 +73,12 @@ class CostScenarioForm(forms.ModelForm):
 
         if period in {"Mensuel", "Trimestriel", "Semestriel", "Annuel"} and not year:
             self.add_error("period_year", "Sélectionnez une année.")
-
         if period == "Mensuel" and not month:
             self.add_error("period_month", "Sélectionnez un mois.")
-
         if period == "Trimestriel" and not quarter:
             self.add_error("period_quarter", "Sélectionnez un trimestre.")
-
         if period == "Semestriel" and not semester:
             self.add_error("period_semester", "Sélectionnez un semestre.")
-
         if period == "Personnalisé":
             if not period_start:
                 self.add_error("period_start", "Sélectionnez une date de début.")
@@ -113,7 +93,58 @@ class CostScenarioForm(forms.ModelForm):
 class CostCenterForm(forms.ModelForm):
     class Meta:
         model = CostCenter
-        fields = ["scenario", "code", "name", "is_auxiliary"]
+        fields = ["code", "name", "is_auxiliary", "unit_of_work", "total_units"]
+        widgets = {
+            "code": forms.TextInput(attrs={"placeholder": "Ex: CA, CF, ATM..."}),
+            "name": forms.TextInput(attrs={"placeholder": "Ex: Centre Atelier"}),
+            "unit_of_work": forms.TextInput(attrs={"placeholder": "Ex: heure machine"}),
+            "total_units": forms.NumberInput(attrs={"step": "0.01"}),
+        }
+        labels = {
+            "code": "Code",
+            "name": "Nom du centre",
+            "is_auxiliary": "Centre auxiliaire",
+            "unit_of_work": "Unité d'œuvre",
+            "total_units": "Nombre total d'unités d'œuvre",
+        }
+        help_texts = {
+            "is_auxiliary": "Un centre auxiliaire répartit ses coûts vers d'autres centres.",
+            "unit_of_work": "Laisser vide pour les centres auxiliaires.",
+            "total_units": "Laisser à 0 pour les centres auxiliaires.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs["class"] = "form-check-input"
+            else:
+                field.widget.attrs["class"] = "form-control"
+
+
+class CostCenterAllocationForm(forms.ModelForm):
+    class Meta:
+        model = CostCenterAllocation
+        fields = ["to_center", "percentage"]
+        widgets = {
+            "percentage": forms.NumberInput(attrs={"step": "0.01", "min": "0", "max": "100"}),
+        }
+        labels = {
+            "to_center": "Vers le centre",
+            "percentage": "Pourcentage (%)",
+        }
+
+    def __init__(self, *args, scenario=None, from_center=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if scenario and from_center:
+            self.fields["to_center"].queryset = CostCenter.objects.filter(
+                scenario=scenario
+            ).exclude(id=from_center.id)
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
+            else:
+                field.widget.attrs["class"] = "form-control"
 
 
 class CostLineForm(forms.ModelForm):
@@ -134,12 +165,15 @@ class CostLineForm(forms.ModelForm):
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         if scenario:
-            self.fields.pop("center")
+            self.fields["center"].queryset = CostCenter.objects.filter(scenario=scenario)
+            self.fields["center"].required = False
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs['class'] = 'form-check-input'
+                field.widget.attrs["class"] = "form-check-input"
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
             else:
-                field.widget.attrs['class'] = 'form-control'
+                field.widget.attrs["class"] = "form-control"
 
 
 class ProductForm(forms.ModelForm):
@@ -155,9 +189,20 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.scenario = scenario
-        
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
+            field.widget.attrs["class"] = "form-control"
+
+
+class ProductCenterUsageForm(forms.ModelForm):
+    class Meta:
+        model = ProductCenterUsage
+        fields = ["units_used"]
+        widgets = {
+            "units_used": forms.NumberInput(attrs={"step": "0.01", "min": "0", "class": "form-control"}),
+        }
+        labels = {
+            "units_used": "Unités d'œuvre consommées",
+        }
 
 
 class VariableCostForm(forms.ModelForm):
@@ -170,16 +215,11 @@ class VariableCostForm(forms.ModelForm):
             "amount": "Montant",
             "product": "Produit",
         }
-        help_texts = {
-            "category": "Type de charge variable (Matériel, Main-d'œuvre, ...)",
-            "amount": "Montant total de la charge variable.",
-            "product": "Associez la charge à un produit si elle est spécifique.",
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-select' if isinstance(field.widget, forms.Select) else 'form-control'
+            field.widget.attrs["class"] = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
 
 
 class FixedCostForm(forms.ModelForm):
@@ -193,17 +233,13 @@ class FixedCostForm(forms.ModelForm):
             "is_common": "Commune",
             "product": "Produit",
         }
-        help_texts = {
-            "is_common": "Décochez si ce coût est spécifique à un produit.",
-            "product": "Associez le coût fixe à un produit s'il est spécifique.",
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs['class'] = 'form-check-input'
+                field.widget.attrs["class"] = "form-check-input"
             elif isinstance(field.widget, forms.Select):
-                field.widget.attrs['class'] = 'form-select'
+                field.widget.attrs["class"] = "form-select"
             else:
-                field.widget.attrs['class'] = 'form-control'
+                field.widget.attrs["class"] = "form-control"
