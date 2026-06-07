@@ -5,6 +5,12 @@ from .models import CostCenter, CostCenterAllocation, CostLine, CostScenario, Pr
 
 
 class CostScenarioForm(forms.ModelForm):
+    name = forms.CharField(
+        max_length=25,
+        label="Nom du scénario",
+        widget=forms.TextInput(attrs={"placeholder": "Max 25 caractères"}),
+    )
+
     PERIOD_CHOICES = [
         ("Mensuel", "Mensuel"),
         ("Trimestriel", "Trimestriel"),
@@ -30,12 +36,6 @@ class CostScenarioForm(forms.ModelForm):
     class Meta:
         model = CostScenario
         fields = ["name", "period", "description", "method", "preset"]
-        widgets = {
-            "name": forms.TextInput(attrs={
-                "maxlength": "25",
-                "placeholder": "Max 25 caractères",
-            }),
-        }
         labels = {
             "name": "Nom du scénario",
             "period": "Période",
