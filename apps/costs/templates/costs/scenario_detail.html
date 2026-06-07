@@ -470,7 +470,14 @@
 <div class="section-card printable">
   {% if seasonality_list %}
   <h2>Saisonnalité</h2>
-  <form method="post" action="{% url 'edit_seasonality' scenario.id %}">
+
+  {% for message in messages %}{% if message.tags == 'error' %}
+  <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.75rem;color:#b91c1c;">
+    {{ message }}
+  </div>
+  {% endif %}{% endfor %}
+
+  <form method="post" action="{% url 'edit_seasonality' scenario.id %}" id="seasonality-form">
     {% csrf_token %}
     <div class="table-wrap">
       <table class="summary">
@@ -489,8 +496,11 @@
               <input
                 type="number"
                 step="0.01"
+                min="0"
+                max="100"
                 name="month_{{ s.month }}"
                 value="{{ s.percentage }}"
+                class="seasonality-input"
                 style="width: 100px"
               />
             </td>
@@ -501,16 +511,57 @@
         <tfoot>
           <tr>
             <td>Total CA</td>
-            <td></td>
+            <td id="seasonality-total-cell" style="font-weight:700;"></td>
             <td>{{ total_revenue|floatformat:2 }}</td>
           </tr>
         </tfoot>
       </table>
     </div>
-    <button class="btn-action" type="submit">
+    <div id="seasonality-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:0.5rem 0.9rem;margin:0.5rem 0;color:#b91c1c;font-size:0.9rem;"></div>
+    <button class="btn-action" type="submit" id="seasonality-submit">
       Enregistrer la saisonnalité
     </button>
   </form>
+
+  <script>
+    (function () {
+      var inputs = document.querySelectorAll(".seasonality-input");
+      var totalCell = document.getElementById("seasonality-total-cell");
+      var errorDiv = document.getElementById("seasonality-error");
+      var submitBtn = document.getElementById("seasonality-submit");
+
+      function updateTotal() {
+        var total = 0;
+        inputs.forEach(function (inp) {
+          total += parseFloat(inp.value) || 0;
+        });
+        var rounded = Math.round(total * 100) / 100;
+        totalCell.textContent = rounded.toFixed(2) + " %";
+
+        if (rounded > 100) {
+          totalCell.style.color = "#b91c1c";
+          errorDiv.textContent =
+            "La somme des pourcentages (" + rounded.toFixed(2) +
+            " %) dépasse 100 %. Réduisez les valeurs avant d'enregistrer.";
+          errorDiv.style.display = "block";
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = "0.5";
+          submitBtn.style.cursor = "not-allowed";
+        } else {
+          totalCell.style.color = rounded === 100 ? "#059669" : "#1f2937";
+          errorDiv.style.display = "none";
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = "1";
+          submitBtn.style.cursor = "pointer";
+        }
+      }
+
+      inputs.forEach(function (inp) {
+        inp.addEventListener("input", updateTotal);
+      });
+      updateTotal();
+    })();
+  </script>
 
   <div style="width: 600px; max-width: 100%; margin-top: 1rem">
     <canvas id="seasonalityChart"></canvas>
