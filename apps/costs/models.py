@@ -180,7 +180,7 @@ class CostLine(models.Model):
 
 class VariableCost(models.Model):
     name = models.CharField(max_length=255)
-    category = models.CharField(max_length=50, choices=VariableCostCategory.choices)
+    category = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
     scenario = models.ForeignKey(CostScenario, related_name='variable_costs', on_delete=models.CASCADE)
@@ -198,7 +198,7 @@ class FixedCostCategory(models.TextChoices):
 
 class FixedCost(models.Model):
     name = models.CharField(max_length=255)
-    category = models.CharField(max_length=50, choices=FixedCostCategory.choices)
+    category = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
     is_common = models.BooleanField(default=True)
