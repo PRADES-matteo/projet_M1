@@ -515,13 +515,24 @@ def scenario_detail(request, pk):
 def edit_seasonality(request, scenario_id):
     scenario = get_object_or_404(CostScenario, pk=scenario_id, user=request.user)
     if request.method == "POST":
+        values = {}
         for m in range(1, 13):
-            key = f"month_{m}"
-            val = request.POST.get(key, "0")
+            val = request.POST.get(f"month_{m}", "0")
             try:
-                pct = Decimal(val)
+                values[m] = Decimal(val)
             except Exception:
-                pct = Decimal("0")
+                values[m] = Decimal("0")
+
+        total = sum(values.values())
+        if total > Decimal("100"):
+            messages.error(
+                request,
+                f"La somme des pourcentages ({total:.2f} %) dépasse 100 %. "
+                "Veuillez corriger les valeurs avant d'enregistrer."
+            )
+            return redirect("scenario-detail", pk=scenario_id)
+
+        for m, pct in values.items():
             entry, _ = SeasonalityEntry.objects.get_or_create(scenario=scenario, month=m)
             entry.percentage = pct
             entry.save()
