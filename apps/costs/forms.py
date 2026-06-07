@@ -225,8 +225,10 @@ class VariableCostForm(forms.ModelForm):
             "product": "Produit",
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
+        if scenario and scenario.method == "direct_costing":
+            self.fields.pop("product", None)
         for field_name, field in self.fields.items():
             field.widget.attrs["class"] = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
 
@@ -257,7 +259,11 @@ class FixedCostForm(forms.ModelForm):
     def __init__(self, *args, scenario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.scenario = scenario
-        self.fields["is_common"].initial = "true" if getattr(self.instance, "is_common", True) else "false"
+        if scenario and scenario.method == "direct_costing":
+            self.fields.pop("is_common", None)
+            self.fields.pop("product", None)
+        else:
+            self.fields["is_common"].initial = "true" if getattr(self.instance, "is_common", True) else "false"
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.RadioSelect):
                 field.widget.attrs['class'] = 'form-check-input'
@@ -270,10 +276,10 @@ class FixedCostForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        if "is_common" not in self.fields:
+            return cleaned_data
         is_common = cleaned_data.get("is_common")
         product = cleaned_data.get("product")
-
         if not is_common and not product:
             self.add_error("product", "Sélectionnez un produit pour une charge spécifique.")
-
         return cleaned_data

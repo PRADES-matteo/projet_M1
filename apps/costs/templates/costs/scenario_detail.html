@@ -354,7 +354,7 @@
           <th>Nom</th>
           <th>Catégorie</th>
           <th>Montant</th>
-          <th>Produit associé</th>
+          {% if scenario.method != "direct_costing" %}<th>Produit associé</th>{% endif %}
           <th>Actions</th>
         </tr>
       </thead>
@@ -364,7 +364,7 @@
           <td>{{ cost.name }}</td>
           <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
-          <td>{{ cost.product.name|default:"N/A" }}</td>
+          {% if scenario.method != "direct_costing" %}<td>{{ cost.product.name|default:"N/A" }}</td>{% endif %}
           <td>
             <a
               href="{% url 'edit_variable_cost' cost.id %}"
@@ -386,14 +386,14 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5">Aucune charge variable saisie.</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}5{% endif %}">Aucune charge variable saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="2">Total</td>
-          <td colspan="3">{{ variable_costs_total|floatformat:2 }}</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}2{% else %}3{% endif %}">{{ variable_costs_total|floatformat:2 }}</td>
         </tr>
       </tfoot>
     </table>
@@ -412,8 +412,10 @@
           <th>Nom</th>
           <th>Catégorie</th>
           <th>Montant</th>
+          {% if scenario.method != "direct_costing" %}
           <th>Commune / Spécifique</th>
           <th>Produit associé</th>
+          {% endif %}
           <th>Actions</th>
         </tr>
       </thead>
@@ -423,8 +425,10 @@
           <td>{{ cost.name }}</td>
           <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
+          {% if scenario.method != "direct_costing" %}
           <td>{% if cost.is_common %}Commune{% else %}Spécifique{% endif %}</td>
           <td>{{ cost.product.name|default:"N/A" }}</td>
+          {% endif %}
           <td>
             <a
               href="{% url 'edit_fixed_cost' cost.id %}"
@@ -446,14 +450,14 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6">Aucune charge fixe saisie.</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}6{% endif %}">Aucune charge fixe saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="2">Total</td>
-          <td colspan="4">{{ fixed_costs_total|floatformat:2 }}</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}2{% else %}4{% endif %}">{{ fixed_costs_total|floatformat:2 }}</td>
         </tr>
       </tfoot>
     </table>

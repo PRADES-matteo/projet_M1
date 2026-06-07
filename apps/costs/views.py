@@ -958,8 +958,21 @@ class VariableCostCreateView(CreateView):
     form_class = VariableCostForm
     template_name = "costs/variable_cost_form.html"
 
+    def get_scenario(self):
+        return get_object_or_404(CostScenario, pk=self.kwargs["scenario_id"], user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["scenario"] = self.get_scenario()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["scenario"] = self.get_scenario()
+        return context
+
     def form_valid(self, form):
-        form.instance.scenario = get_object_or_404(CostScenario, pk=self.kwargs["scenario_id"], user=self.request.user)
+        form.instance.scenario = self.get_scenario()
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -970,6 +983,16 @@ class VariableCostUpdateView(UpdateView):
     model = VariableCost
     form_class = VariableCostForm
     template_name = "costs/variable_cost_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["scenario"] = self.object.scenario
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["scenario"] = self.object.scenario
+        return context
 
     def form_valid(self, form):
         form.instance.scenario = self.object.scenario
