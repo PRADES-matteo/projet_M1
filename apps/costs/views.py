@@ -122,6 +122,7 @@ def build_advanced_direct_costing_results(scenario):
     common_fixed_costs = Decimal("0.00")
     common_fixed_cost_lines = []
     fixed_costs_by_product = {product.id: Decimal("0.00") for product in products}
+    fixed_cost_lines_by_product = {}
     variable_costs_by_product = {product.id: Decimal("0.00") for product in products}
 
     for cost in variable_costs:
@@ -135,6 +136,7 @@ def build_advanced_direct_costing_results(scenario):
             common_fixed_cost_lines.append(cost)
         else:
             fixed_costs_by_product[cost.product_id] = fixed_costs_by_product.get(cost.product_id, Decimal("0.00")) + amount
+            fixed_cost_lines_by_product.setdefault(cost.product_id, []).append(cost)
 
     product_rows = []
     total_revenue = Decimal("0.00")
@@ -143,12 +145,22 @@ def build_advanced_direct_costing_results(scenario):
     total_specific_fixed_costs = Decimal("0.00")
     total_marge_specifique = Decimal("0.00")
 
+    total_production = Decimal("0.00")
+
     for product in products:
         revenue = _decimal(product.total_revenue)
         variable_cost = variable_costs_by_product.get(product.id, Decimal("0.00"))
         fixed_specific_cost = fixed_costs_by_product.get(product.id, Decimal("0.00"))
         mscv = revenue - variable_cost
         marge_specifique = mscv - fixed_specific_cost
+        qty_produite = Decimal(str(product.production_volume))
+        pv_unit = _decimal(product.unit_price)
+
+        cv_unitaire = (variable_cost / qty_produite).quantize(Decimal("0.01")) if qty_produite else Decimal("0.00")
+        cf_unitaire = (fixed_specific_cost / qty_produite).quantize(Decimal("0.01")) if qty_produite else Decimal("0.00")
+        cmp = (cv_unitaire + cf_unitaire).quantize(Decimal("0.01"))
+        taux_mscv = (mscv / revenue * Decimal("100")).quantize(Decimal("0.1")) if revenue else Decimal("0.0")
+        taux_ms = (marge_specifique / revenue * Decimal("100")).quantize(Decimal("0.1")) if revenue else Decimal("0.0")
 
         product_rows.append({
             "product": product,
@@ -157,6 +169,18 @@ def build_advanced_direct_costing_results(scenario):
             "mscv": mscv,
             "fixed_specific_cost": fixed_specific_cost,
             "marge_specifique": marge_specifique,
+            # Données unitaires & stock
+            "qty_vendue": product.quantity,
+            "qty_produite": int(qty_produite),
+            "pv_unitaire": pv_unit,
+            "fixed_specific_cost_lines": fixed_cost_lines_by_product.get(product.id, []),
+            "stock_initial": product.stock_initial,
+            "stock_final": product.stock_final,
+            "cv_unitaire": cv_unitaire,
+            "cf_unitaire": cf_unitaire,
+            "cmp": cmp,
+            "taux_mscv": taux_mscv,
+            "taux_ms": taux_ms,
         })
 
         total_revenue += revenue
@@ -164,8 +188,13 @@ def build_advanced_direct_costing_results(scenario):
         total_mscv += mscv
         total_specific_fixed_costs += fixed_specific_cost
         total_marge_specifique += marge_specifique
+        total_production += qty_produite
 
     global_result = total_marge_specifique - common_fixed_costs
+    taux_ms_global = (total_marge_specifique / total_revenue * Decimal("100")).quantize(Decimal("0.1")) if total_revenue else Decimal("0.0")
+    for row in product_rows:
+        row["contrib_pct"] = (row["marge_specifique"] / total_marge_specifique * Decimal("100")).quantize(Decimal("0.1")) if total_marge_specifique else Decimal("0.0")
+        row["marge_unitaire"] = (row["pv_unitaire"] - row["cmp"]).quantize(Decimal("0.01"))
     best_row = max(product_rows, key=lambda r: r["marge_specifique"]) if product_rows else None
     worst_row = min(product_rows, key=lambda r: r["marge_specifique"]) if product_rows else None
     main_row = max(product_rows, key=lambda r: r["mscv"]) if product_rows else None
@@ -180,6 +209,8 @@ def build_advanced_direct_costing_results(scenario):
         "total_specific_fixed_costs": total_specific_fixed_costs,
         "total_marge_specifique": total_marge_specifique,
         "global_result": global_result,
+        "taux_ms_global": taux_ms_global,
+        "total_production": total_production,
         # Lecture métier
         "best_product_name": best_row["product"].name if best_row else "—",
         "best_product_marge": best_row["marge_specifique"] if best_row else Decimal("0"),

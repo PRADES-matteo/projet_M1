@@ -20,6 +20,10 @@
   .kpi-label { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.35rem; }
   .kpi-value { font-size: 1.4rem; font-weight: 700; color: #0f172a; }
   .featured-commercial { border-color: #fb923c; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%); }
+  .featured-industrial { border-color: #0f766e; background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%); }
+  .featured-services   { border-color: #7c3aed; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%); }
+  .featured-positive   { border-color: #16a34a; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%); }
+  .featured-negative   { border-color: #dc2626; background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%); }
   .table-wrap { overflow-x: auto; }
   table.summary { width: 100%; border-collapse: collapse; }
   table.summary th,
@@ -48,7 +52,710 @@
 <h1>Résultats automatiques - {{ scenario.name }}</h1>
 <p>Méthode : {{ scenario.get_method_display }}</p>
 
-{% if scenario.method == "direct_costing_advanced" %}
+{% if scenario.method == "direct_costing_advanced" and industrial_mode %}
+
+{# ── KPI RAPIDES ────────────────────────────────────────────────── #}
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
+  <div class="kpi-card">
+    <div class="kpi-label">CA total</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CV total</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_variable_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF spécifiques</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF communes</div>
+    <div class="kpi-value">{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card" style="border-color:#0f766e;background:linear-gradient(180deg,#f0fdfa,#fff);">
+    <div class="kpi-label">Marge spécifique totale</div>
+    <div class="kpi-value" style="color:#0f766e;">{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card" style="border-color:{% if advanced_direct_costing.global_result >= 0 %}#16a34a{% else %}#dc2626{% endif %};background:linear-gradient(180deg,{% if advanced_direct_costing.global_result >= 0 %}#f0fdf4{% else %}#fef2f2{% endif %},#fff);">
+    <div class="kpi-label">Résultat global</div>
+    <div class="kpi-value" style="color:{% if advanced_direct_costing.global_result >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ advanced_direct_costing.global_result|floatformat:2 }} €</div>
+  </div>
+</div>
+
+{# ── SECTION 1 : TABLEAU PRODUIT CENTRAL ───────────────────────── #}
+<div class="section-card">
+  <h2 style="color:#0f766e;margin-top:0;">Analyse détaillée par produit</h2>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr style="background:#f0fdfa;">
+          <th>Produit</th>
+          <th>Qté produite</th>
+          <th>Qté vendue</th>
+          <th>PV unitaire</th>
+          <th>CA</th>
+          <th>CV total</th>
+          <th>CV unitaire</th>
+          <th>CF spécifiques</th>
+          <th>CF unitaire</th>
+          <th title="Coût Moyen Pondéré = CV unit + CF unit">CMP</th>
+          <th>MSCV</th>
+          <th>Marge spécifique</th>
+          <th>Taux MS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in advanced_direct_costing.product_rows %}
+        <tr>
+          <td style="font-weight:600;">{{ row.product.name }}</td>
+          <td>{{ row.qty_produite }}</td>
+          <td>{{ row.qty_vendue }}</td>
+          <td>{{ row.pv_unitaire|floatformat:2 }} €</td>
+          <td>{{ row.revenue|floatformat:2 }}</td>
+          <td>{{ row.variable_cost|floatformat:2 }}</td>
+          <td>{{ row.cv_unitaire|floatformat:2 }}</td>
+          <td>{{ row.fixed_specific_cost|floatformat:2 }}</td>
+          <td>{{ row.cf_unitaire|floatformat:2 }}</td>
+          <td style="font-weight:700;background:#f0fdfa;">{{ row.cmp|floatformat:2 }}</td>
+          <td>{{ row.mscv|floatformat:2 }}</td>
+          <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }}</td>
+          <td>{{ row.taux_ms|floatformat:1 }} %</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="13" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;background:#f0fdfa;">
+          <td>Total</td>
+          <td>{{ advanced_direct_costing.total_production|floatformat:0 }}</td>
+          <td>—</td>
+          <td>—</td>
+          <td>{{ advanced_direct_costing.total_revenue|floatformat:2 }}</td>
+          <td>{{ advanced_direct_costing.total_variable_costs|floatformat:2 }}</td>
+          <td>—</td>
+          <td>{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }}</td>
+          <td>—</td>
+          <td>—</td>
+          <td>{{ advanced_direct_costing.total_mscv|floatformat:2 }}</td>
+          <td>{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }}</td>
+          <td>—</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+{# ── SECTION 2 : VISUALISATION STOCK ───────────────────────────── #}
+<div class="section-card">
+  <h2 style="margin-top:0;">Mouvement de stock par produit</h2>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th>Produit</th>
+          <th>Stock initial</th>
+          <th>+ Production</th>
+          <th>− Ventes</th>
+          <th>= Stock final</th>
+          <th>Variation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in advanced_direct_costing.product_rows %}
+        {% with variation=row.stock_final|add:"-"|add:row.stock_initial|add:"0" %}
+        <tr>
+          <td style="font-weight:600;">{{ row.product.name }}</td>
+          <td>{{ row.stock_initial }} u.</td>
+          <td style="color:#2563eb;">+{{ row.qty_produite }} u.</td>
+          <td style="color:#6b7280;">−{{ row.qty_vendue }} u.</td>
+          <td style="font-weight:700;">{{ row.stock_final }} u.</td>
+          <td>
+            {% if row.stock_final > row.stock_initial %}
+            <span style="color:#16a34a;font-weight:600;">▲ +{{ row.stock_final|add:"-"|add:row.stock_initial }} u.</span>
+            {% elif row.stock_final < row.stock_initial %}
+            <span style="color:#dc2626;font-weight:600;">▼ {{ row.stock_final|add:"-"|add:row.stock_initial }} u.</span>
+            {% else %}
+            <span style="color:#6b7280;">= stable</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if advanced_direct_costing.product_rows %}
+  <div style="margin-top:1rem;">
+    <canvas id="stockFlowChart" style="max-height:260px;"></canvas>
+  </div>
+  {% endif %}
+</div>
+
+{# ── SECTION 3 : ANALYSE COÛT PAR PRODUIT ──────────────────────── #}
+{% if advanced_direct_costing.product_rows %}
+<div class="section-card">
+  <h2 style="margin-top:0;">Répartition des coûts par produit</h2>
+  <canvas id="costBreakdownChart" style="max-height:320px;"></canvas>
+</div>
+{% endif %}
+
+{# ── SECTION 4 (secondaire) : CHARGES FIXES COMMUNES ───────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">Charges fixes communes <span style="color:#6b7280;font-weight:400;">({{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €)</span></summary>
+  <div class="table-wrap" style="margin-top:0.75rem;">
+    <table class="summary">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Catégorie</th>
+          <th>Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
+        <tr>
+          <td>{{ cost.name }}</td>
+          <td>{{ cost.category }}</td>
+          <td>{{ cost.amount|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:#6b7280;">Aucune charge fixe commune.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">Total charges fixes communes</td>
+          <td>{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</details>
+
+{# ── SECTION 5 (secondaire) : INDICATEURS GLOBAUX ──────────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">Indicateurs globaux</summary>
+  <div class="kpi-grid" style="margin-top:0.75rem;">
+    <div class="kpi-card">
+      <div class="kpi-label">MSCV totale</div>
+      <div class="kpi-value">{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meilleur produit</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.best_product_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">Marge : {{ advanced_direct_costing.best_product_marge|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Produit le moins rentable</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.worst_product_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">Marge : {{ advanced_direct_costing.worst_product_marge|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Contributeur principal (MSCV)</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.main_contributor_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">{{ advanced_direct_costing.main_contributor_pct }} % de la MSCV</div>
+    </div>
+  </div>
+</details>
+
+{# ── SCRIPTS GRAPHIQUES ─────────────────────────────────────────── #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  const productLabels = [{% for row in advanced_direct_costing.product_rows %}"{{ row.product.name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const cvData       = [{% for row in advanced_direct_costing.product_rows %}{{ row.variable_cost|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const cfData       = [{% for row in advanced_direct_costing.product_rows %}{{ row.fixed_specific_cost|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const margeData    = [{% for row in advanced_direct_costing.product_rows %}{{ row.marge_specifique|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const siData       = [{% for row in advanced_direct_costing.product_rows %}{{ row.stock_initial }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const sfData       = [{% for row in advanced_direct_costing.product_rows %}{{ row.stock_final }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const prodData     = [{% for row in advanced_direct_costing.product_rows %}{{ row.qty_produite }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const ventesData   = [{% for row in advanced_direct_costing.product_rows %}{{ row.qty_vendue }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+  const costCtx = document.getElementById("costBreakdownChart");
+  if (costCtx) {
+    new Chart(costCtx, {
+      type: "bar",
+      data: {
+        labels: productLabels,
+        datasets: [
+          { label: "CV total", data: cvData, backgroundColor: "#3b82f6" },
+          { label: "CF spécifiques", data: cfData, backgroundColor: "#f59e0b" },
+          { label: "Marge spécifique", data: margeData, backgroundColor: margeData.map(v => v >= 0 ? "#16a34a" : "#dc2626") },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+        scales: { x: { stacked: false }, y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  const stockCtx = document.getElementById("stockFlowChart");
+  if (stockCtx) {
+    new Chart(stockCtx, {
+      type: "bar",
+      data: {
+        labels: productLabels,
+        datasets: [
+          { label: "Stock initial", data: siData, backgroundColor: "#cbd5e1" },
+          { label: "Production", data: prodData, backgroundColor: "#3b82f6" },
+          { label: "Ventes", data: ventesData.map(v => -v), backgroundColor: "#f97316" },
+          { label: "Stock final", data: sfData, backgroundColor: "#0f766e" },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + " : " + Math.abs(ctx.raw) + " u." } } },
+        scales: { x: { stacked: false }, y: { title: { display: true, text: "Unités" } } },
+      },
+    });
+  }
+})();
+</script>
+
+{% elif scenario.method == "direct_costing_advanced" and commercial_mode %}
+
+{# ── KPI RAPIDES ─────────────────────────────────────────────────── #}
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
+  <div class="kpi-card">
+    <div class="kpi-label">CA total</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">MSCV totale</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card" style="border-color:#fb923c;background:linear-gradient(180deg,#fff7ed,#fff);">
+    <div class="kpi-label">Marge spécifique totale</div>
+    <div class="kpi-value" style="color:#ea580c;">{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Taux de marge (global)</div>
+    <div class="kpi-value">{{ advanced_direct_costing.taux_ms_global|floatformat:1 }} %</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF spécifiques</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF communes</div>
+    <div class="kpi-value">{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card" style="border-color:{% if advanced_direct_costing.global_result >= 0 %}#16a34a{% else %}#dc2626{% endif %};background:linear-gradient(180deg,{% if advanced_direct_costing.global_result >= 0 %}#f0fdf4{% else %}#fef2f2{% endif %},#fff);">
+    <div class="kpi-label">Résultat global</div>
+    <div class="kpi-value" style="color:{% if advanced_direct_costing.global_result >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ advanced_direct_costing.global_result|floatformat:2 }} €</div>
+  </div>
+</div>
+
+{# ── SECTION 1 : CLASSEMENT PRODUITS ─────────────────────────────── #}
+<div class="section-card">
+  <h2 style="color:#ea580c;margin-top:0;">Classement — du plus au moins rentable</h2>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr style="background:#fff7ed;">
+          <th>#</th>
+          <th>Produit</th>
+          <th>CA</th>
+          <th>MSCV</th>
+          <th>Taux MSCV</th>
+          <th>CF spécifiques</th>
+          <th>Marge spécifique</th>
+          <th>Taux MS</th>
+          <th>Contribution</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in advanced_direct_costing.product_rows|dictsortreversed:"marge_specifique" %}
+        <tr {% if forloop.first %}style="background:linear-gradient(90deg,#f0fdf4,#fff);border-left:4px solid #16a34a;"{% elif forloop.last and advanced_direct_costing.product_rows|length > 1 %}style="background:linear-gradient(90deg,#fef2f2,#fff);border-left:4px solid #dc2626;"{% endif %}>
+          <td style="color:#9ca3af;font-weight:700;">{{ forloop.counter }}</td>
+          <td style="font-weight:700;">{{ row.product.name }}</td>
+          <td>{{ row.revenue|floatformat:2 }} €</td>
+          <td>{{ row.mscv|floatformat:2 }} €</td>
+          <td>{{ row.taux_mscv|floatformat:1 }} %</td>
+          <td>{{ row.fixed_specific_cost|floatformat:2 }} €</td>
+          <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }} €</td>
+          <td>{{ row.taux_ms|floatformat:1 }} %</td>
+          <td>{{ row.contrib_pct|floatformat:1 }} %</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;background:#fff7ed;">
+          <td colspan="2">Total</td>
+          <td>{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</td>
+          <td>—</td>
+          <td>{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.taux_ms_global|floatformat:1 }} %</td>
+          <td>100 %</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+{# ── SECTION 2 : GRAPHIQUES ───────────────────────────────────────── #}
+{% if advanced_direct_costing.product_rows %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-top:0.9rem;">
+  <div class="section-card" style="margin-top:0;">
+    <h3 style="margin-top:0;color:#ea580c;">MSCV · CF spéc · Marge par produit</h3>
+    <canvas id="commercialBarChart" style="max-height:300px;"></canvas>
+  </div>
+  <div class="section-card" style="margin-top:0;">
+    <h3 style="margin-top:0;color:#ea580c;">Marge spécifique — classement visuel</h3>
+    <canvas id="commercialRankChart" style="max-height:300px;"></canvas>
+  </div>
+</div>
+{% endif %}
+
+{# ── SECTION 3 (secondaire) : CMP & COÛTS UNITAIRES ─────────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">CMP & coûts unitaires <span style="color:#6b7280;font-weight:400;">(par produit)</span></summary>
+  <div class="table-wrap" style="margin-top:0.75rem;">
+    <table class="summary">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Qté vendue</th>
+          <th>PV unitaire</th>
+          <th>CV unitaire</th>
+          <th>CF unitaire</th>
+          <th title="Coût Moyen Pondéré = CV unit + CF unit">CMP</th>
+          <th>Marge unit. (PV − CMP)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in advanced_direct_costing.product_rows %}
+        <tr>
+          <td style="font-weight:600;">{{ row.product.name }}</td>
+          <td>{{ row.qty_vendue }}</td>
+          <td>{{ row.pv_unitaire|floatformat:2 }} €</td>
+          <td>{{ row.cv_unitaire|floatformat:2 }} €</td>
+          <td>{{ row.cf_unitaire|floatformat:2 }} €</td>
+          <td style="font-weight:700;background:#fff7ed;">{{ row.cmp|floatformat:2 }} €</td>
+          <td style="font-weight:700;color:{% if row.marge_unitaire >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ row.marge_unitaire|floatformat:2 }} €</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+
+{# ── SECTION 4 (secondaire) : CHARGES FIXES COMMUNES ─────────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">Charges fixes communes <span style="color:#6b7280;font-weight:400;">({{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €)</span></summary>
+  <div class="table-wrap" style="margin-top:0.75rem;">
+    <table class="summary">
+      <thead>
+        <tr><th>Nom</th><th>Catégorie</th><th>Montant</th></tr>
+      </thead>
+      <tbody>
+        {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
+        <tr>
+          <td>{{ cost.name }}</td>
+          <td>{{ cost.category }}</td>
+          <td>{{ cost.amount|floatformat:2 }} €</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:#6b7280;">Aucune charge fixe commune.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="font-weight:700;">Total</td>
+          <td style="font-weight:700;">{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</details>
+
+{# ── SECTION 5 (secondaire) : INDICATEURS GLOBAUX ─────────────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">Indicateurs globaux</summary>
+  <div class="kpi-grid" style="margin-top:0.75rem;">
+    <div class="kpi-card">
+      <div class="kpi-label">Meilleur produit</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.best_product_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">Marge spéc : {{ advanced_direct_costing.best_product_marge|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Produit le moins rentable</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.worst_product_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">Marge spéc : {{ advanced_direct_costing.worst_product_marge|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Contributeur principal (MSCV)</div>
+      <div class="kpi-value" style="font-size:1.1rem;">{{ advanced_direct_costing.main_contributor_name }}</div>
+      <div style="font-size:0.8rem;color:#6b7280;">{{ advanced_direct_costing.main_contributor_pct }} % de la MSCV</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Seuil de rentabilité</div>
+      <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Point mort</div>
+      <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} j</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marge de sécurité</div>
+      <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:1 }} %</div>
+    </div>
+  </div>
+</details>
+
+{# ── SCRIPTS GRAPHIQUES COMMERCIAL ────────────────────────────────── #}
+{% if advanced_direct_costing.product_rows %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  const labels   = [{% for row in advanced_direct_costing.product_rows %}"{{ row.product.name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const mscvData = [{% for row in advanced_direct_costing.product_rows %}{{ row.mscv|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const cfData   = [{% for row in advanced_direct_costing.product_rows %}{{ row.fixed_specific_cost|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const margeData= [{% for row in advanced_direct_costing.product_rows %}{{ row.marge_specifique|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+  const barCtx = document.getElementById("commercialBarChart");
+  if (barCtx) {
+    new Chart(barCtx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          { label: "MSCV",            data: mscvData, backgroundColor: "#3b82f6" },
+          { label: "CF spécifiques",  data: cfData,   backgroundColor: "#f59e0b" },
+          { label: "Marge spécifique",data: margeData, backgroundColor: margeData.map(v => v >= 0 ? "#16a34a" : "#dc2626") },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+        scales: { x: { stacked: false }, y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  // Classement visuel : barres horizontales triées par marge desc
+  const ranked = labels.map((l, i) => ({ l, v: margeData[i] })).sort((a, b) => b.v - a.v);
+  const rankCtx = document.getElementById("commercialRankChart");
+  if (rankCtx) {
+    new Chart(rankCtx, {
+      type: "bar",
+      data: {
+        labels: ranked.map(r => r.l),
+        datasets: [{
+          label: "Marge spécifique",
+          data: ranked.map(r => r.v),
+          backgroundColor: ranked.map(r => r.v >= 0 ? "#fb923c" : "#dc2626"),
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, title: { display: true, text: "€" } } },
+      },
+    });
+  }
+})();
+</script>
+{% endif %}
+
+{% elif scenario.method == "direct_costing_advanced" and services_mode %}
+
+{# ── KPI RAPIDES ─────────────────────────────────────────────────── #}
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
+  <div class="kpi-card">
+    <div class="kpi-label">CA total</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Charges variables</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_variable_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">MSCV</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF spécifiques</div>
+    <div class="kpi-value">{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CF communes</div>
+    <div class="kpi-value">{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €</div>
+  </div>
+  <div class="kpi-card" style="border-color:{% if advanced_direct_costing.global_result >= 0 %}#7c3aed{% else %}#dc2626{% endif %};background:linear-gradient(180deg,{% if advanced_direct_costing.global_result >= 0 %}#f5f3ff{% else %}#fef2f2{% endif %},#fff);">
+    <div class="kpi-label">Résultat global</div>
+    <div class="kpi-value" style="color:{% if advanced_direct_costing.global_result >= 0 %}#7c3aed{% else %}#dc2626{% endif %};">{{ advanced_direct_costing.global_result|floatformat:2 }} €</div>
+  </div>
+</div>
+
+{# ── SECTION 1 : CASCADE DE RÉSULTAT ─────────────────────────────── #}
+<div class="section-card">
+  <h2 style="color:#7c3aed;margin-top:0;">Résultat global — décomposition</h2>
+  <div class="table-wrap">
+    <table class="summary" style="max-width:480px;">
+      <tbody>
+        <tr>
+          <td>Chiffre d'affaires</td>
+          <td style="text-align:right;font-weight:600;">{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</td>
+        </tr>
+        <tr style="color:#6b7280;">
+          <td>− Charges variables</td>
+          <td style="text-align:right;">({{ advanced_direct_costing.total_variable_costs|floatformat:2 }}) €</td>
+        </tr>
+        <tr style="font-weight:700;background:#f5f3ff;">
+          <td>= MSCV</td>
+          <td style="text-align:right;color:#7c3aed;">{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</td>
+        </tr>
+        <tr style="color:#6b7280;">
+          <td>− CF spécifiques</td>
+          <td style="text-align:right;">({{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }}) €</td>
+        </tr>
+        <tr style="font-weight:700;background:#f5f3ff;">
+          <td>= Marge spécifique totale</td>
+          <td style="text-align:right;color:#7c3aed;">{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</td>
+        </tr>
+        <tr style="color:#6b7280;">
+          <td>− CF communes</td>
+          <td style="text-align:right;">({{ advanced_direct_costing.common_fixed_costs|floatformat:2 }}) €</td>
+        </tr>
+        <tr style="font-weight:800;font-size:1.05rem;border-top:2px solid #7c3aed;">
+          <td>= Résultat global</td>
+          <td style="text-align:right;color:{% if advanced_direct_costing.global_result >= 0 %}#7c3aed{% else %}#dc2626{% endif %};">{{ advanced_direct_costing.global_result|floatformat:2 }} €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── SECTION 2 : CHARGES FIXES COMMUNES ──────────────────────────── #}
+<div class="section-card">
+  <h2 style="color:#7c3aed;margin-top:0;">Charges fixes communes <span style="font-weight:400;font-size:1rem;color:#6b7280;">({{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €)</span></h2>
+  <div class="table-wrap">
+    <table class="summary">
+      <thead>
+        <tr style="background:#f5f3ff;">
+          <th>Nom</th>
+          <th>Catégorie</th>
+          <th>Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
+        <tr>
+          <td style="font-weight:600;">{{ cost.name }}</td>
+          <td>{{ cost.category }}</td>
+          <td>{{ cost.amount|floatformat:2 }} €</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:#6b7280;text-align:center;">Aucune charge fixe commune.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;background:#f5f3ff;">
+          <td colspan="2">Total CF communes</td>
+          <td>{{ advanced_direct_costing.common_fixed_costs|floatformat:2 }} €</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+{# ── SECTION 3 : CHARGES FIXES SPÉCIFIQUES ───────────────────────── #}
+{% if advanced_direct_costing.total_specific_fixed_costs %}
+<div class="section-card">
+  <h2 style="color:#7c3aed;margin-top:0;">Charges fixes spécifiques <span style="font-weight:400;font-size:1rem;color:#6b7280;">({{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €)</span></h2>
+  {% for row in advanced_direct_costing.product_rows %}
+  {% if row.fixed_specific_cost_lines %}
+  <div style="margin-bottom:1rem;">
+    <div style="font-weight:700;color:#374151;margin-bottom:0.4rem;padding:0.3rem 0.5rem;background:#f5f3ff;border-radius:6px;">
+      {{ row.product.name }} — {{ row.fixed_specific_cost|floatformat:2 }} € de CF spéc.
+    </div>
+    <div class="table-wrap">
+      <table class="summary" style="font-size:0.9rem;">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Catégorie</th>
+            <th>Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cost in row.fixed_specific_cost_lines %}
+          <tr>
+            <td>{{ cost.name }}</td>
+            <td>{{ cost.category }}</td>
+            <td>{{ cost.amount|floatformat:2 }} €</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ── SECTION 4 (secondaire) : TABLEAU PRODUITS ───────────────────── #}
+<details class="section-card" style="margin-top:0.9rem;">
+  <summary style="cursor:pointer;font-size:1.05rem;font-weight:600;padding:0.2rem 0;">Détail par prestation / produit <span style="color:#6b7280;font-weight:400;">(optionnel)</span></summary>
+  <div class="table-wrap" style="margin-top:0.75rem;">
+    <table class="summary">
+      <thead>
+        <tr style="background:#f5f3ff;">
+          <th>Prestation / Produit</th>
+          <th>CA</th>
+          <th>Charges variables</th>
+          <th>MSCV</th>
+          <th>Taux MSCV</th>
+          <th>CF spécifiques</th>
+          <th>Marge spécifique</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in advanced_direct_costing.product_rows %}
+        <tr>
+          <td style="font-weight:600;">{{ row.product.name }}</td>
+          <td>{{ row.revenue|floatformat:2 }} €</td>
+          <td>{{ row.variable_cost|floatformat:2 }} €</td>
+          <td>{{ row.mscv|floatformat:2 }} €</td>
+          <td>{{ row.taux_mscv|floatformat:1 }} %</td>
+          <td>{{ row.fixed_specific_cost|floatformat:2 }} €</td>
+          <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#7c3aed{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }} €</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:#6b7280;">Aucune prestation saisie.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;background:#f5f3ff;">
+          <td>Total</td>
+          <td>{{ advanced_direct_costing.total_revenue|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.total_variable_costs|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.total_mscv|floatformat:2 }} €</td>
+          <td>—</td>
+          <td>{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</td>
+          <td>{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</details>
+
+{% elif scenario.method == "direct_costing_advanced" %}
+
 <div class="section-card">
   <h2>Résultats par produit</h2>
   <div class="table-wrap">
@@ -96,17 +803,13 @@
   <div class="table-wrap">
     <table class="summary">
       <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Catégorie</th>
-          <th>Montant</th>
-        </tr>
+        <tr><th>Nom</th><th>Catégorie</th><th>Montant</th></tr>
       </thead>
       <tbody>
         {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
         <tr>
           <td>{{ cost.name }}</td>
-          <td>{{ cost.get_category_display }}</td>
+          <td>{{ cost.category }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
         </tr>
         {% empty %}
@@ -140,9 +843,10 @@
     </div>
   </div>
 </div>
+
 {% else %}
 <div class="kpi-grid">
-  <div class="kpi-card {% if commercial_mode %}featured-commercial{% endif %}">
+  <div class="kpi-card {% if commercial_mode %}featured-commercial{% elif industrial_mode %}featured-industrial{% elif services_mode %}featured-services{% endif %}">
     <div class="kpi-label">Chiffre d'affaires total</div>
     <div class="kpi-value">{{ automatic_results.total_revenue|floatformat:2 }}</div>
   </div>
@@ -156,13 +860,13 @@
     <div class="kpi-value">{{ total_cmp|floatformat:2 }}</div>
   </div>
   {% endif %}
-  <div class="kpi-card {% if commercial_mode %}featured-commercial{% endif %}">
-    <div class="kpi-label">{% if commercial_mode %}Marge commerciale{% else %}Marge sur coût variable{% endif %}</div>
+  <div class="kpi-card {% if commercial_mode %}featured-commercial{% elif industrial_mode %}featured-industrial{% elif services_mode %}featured-services{% endif %}">
+    <div class="kpi-label">{% if commercial_mode %}Marge commerciale{% elif services_mode %}MSCV{% else %}Marge sur coût variable{% endif %}</div>
     <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card {% if automatic_results.resultat >= 0 %}featured-positive{% else %}featured-negative{% endif %}">
     <div class="kpi-label">Résultat</div>
-    <div class="kpi-value">{{ automatic_results.resultat|floatformat:2 }}</div>
+    <div class="kpi-value" style="color:{% if automatic_results.resultat >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ automatic_results.resultat|floatformat:2 }}</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Taux de marge</div>
