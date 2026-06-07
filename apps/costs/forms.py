@@ -214,7 +214,37 @@ class ProductCenterUsageForm(forms.ModelForm):
         }
 
 
+VARIABLE_CATEGORY_CHOICES = [
+    ("", "— Sélectionnez une catégorie —"),
+    ("Material", "Matériel"),
+    ("Labor", "Main-d'œuvre"),
+    ("Overhead", "Frais généraux"),
+    ("__custom__", "Autre (personnalisé)..."),
+]
+
+FIXED_CATEGORY_CHOICES = [
+    ("", "— Sélectionnez une catégorie —"),
+    ("Rent", "Loyer"),
+    ("Salary", "Salaires"),
+    ("Depreciation", "Amortissement"),
+    ("Other", "Autre"),
+    ("__custom__", "Autre (personnalisé)..."),
+]
+
+
 class VariableCostForm(forms.ModelForm):
+    category = forms.ChoiceField(
+        label="Catégorie",
+        choices=VARIABLE_CATEGORY_CHOICES,
+        required=True,
+        widget=forms.Select(),
+    )
+    category_custom = forms.CharField(
+        label="Catégorie personnalisée",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Transport, Emballage..."}),
+    )
+
     class Meta:
         model = VariableCost
         fields = ["name", "category", "amount", "product"]
@@ -229,11 +259,63 @@ class VariableCostForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if scenario and scenario.method == "direct_costing":
             self.fields.pop("product", None)
+        # Build choices: predefined + custom categories already used in this scenario
+        predefined_keys = {c[0] for c in VARIABLE_CATEGORY_CHOICES if c[0] not in ("", "__custom__")}
+        choices = list(VARIABLE_CATEGORY_CHOICES)
+        if scenario:
+            used = (
+                VariableCost.objects.filter(scenario=scenario)
+                .values_list("category", flat=True)
+                .distinct()
+            )
+            insert_idx = next(i for i, (k, _) in enumerate(choices) if k == "__custom__")
+            for cat in sorted(used):
+                if cat and cat not in predefined_keys:
+                    choices.insert(insert_idx, (cat, cat))
+                    insert_idx += 1
+        self.fields["category"].choices = choices
+        # If editing an instance with a custom category, select it directly (it's now in choices)
+        if not self.is_bound and self.instance.pk:
+            if self.instance.category and self.instance.category not in predefined_keys:
+                self.initial["category"] = self.instance.category
+        # Reorder fields: insert category_custom right after category
+        ordered = {}
+        for key, field in self.fields.items():
+            ordered[key] = field
+            if key == "category":
+                ordered["category_custom"] = self.fields["category_custom"]
+        self.fields = type(self.fields)(ordered)
+        # Apply CSS classes
         for field_name, field in self.fields.items():
-            field.widget.attrs["class"] = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
+            else:
+                field.widget.attrs["class"] = "form-control"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get("category")
+        if category == "__custom__":
+            custom = cleaned_data.get("category_custom", "").strip()
+            if not custom:
+                self.add_error("category_custom", "Veuillez saisir un nom de catégorie.")
+            else:
+                cleaned_data["category"] = custom
+        return cleaned_data
 
 
 class FixedCostForm(forms.ModelForm):
+    category = forms.ChoiceField(
+        label="Catégorie",
+        choices=FIXED_CATEGORY_CHOICES,
+        required=True,
+        widget=forms.Select(),
+    )
+    category_custom = forms.CharField(
+        label="Catégorie personnalisée",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ex: Assurance, Maintenance..."}),
+    )
     is_common = forms.TypedChoiceField(
         label="Type",
         choices=[("true", "Commune"), ("false", "Spécifique")],
@@ -264,6 +346,33 @@ class FixedCostForm(forms.ModelForm):
             self.fields.pop("product", None)
         else:
             self.fields["is_common"].initial = "true" if getattr(self.instance, "is_common", True) else "false"
+        # Build choices: predefined + custom categories already used in this scenario
+        predefined_keys = {c[0] for c in FIXED_CATEGORY_CHOICES if c[0] not in ("", "__custom__")}
+        choices = list(FIXED_CATEGORY_CHOICES)
+        if scenario:
+            used = (
+                FixedCost.objects.filter(scenario=scenario)
+                .values_list("category", flat=True)
+                .distinct()
+            )
+            insert_idx = next(i for i, (k, _) in enumerate(choices) if k == "__custom__")
+            for cat in sorted(used):
+                if cat and cat not in predefined_keys:
+                    choices.insert(insert_idx, (cat, cat))
+                    insert_idx += 1
+        self.fields["category"].choices = choices
+        # If editing an instance with a custom category, select it directly (it's now in choices)
+        if not self.is_bound and self.instance.pk:
+            if self.instance.category and self.instance.category not in predefined_keys:
+                self.initial["category"] = self.instance.category
+        # Reorder fields: insert category_custom right after category
+        ordered = {}
+        for key, field in self.fields.items():
+            ordered[key] = field
+            if key == "category":
+                ordered["category_custom"] = self.fields["category_custom"]
+        self.fields = type(self.fields)(ordered)
+        # Apply CSS classes
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.RadioSelect):
                 field.widget.attrs['class'] = 'form-check-input'
@@ -276,6 +385,13 @@ class FixedCostForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        category = cleaned_data.get("category")
+        if category == "__custom__":
+            custom = cleaned_data.get("category_custom", "").strip()
+            if not custom:
+                self.add_error("category_custom", "Veuillez saisir un nom de catégorie.")
+            else:
+                cleaned_data["category"] = custom
         if "is_common" not in self.fields:
             return cleaned_data
         is_common = cleaned_data.get("is_common")
