@@ -1,4 +1,5 @@
-{% extends "costs/base.html" %} {% block content %}
+{% extends "costs/base.html" %}
+{% block content %}
 <div class="container mt-4 mb-5" style="max-width: 600px">
   <div class="card shadow-sm border-0">
     <div class="card-header text-white" style="background-color: #0f766e">
@@ -6,38 +7,28 @@
     </div>
     <div class="card-body">
       <form method="post" novalidate>
-        {% csrf_token %} {{ form.non_field_errors }} {% if scenario and
-        scenario.method == 'direct_costing_advanced' %}
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% if scenario and scenario.method == 'direct_costing_advanced' %}
         <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.name.id_for_label }}"
-            >{{ form.name.label }}</label
-          >
-          {{ form.name }} {% if form.name.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.name.errors|striptags }}
-          </div>
+          <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+          <div class="text-danger small mt-1">{{ form.name.errors|striptags }}</div>
           {% endif %}
         </div>
         <div class="mb-3">
-          <label
-            class="form-label fw-bold"
-            for="{{ form.category.id_for_label }}"
-            >{{ form.category.label }}</label
-          >
-          {{ form.category }} {% if form.category.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.category.errors|striptags }}
-          </div>
+          <label class="form-label fw-bold" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+          {{ form.category }}
+          {% if form.category.errors %}
+          <div class="text-danger small mt-1">{{ form.category.errors|striptags }}</div>
           {% endif %}
         </div>
         <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}"
-            >{{ form.amount.label }}</label
-          >
-          {{ form.amount }} {% if form.amount.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.amount.errors|striptags }}
-          </div>
+          <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+          {{ form.amount }}
+          {% if form.amount.errors %}
+          <div class="text-danger small mt-1">{{ form.amount.errors|striptags }}</div>
           {% endif %}
         </div>
         <div class="mb-3 mt-3">
@@ -46,65 +37,47 @@
             {% for radio in form.is_common %}
             <div class="form-check">
               {{ radio.tag }}
-              <label class="form-check-label" for="{{ radio.id_for_label }}"
-                >{{ radio.choice_label }}</label
-              >
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
             </div>
             {% endfor %}
           </div>
           {% if form.is_common.help_text %}
           <div class="form-text">{{ form.is_common.help_text }}</div>
-          {% endif %} {% if form.is_common.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.is_common.errors|striptags }}
-          </div>
+          {% endif %}
+          {% if form.is_common.errors %}
+          <div class="text-danger small mt-1">{{ form.is_common.errors|striptags }}</div>
           {% endif %}
         </div>
         <div class="mb-3" id="product-field-wrapper">
-          <label
-            class="form-label fw-bold"
-            for="{{ form.product.id_for_label }}"
-            >{{ form.product.label }}</label
-          >
-          {{ form.product }} {% if form.product.help_text %}
+          <label class="form-label fw-bold" for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
+          {{ form.product }}
+          {% if form.product.help_text %}
           <div class="form-text">{{ form.product.help_text }}</div>
-          {% endif %} {% if form.product.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.product.errors|striptags }}
-          </div>
+          {% endif %}
+          {% if form.product.errors %}
+          <div class="text-danger small mt-1">{{ form.product.errors|striptags }}</div>
           {% endif %}
         </div>
-        {% else %} {% for field in form %}
-        <div
-          class="mb-3 {% if field.field.widget.input_type == 'checkbox' %}form-check mt-3{% endif %}"
-        >
-          {% if field.field.widget.input_type == 'checkbox' %} {{ field }}
-          <label class="form-check-label fw-bold" for="{{ field.id_for_label }}"
-            >{{ field.label }}</label
-          >
+        {% else %}
+        {% for field in form %}
+        <div class="mb-3 {% if field.field.widget.input_type == 'checkbox' %}form-check mt-3{% endif %}">
+          {% if field.field.widget.input_type == 'checkbox' %}
+          {{ field }}
+          <label class="form-check-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {% else %}
-          <label class="form-label fw-bold" for="{{ field.id_for_label }}"
-            >{{ field.label }}</label
-          >
-          {{ field }} {% endif %} {% if field.errors %}
+          <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% endif %}
+          {% if field.errors %}
           <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
           {% endif %}
         </div>
-        {% endfor %} {% endif %}
+        {% endfor %}
+        {% endif %}
 
         <div class="d-flex justify-content-between align-items-center mt-4">
-          <a
-            href="javascript:history.back()"
-            class="text-decoration-none text-secondary"
-            >← Annuler</a
-          >
-          <button
-            type="submit"
-            class="btn text-white"
-            style="background-color: #0f766e"
-          >
-            Enregistrer
-          </button>
+          <a href="javascript:history.back()" class="text-decoration-none text-secondary">← Annuler</a>
+          <button type="submit" class="btn text-white" style="background-color: #0f766e">Enregistrer</button>
         </div>
       </form>
     </div>
@@ -113,22 +86,16 @@
 {% if scenario and scenario.method == 'direct_costing_advanced' %}
 <script>
   (function () {
-    const commonRadios = document.querySelectorAll(
-      'input[name="{{ form.is_common.html_name }}"]',
-    );
+    const commonRadios = document.querySelectorAll('input[name="{{ form.is_common.html_name }}"]');
     const productWrapper = document.getElementById("product-field-wrapper");
-    const productField = document.getElementById(
-      "{{ form.product.id_for_label }}",
-    );
+    const productField = document.getElementById("{{ form.product.id_for_label }}");
 
     if (!commonRadios.length || !productWrapper || !productField) {
       return;
     }
 
     function toggleProductField() {
-      const selected = document.querySelector(
-        'input[name="{{ form.is_common.html_name }}"]:checked',
-      );
+      const selected = document.querySelector('input[name="{{ form.is_common.html_name }}"]:checked');
       const isCommon = !selected || selected.value === "true";
       productWrapper.style.display = isCommon ? "none" : "block";
       productField.disabled = isCommon;
@@ -137,10 +104,9 @@
       }
     }
 
-    commonRadios.forEach((radio) =>
-      radio.addEventListener("change", toggleProductField),
-    );
+    commonRadios.forEach((radio) => radio.addEventListener("change", toggleProductField));
     toggleProductField();
   })();
 </script>
-{% endif %} {% endblock %}
+{% endif %}
+{% endblock %}
