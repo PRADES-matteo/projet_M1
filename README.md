@@ -1,105 +1,96 @@
 # projet_M1
 
-Application Django de gestion des coûts pensée pour un usage simple et pédagogique.
+Application Django de comptabilité analytique (gestion des coûts) à usage pédagogique. Les utilisateurs créent des **scénarios** et analysent leurs coûts selon trois méthodes, avec des templates adaptés à leur secteur d'activité.
 
-## Objectif
-L'utilisateur saisit ses données de coûts dans l'application, puis le système calcule les résultats selon deux méthodes :
-- la méthode des centres d'analyse
-- le direct costing, y compris une vue d'évaluation du direct costing
+## Méthodes de calcul
 
-## Architecture proposée
+| Méthode | Description |
+|---|---|
+| **Direct costing** | Sépare charges variables et charges fixes. Calcule MCV, seuil de rentabilité, point mort. |
+| **Direct costing évolué** | Ajoute charges fixes spécifiques/communes par produit, saisonnalité mensuelle. |
+| **Centres d'analyse** | Répartit les charges via centres auxiliaires → centres principaux, calcule le taux de cession par unité d'œuvre. |
 
-### `projet_m1/`
-Configuration globale du projet Django.
-- `settings.py` : réglages Django, base de données SQLite, templates et static files
-- `urls.py` : routage principal
-- `asgi.py` / `wsgi.py` : points d'entrée serveur
+## Templates métier (presets)
 
-### `apps/dashboard/`
-Espace d'accueil et navigation utilisateur.
-- page d'accueil
-- accès vers les scénarios de coût
+Chaque scénario peut adopter un template qui adapte l'affichage des résultats :
 
-### `apps/costs/`
-Cœur fonctionnel du site.
-- modèles pour scénario, centre de coût et lignes de coût
-- formulaires de saisie
-- services de calcul métier
-- pages liste et détail des scénarios
+- **Industriel** — focus production : CMP, volumes, marges sur coût de production
+- **Commercial** — focus rentabilité produit : classement par marge spécifique, taux de marge, contribution au résultat
+- **Services** — focus charges fixes : cascade CA → MSCV → marge spécifique → résultat, détail CF communes/spécifiques
 
-### `templates/`
-Templates globaux partagés par le front Django.
+## Architecture
 
-## Flux utilisateur
-1. L'utilisateur crée un scénario de coûts.
-2. Il renseigne les centres et les lignes de coûts.
-3. L'application calcule automatiquement les montants.
-4. Les résultats sont affichés pour les centres d'analyse et pour le direct costing.
-
-## Arborescence
-```text
+```
 projet_M1/
-├─ manage.py
-├─ projet_m1/
-├─ apps/
-│  ├─ dashboard/
-│  └─ costs/
-├─ templates/
-└─ requirements.txt
+├── manage.py
+├── projet_m1/          # Config Django (settings, urls)
+├── apps/
+│   ├── dashboard/      # Page d'accueil
+│   └── costs/          # Toute la logique métier
+│       ├── models.py
+│       ├── views.py
+│       ├── forms.py
+│       ├── services/   # Calculs purs (direct_costing.py, center_analysis_full.py)
+│       ├── templatetags/
+│       ├── management/commands/createdemo.py
+│       └── fixtures/
+├── templates/          # base.html, registration/
+└── static/
 ```
 
-## Lancement
-Exécuter les commandes depuis le dossier `projet_M1/`.
+## Installation et lancement
 
-1. Créer un environnement virtuel (si besoin) :
+Toutes les commandes s'exécutent depuis `projet_M1/`.
+
 ```powershell
+# 1. Environnement virtuel
 py -m venv .venv
-```
-2. Activer l'environnement virtuel (PowerShell) :
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-3. Installer les dépendances :
-```powershell
-python -m pip install --upgrade pip
+
+# 2. Dépendances
 python -m pip install -r requirements.txt
-```
-4. Créer et appliquer les migrations :
-```powershell
-python manage.py makemigrations
+
+# 3. Base de données
 python manage.py migrate
-```
-4.5 (optionnel) Créer un utilisateur de démonstration et peupler la base avec des scénarios réalistes :
-```powershell
+
+# 4. (Optionnel) Données de démonstration
 python manage.py createdemo
-```
-Identifiants générés : `demo` / `demo123`
-5. Lancer le serveur :
-```powershell
+# Identifiants : demo / demo123
+
+# 5. Serveur
 python manage.py runserver
-```
-
-## Charger les scénarios de test
-Pour importer les données d'exemple dans la base SQLite :
-```powershell
-python manage.py loaddata apps/costs/fixtures/sample_scenarios.json
-```
-
-Pour vérifier ensuite que les scénarios sont bien présents :
-```powershell
-python manage.py test apps.costs
-```
-
-## Accès au site
-Une fois le serveur lancé, ouvrir :
-- `http://127.0.0.1:8000/`
-
-Si le port 8000 est déjà utilisé :
-```powershell
+# ou sur un autre port :
 python manage.py runserver 8080
 ```
 
-## Suite logique
-- ajouter l’authentification utilisateur
-- ajouter des formulaires de saisie complets
-- enrichir les calculs par marges et rapports exportables
+Accès : `http://127.0.0.1:8000/`
+
+## Scénarios de démonstration
+
+`python manage.py createdemo` crée 9 scénarios couvrant les 3 méthodes × 3 templates :
+
+| Nom | Méthode | Template |
+|---|---|---|
+| Industrie Alpha | Direct costing | Industriel |
+| Commerce Beta | Direct costing | Commercial |
+| Services Gamma | Direct costing | Services |
+| Industrie Zeta — Évolué | Direct costing évolué | Industriel |
+| Commerce Eta — Évolué | Direct costing évolué | Commercial |
+| Services Iota — Évolué | Direct costing évolué | Services |
+| Menuiserie Delta — Centres | Centres d'analyse | Industriel |
+| Agence Epsilon — Centres | Centres d'analyse | Services |
+| Distribution Kappa — Centres | Centres d'analyse | Commercial |
+
+## Autres commandes utiles
+
+```powershell
+# Charger les fixtures (scénarios sans user associé)
+python manage.py loaddata apps/costs/fixtures/sample_scenarios.json
+
+# Lancer les tests
+python manage.py test apps.costs
+
+# Migrations après modification des modèles
+python manage.py makemigrations
+python manage.py migrate
+```

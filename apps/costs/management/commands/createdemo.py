@@ -363,11 +363,236 @@ class Command(BaseCommand):
                 seasonality=[7, 7, 8, 8, 9, 10, 10, 9, 8, 7, 7, 8],
             )
 
+            # ----------------------------------------------------------------
+            # Scénario 3 — Centres d'analyse : distribution commerciale
+            # Un centre auxiliaire (Logistique) réparti vers trois centres
+            # principaux (Réception, Mise en rayon, Expédition).
+            # Produits : Référence L et Référence M.
+            # ----------------------------------------------------------------
+            make_center_scenario(
+                name='Distribution Kappa — Centres',
+                preset='commercial',
+                period='Annuel',
+                description=(
+                    "Exemple centres d'analyse : distribution commerciale. "
+                    "Centre auxiliaire Logistique réparti vers Réception, "
+                    "Mise en rayon et Expédition. Unités d'œuvre : palette, h/travail, colis."
+                ),
+                products_data=[
+                    {'key': 'p1', 'name': 'Référence L', 'quantity': 2000, 'unit_price': '25.00'},
+                    {'key': 'p2', 'name': 'Référence M', 'quantity': 1200, 'unit_price': '45.00'},
+                ],
+                centers_data=[
+                    # Auxiliaire
+                    {'key': 'logistique', 'code': 'LOG', 'name': 'Logistique commune',
+                     'is_auxiliary': True,  'unit_of_work': '',              'total_units': 0},
+                    # Principaux
+                    {'key': 'reception',  'code': 'REC', 'name': 'Réception',
+                     'is_auxiliary': False, 'unit_of_work': 'palette traitée', 'total_units': 500},
+                    {'key': 'rayon',      'code': 'MRY', 'name': 'Mise en rayon',
+                     'is_auxiliary': False, 'unit_of_work': 'heure travail',   'total_units': 1200},
+                    {'key': 'expedition', 'code': 'EXP', 'name': 'Expédition',
+                     'is_auxiliary': False, 'unit_of_work': 'colis expédié',   'total_units': 3200},
+                ],
+                cost_lines_data=[
+                    # Logistique
+                    {'label': 'Salaires logistique',     'amount': '20000.00', 'center_key': 'logistique'},
+                    {'label': 'Assurances entrepôt',     'amount':  '5000.00', 'center_key': 'logistique'},
+                    # Réception
+                    {'label': 'Salaires réception',      'amount': '18000.00', 'center_key': 'reception'},
+                    {'label': 'Matériel manutention',    'amount':  '6000.00', 'center_key': 'reception'},
+                    # Mise en rayon
+                    {'label': 'Salaires mise en rayon',  'amount': '22000.00', 'center_key': 'rayon'},
+                    {'label': 'Fournitures',             'amount':  '3000.00', 'center_key': 'rayon'},
+                    # Expédition
+                    {'label': 'Salaires expédition',     'amount': '28000.00', 'center_key': 'expedition'},
+                    {'label': 'Emballages',              'amount':  '8000.00', 'center_key': 'expedition'},
+                ],
+                allocations_data=[
+                    # Logistique → 30 % Réception, 40 % Mise en rayon, 30 % Expédition
+                    {'from_key': 'logistique', 'to_key': 'reception',  'percentage': 30},
+                    {'from_key': 'logistique', 'to_key': 'rayon',      'percentage': 40},
+                    {'from_key': 'logistique', 'to_key': 'expedition', 'percentage': 30},
+                ],
+                usages_data=[
+                    # Référence L : 200 palettes, 700 h rayon, 2000 colis
+                    {'product_key': 'p1', 'center_key': 'reception',  'units_used': 200},
+                    {'product_key': 'p1', 'center_key': 'rayon',      'units_used': 700},
+                    {'product_key': 'p1', 'center_key': 'expedition', 'units_used': 2000},
+                    # Référence M : 300 palettes, 500 h rayon, 1200 colis
+                    {'product_key': 'p2', 'center_key': 'reception',  'units_used': 300},
+                    {'product_key': 'p2', 'center_key': 'rayon',      'units_used': 500},
+                    {'product_key': 'p2', 'center_key': 'expedition', 'units_used': 1200},
+                ],
+                seasonality=[6, 6, 7, 8, 9, 10, 11, 10, 8, 7, 9, 9],
+            )
+
+            # ----------------------------------------------------------------
+            # Helper : direct costing évolué (CF communes + spécifiques)
+            # ----------------------------------------------------------------
+            def make_advanced_scenario(name, preset, period, products_data,
+                                       variable_costs, fixed_costs, seasonality):
+                sc = CostScenario.objects.create(
+                    user=user,
+                    name=name,
+                    period=period,
+                    description=f"Scénario exemple direct costing évolué : {name}",
+                    method="direct_costing_advanced",
+                    preset=preset,
+                    use_seasonality=True,
+                )
+
+                prod_objs = {}
+                for p in products_data:
+                    prod = Product.objects.create(
+                        scenario=sc,
+                        name=p['name'],
+                        quantity=p['quantity'],
+                        unit_price=Decimal(p['unit_price']),
+                    )
+                    prod_objs[p['key']] = prod
+
+                for vc in variable_costs:
+                    VariableCost.objects.create(
+                        scenario=sc,
+                        name=vc['name'],
+                        category=vc.get('category', 'Material'),
+                        amount=Decimal(vc['amount']),
+                        product=prod_objs.get(vc.get('product_key')),
+                    )
+
+                for fc in fixed_costs:
+                    product_key = fc.get('product_key')
+                    FixedCost.objects.create(
+                        scenario=sc,
+                        name=fc['name'],
+                        category=fc.get('category', 'Other'),
+                        amount=Decimal(fc['amount']),
+                        product=prod_objs.get(product_key) if product_key else None,
+                        is_common=fc.get('is_common', True),
+                    )
+
+                for month, pct in enumerate(seasonality, start=1):
+                    SeasonalityEntry.objects.create(
+                        scenario=sc, month=month, percentage=Decimal(str(pct)),
+                    )
+
+                return sc
+
+            # ----------------------------------------------------------------
+            # Direct costing évolué — Industriel
+            # Produits : Produit X et Produit Y.
+            # CF communes : loyer, salaires direction.
+            # CF spécifiques : amortissement machine par produit.
+            # ----------------------------------------------------------------
+            make_advanced_scenario(
+                name='Industrie Zeta — Évolué',
+                preset='industriel',
+                period='Annuel',
+                products_data=[
+                    {'key': 'p1', 'name': 'Produit X', 'quantity': 800, 'unit_price': '65.00'},
+                    {'key': 'p2', 'name': 'Produit Y', 'quantity': 500, 'unit_price': '95.00'},
+                ],
+                variable_costs=[
+                    {'name': 'Matières premières X', 'category': 'Material', 'amount': '12000.00', 'product_key': 'p1'},
+                    {'name': "Main d'œuvre X",        'category': 'Labor',    'amount':  '8000.00', 'product_key': 'p1'},
+                    {'name': 'Matières premières Y', 'category': 'Material', 'amount': '15000.00', 'product_key': 'p2'},
+                    {'name': "Main d'œuvre Y",        'category': 'Labor',    'amount': '10000.00', 'product_key': 'p2'},
+                    {'name': 'Énergie variable',     'category': 'Overhead', 'amount':  '5000.00'},
+                ],
+                fixed_costs=[
+                    # CF communes
+                    {'name': 'Loyer usine',          'category': 'Rent',        'amount': '15000.00', 'is_common': True},
+                    {'name': 'Salaires direction',   'category': 'Salary',      'amount': '42000.00', 'is_common': True},
+                    {'name': 'Amort. bâtiment',      'category': 'Depreciation','amount':  '8000.00', 'is_common': True},
+                    # CF spécifiques
+                    {'name': 'Amort. ligne Produit X','category': 'Depreciation','amount': '18000.00', 'is_common': False, 'product_key': 'p1'},
+                    {'name': 'Contrôle qualité X',   'category': 'Other',       'amount':  '6000.00', 'is_common': False, 'product_key': 'p1'},
+                    {'name': 'Amort. ligne Produit Y','category': 'Depreciation','amount': '22000.00', 'is_common': False, 'product_key': 'p2'},
+                ],
+                seasonality=[5, 5, 8, 9, 10, 12, 10, 10, 8, 7, 8, 8],
+            )
+
+            # ----------------------------------------------------------------
+            # Direct costing évolué — Commercial
+            # Produits : Gamme A, Gamme B, Gamme C.
+            # CF communes : loyer boutique, frais généraux, salaires accueil.
+            # CF spécifiques : publicité et SAV par gamme.
+            # ----------------------------------------------------------------
+            make_advanced_scenario(
+                name='Commerce Eta — Évolué',
+                preset='commercial',
+                period='Annuel',
+                products_data=[
+                    {'key': 'p1', 'name': 'Gamme A', 'quantity': 3000, 'unit_price': '18.00'},
+                    {'key': 'p2', 'name': 'Gamme B', 'quantity': 1500, 'unit_price': '32.00'},
+                    {'key': 'p3', 'name': 'Gamme C', 'quantity':  800, 'unit_price': '55.00'},
+                ],
+                variable_costs=[
+                    {'name': 'Achat marchandises A', 'category': 'Material', 'amount': '32000.00', 'product_key': 'p1'},
+                    {'name': 'Transport A',           'category': 'Overhead', 'amount':  '3000.00', 'product_key': 'p1'},
+                    {'name': 'Achat marchandises B', 'category': 'Material', 'amount': '24000.00', 'product_key': 'p2'},
+                    {'name': 'Transport B',           'category': 'Overhead', 'amount':  '2500.00', 'product_key': 'p2'},
+                    {'name': 'Achat marchandises C', 'category': 'Material', 'amount': '20000.00', 'product_key': 'p3'},
+                    {'name': 'Commission vente C',    'category': 'Labor',    'amount':  '4000.00', 'product_key': 'p3'},
+                ],
+                fixed_costs=[
+                    # CF communes
+                    {'name': 'Loyer boutique',   'category': 'Rent',   'amount': '24000.00', 'is_common': True},
+                    {'name': 'Frais généraux',   'category': 'Other',  'amount':  '8000.00', 'is_common': True},
+                    {'name': 'Salaires accueil', 'category': 'Salary', 'amount': '18000.00', 'is_common': True},
+                    # CF spécifiques
+                    {'name': 'Publicité Gamme A', 'category': 'Other', 'amount': '5000.00', 'is_common': False, 'product_key': 'p1'},
+                    {'name': 'SAV Gamme B',       'category': 'Other', 'amount': '3000.00', 'is_common': False, 'product_key': 'p2'},
+                    {'name': 'Publicité Gamme C', 'category': 'Other', 'amount': '8000.00', 'is_common': False, 'product_key': 'p3'},
+                ],
+                seasonality=[6, 6, 7, 8, 9, 10, 11, 10, 8, 7, 9, 9],
+            )
+
+            # ----------------------------------------------------------------
+            # Direct costing évolué — Services
+            # Produits : Consulting RH et Formation Pro.
+            # CF communes : salaires fixes, loyer, assurance.
+            # CF spécifiques : certification et salle par prestation.
+            # ----------------------------------------------------------------
+            make_advanced_scenario(
+                name='Services Iota — Évolué',
+                preset='services',
+                period='Annuel',
+                products_data=[
+                    {'key': 'p1', 'name': 'Consulting RH',  'quantity': 80, 'unit_price': '1800.00'},
+                    {'key': 'p2', 'name': 'Formation Pro',  'quantity': 60, 'unit_price': '1200.00'},
+                ],
+                variable_costs=[
+                    {'name': 'Déplacements RH',      'category': 'Overhead', 'amount':  '8000.00', 'product_key': 'p1'},
+                    {'name': 'Sous-traitance RH',    'category': 'Labor',    'amount': '12000.00', 'product_key': 'p1'},
+                    {'name': 'Supports formation',   'category': 'Material', 'amount':  '4000.00', 'product_key': 'p2'},
+                    {'name': 'Intervenants externes','category': 'Labor',    'amount':  '9000.00', 'product_key': 'p2'},
+                ],
+                fixed_costs=[
+                    # CF communes
+                    {'name': 'Salaires fixes',      'category': 'Salary', 'amount': '72000.00', 'is_common': True},
+                    {'name': 'Loyer bureaux',       'category': 'Rent',   'amount': '14400.00', 'is_common': True},
+                    {'name': 'Assurance entreprise','category': 'Other',  'amount':  '3600.00', 'is_common': True},
+                    # CF spécifiques
+                    {'name': 'Certification RH',  'category': 'Other', 'amount': '5000.00', 'is_common': False, 'product_key': 'p1'},
+                    {'name': 'Location salle',    'category': 'Rent',  'amount': '9000.00', 'is_common': False, 'product_key': 'p2'},
+                ],
+                seasonality=[7, 7, 8, 8, 9, 10, 10, 9, 8, 7, 7, 8],
+            )
+
             self.stdout.write(self.style.SUCCESS(
                 'Demo scenarios created and assigned to user "demo".\n'
-                '  - Industrie Alpha (direct costing)\n'
-                '  - Commerce Beta (direct costing)\n'
-                '  - Services Gamma (direct costing)\n'
-                '  - Menuiserie Delta — Centres (centres d\'analyse)\n'
-                '  - Agence Epsilon — Centres (centres d\'analyse)\n'
+                '  Direct costing simple:\n'
+                '    - Industrie Alpha (industriel)\n'
+                '    - Commerce Beta (commercial)\n'
+                '    - Services Gamma (services)\n'
+                '  Direct costing évolué:\n'
+                '    - Industrie Zeta — Évolué (industriel)\n'
+                '    - Commerce Eta — Évolué (commercial)\n'
+                '    - Services Iota — Évolué (services)\n'
+                '  Centres d\'analyse:\n'
+                '    - Menuiserie Delta — Centres (industriel)\n'
+                '    - Agence Epsilon — Centres (services)\n'
+                '    - Distribution Kappa — Centres (commercial)\n'
             ))

@@ -985,9 +985,33 @@ def center_analysis_results(request, scenario_id):
     from .services.center_analysis_full import calculate_center_analysis_full
     scenario = get_object_or_404(CostScenario, id=scenario_id, user=request.user)
     results = calculate_center_analysis_full(scenario)
+
+    product_results = results["product_results"]
+    total_revenue = sum(r["revenue"] for r in product_results)
+    total_cost = sum(r["total_cost"] for r in product_results)
+    total_profit = total_revenue - total_cost
+    total_profit_rate = (
+        (total_profit / total_revenue * Decimal("100")).quantize(Decimal("0.01"))
+        if total_revenue else Decimal("0.00")
+    )
+    received_costs = {c.id: Decimal("0.00") for c in results["centers"]}
+    for c in results["principal_centers"]:
+        received_costs[c.id] = (
+            results["secondary_costs"].get(c.id, Decimal("0.00"))
+            - results["primary_costs"].get(c.id, Decimal("0.00"))
+        )
+
     return render(request, "costs/center_analysis/results.html", {
         "scenario": scenario,
         "results": results,
+        "industrial_mode": scenario.preset == "industriel",
+        "commercial_mode": scenario.preset == "commercial",
+        "services_mode": scenario.preset == "services",
+        "total_revenue": total_revenue,
+        "total_cost": total_cost,
+        "total_profit": total_profit,
+        "total_profit_rate": total_profit_rate,
+        "received_costs": received_costs,
     })
 
 
