@@ -1,56 +1,53 @@
 {% extends "costs/base.html" %}
-
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 600px;">
-  <div class="card shadow-sm border-0">
-    <div class="card-header text-white" style="background-color: #0f766e;">
-      <h5 class="mb-0">Ajouter une charge variable</h5>
-    </div>
-    <div class="card-body">
-      <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-          {{ form.name }}
-          {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors|striptags }}</div>{% endif %}
-        </div>
+<div style="max-width:640px;">
+  <div class="card">
+    <h2 style="margin:0 0 1.25rem; font-size:1.1rem;">Ajouter une charge variable</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-          {{ form.category }}
-          {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors|striptags }}</div>{% endif %}
-        </div>
+      <div class="field-box">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="field-error">{{ form.name.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3 d-none" id="category-custom-wrapper">
-          <label class="form-label fw-bold" for="{{ form.category_custom.id_for_label }}">{{ form.category_custom.label }}</label>
-          {{ form.category_custom }}
-          {% if form.category_custom.errors %}<div class="text-danger small mt-1">{{ form.category_custom.errors|striptags }}</div>{% endif %}
-        </div>
+      <div class="field-box">
+        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+        {{ form.category }}
+        {% if form.category.errors %}<div class="field-error">{{ form.category.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
-          {{ form.amount }}
-          {% if form.amount.errors %}<div class="text-danger small mt-1">{{ form.amount.errors|striptags }}</div>{% endif %}
-        </div>
+      <div class="field-box is-hidden" id="category-custom-wrapper">
+        <label for="{{ form.category_custom.id_for_label }}">{{ form.category_custom.label }}</label>
+        {{ form.category_custom }}
+        {% if form.category_custom.errors %}<div class="field-error">{{ form.category_custom.errors|striptags }}</div>{% endif %}
+      </div>
 
-        {% if form.product %}
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
-          {{ form.product }}
-          {% if form.product.errors %}<div class="text-danger small mt-1">{{ form.product.errors|striptags }}</div>{% endif %}
-        </div>
-        {% endif %}
+      <div class="field-box">
+        <label for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+        {{ form.amount }}
+        {% if form.amount.errors %}<div class="field-error">{{ form.amount.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <a href="javascript:history.back()" class="text-decoration-none text-secondary">← Annuler</a>
-          <button type="submit" class="btn text-white" style="background-color: #0f766e;">Enregistrer</button>
-        </div>
-      </form>
-    </div>
+      {% if form.product %}
+      <div class="field-box">
+        <label for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
+        {{ form.product }}
+        {% if form.product.errors %}<div class="field-error">{{ form.product.errors|striptags }}</div>{% endif %}
+      </div>
+      {% endif %}
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <a href="javascript:history.back()" class="btn-action btn-light">← Annuler</a>
+        <button type="submit" class="btn-action">Enregistrer</button>
+      </div>
+    </form>
   </div>
 </div>
+
 <script>
   (function () {
     const sel = document.getElementById("id_category");
@@ -60,7 +57,7 @@
 
     function toggle() {
       const isCustom = sel.value === "__custom__";
-      wrapper.classList.toggle("d-none", !isCustom);
+      wrapper.classList.toggle("is-hidden", !isCustom);
       if (customInput) {
         customInput.required = isCustom;
         if (!isCustom) customInput.value = "";
@@ -71,4 +68,5 @@
     toggle();
   })();
 </script>
+
 {% endblock %}

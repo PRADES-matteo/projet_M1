@@ -1,32 +1,34 @@
 {% extends "costs/base.html" %}
-
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 600px;">
-    <div class="card shadow-sm border-0">
-        <div class="card-header text-white" style="background-color: #0f766e;">
-            <h5 class="mb-0">Ajouter un produit (Scénario : {{ scenario.name }})</h5>
-        </div>
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %} 
-                {{ form.non_field_errors }}
-                
-                {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <a href="{% url 'scenario-detail' scenario.id %}" class="text-decoration-none text-secondary">← Retour au scénario</a>
-                    <button type="submit" class="btn text-white" style="background-color: #0f766e;" >Ajouter le produit</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div style="max-width:640px;">
+  <div class="card">
+    <h2 style="margin:0 0 1.25rem; font-size:1.1rem;">
+      Ajouter un produit — {{ scenario.name }}
+    </h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      {% for field in form %}
+      <div class="field-box">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}
+          <div class="field-error">{{ field.errors|striptags }}</div>
+        {% endif %}
+        {% if field.help_text %}
+          <small>{{ field.help_text }}</small>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <a href="{% url 'scenario-detail' scenario.id %}" class="btn-action btn-light">← Retour au scénario</a>
+        <button type="submit" class="btn-action">Ajouter le produit</button>
+      </div>
+    </form>
+  </div>
 </div>
+
 {% endblock %}

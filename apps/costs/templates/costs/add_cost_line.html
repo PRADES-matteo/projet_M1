@@ -1,45 +1,35 @@
-{% extends "costs/base.html" %} {% block content %}
-<div class="container mt-4" style="max-width: 600px">
-  <div class="card shadow-sm border-0">
-    <div class="card-heade text-white" style="background-color: #0f766e">
-      <h5 class="mb-0">Ajouter une ligne de coût - {{ product.name }}</h5>
-    </div>
-    <div class="card-body">
-      <form method="post">
-        {% csrf_token %} {% for field in form %}
-        <div
-          class="mb-3 {% if field.field.widget.input_type == 'checkbox' %}form-check{% endif %}"
-        >
-          {% if field.field.widget.input_type == 'checkbox' %} {{ field }}
-          <label class="form-check-label fw-bold" for="{{ field.id_for_label }}"
-            >{{ field.label }}</label
-          >
-          {% else %}
-          <label class="form-label fw-bold" for="{{ field.id_for_label }}"
-            >{{ field.label }}</label
-          >
-          {{ field }} {% endif %} {% if field.errors %}
-          <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
-          {% endif %}
-        </div>
-        {% endfor %}
+{% extends "costs/base.html" %}
+{% block content %}
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <a
-            href="{% url 'scenario-detail' pk=scenario.id %}"
-            class="text-decoration-none text-secondary"
-            >← Retour au scénario</a
-          >
-          <button
-            type="submit"
-            class="btn text-white"
-            style="background-color: #0f766e"
-          >
-            Ajouter la ligne
-          </button>
-        </div>
-      </form>
-    </div>
+<div style="max-width:640px;">
+  <div class="card">
+    <h2 style="margin:0 0 1.25rem; font-size:1.1rem;">
+      Ajouter une ligne de coût — {{ product.name }}
+    </h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="field-box {% if field.field.widget.input_type == 'checkbox' %}d-flex align-items-center gap-2{% endif %}">
+        {% if field.field.widget.input_type == 'checkbox' %}
+          {{ field }}
+          <label for="{{ field.id_for_label }}" style="margin-bottom:0;">{{ field.label }}</label>
+        {% else %}
+          {{ field.label_tag }}
+          {{ field }}
+        {% endif %}
+        {% if field.errors %}
+          <div class="field-error">{{ field.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <a href="{% url 'scenario-detail' pk=scenario.id %}" class="btn-action btn-light">← Retour au scénario</a>
+        <button type="submit" class="btn-action">Ajouter la ligne</button>
+      </div>
+    </form>
   </div>
 </div>
+
 {% endblock %}

@@ -1,40 +1,39 @@
 {% extends "costs/base.html" %}
-
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 600px;">
-    <div class="card shadow-sm border-0">
-        <div class="card-header text-white" style="background-color: #0f766e;">
-            <h5 class="mb-0">Modifier le produit : {{ product.name }}</h5>
-        </div>
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %} 
-                {{ form.non_field_errors }}
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{{ form.name.label }}</label>
-                    {{ form.name }} 
-                    <div class="text-danger small">{{ form.name.errors }}</div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{{ form.quantity.label }}</label>
-                    {{ form.quantity }} 
-                    <div class="text-danger small">{{ form.quantity.errors }}</div>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-bold">{{ form.unit_price.label }}</label>
-                    {{ form.unit_price }} 
-                    <div class="text-danger small">{{ form.unit_price.errors }}</div>
-                </div>
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="{% url 'scenario-detail' scenario.id %}" class="text-decoration-none text-secondary">← Retour</a>
-                    <button type="submit" class="btn text-white" style="background-color: #0f766e;">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div style="max-width:640px;">
+  <div class="card">
+    <h2 style="margin:0 0 1.25rem; font-size:1.1rem;">
+      Modifier le produit : {{ product.name }}
+    </h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="field-box">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="field-error">{{ form.name.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div class="field-box">
+        <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+        {{ form.quantity }}
+        {% if form.quantity.errors %}<div class="field-error">{{ form.quantity.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div class="field-box">
+        <label for="{{ form.unit_price.id_for_label }}">{{ form.unit_price.label }}</label>
+        {{ form.unit_price }}
+        {% if form.unit_price.errors %}<div class="field-error">{{ form.unit_price.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <a href="{% url 'scenario-detail' scenario.id %}" class="btn-action btn-light">← Retour</a>
+        <button type="submit" class="btn-action">Enregistrer</button>
+      </div>
+    </form>
+  </div>
 </div>
+
 {% endblock %}

@@ -1,139 +1,70 @@
 {% extends "costs/base.html" %}
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 600px">
-  <div class="card shadow-sm border-0">
-    <div class="card-header text-white" style="background-color: #0f766e">
-      <h5 class="mb-0">Ajouter / Modifier une charge fixe</h5>
-    </div>
-    <div class="card-body">
-      <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
 
-        {% if scenario and scenario.method == 'direct_costing_advanced' %}
+<div style="max-width:640px;">
+  <div class="card">
+    <h2 style="margin:0 0 1.25rem; font-size:1.1rem;">Ajouter / Modifier une charge fixe</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-          {{ form.name }}
-          {% if form.name.errors %}
-          <div class="text-danger small mt-1">{{ form.name.errors|striptags }}</div>
-          {% endif %}
-        </div>
+      <div class="field-box">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="field-error">{{ form.name.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-          {{ form.category }}
-          {% if form.category.errors %}
-          <div class="text-danger small mt-1">{{ form.category.errors|striptags }}</div>
-          {% endif %}
-        </div>
+      <div class="field-box">
+        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+        {{ form.category }}
+        {% if form.category.errors %}<div class="field-error">{{ form.category.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3 d-none" id="category-custom-wrapper">
-          <label class="form-label fw-bold" for="{{ form.category_custom.id_for_label }}">{{ form.category_custom.label }}</label>
-          {{ form.category_custom }}
-          {% if form.category_custom.errors %}
-          <div class="text-danger small mt-1">{{ form.category_custom.errors|striptags }}</div>
-          {% endif %}
-        </div>
+      <div class="field-box is-hidden" id="category-custom-wrapper">
+        <label for="{{ form.category_custom.id_for_label }}">{{ form.category_custom.label }}</label>
+        {{ form.category_custom }}
+        {% if form.category_custom.errors %}<div class="field-error">{{ form.category_custom.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
-          {{ form.amount }}
-          {% if form.amount.errors %}
-          <div class="text-danger small mt-1">{{ form.amount.errors|striptags }}</div>
-          {% endif %}
-        </div>
+      <div class="field-box">
+        <label for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+        {{ form.amount }}
+        {% if form.amount.errors %}<div class="field-error">{{ form.amount.errors|striptags }}</div>{% endif %}
+      </div>
 
-        <div class="mb-3 mt-3">
-          <div class="fw-bold mb-2">Type</div>
-          <div class="d-flex flex-column gap-2">
-            {% for radio in form.is_common %}
-            <div class="form-check">
-              {{ radio.tag }}
-              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-            </div>
-            {% endfor %}
+      {% if form.is_common %}
+      <div class="field-box">
+        <label style="margin-bottom:.5rem;">Type</label>
+        <div style="display:flex; flex-direction:column; gap:.4rem;">
+          {% for radio in form.is_common %}
+          <div style="display:flex; align-items:center; gap:.5rem;">
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}" style="font-weight:400; margin:0; font-size:.9rem;">{{ radio.choice_label }}</label>
           </div>
-          {% if form.is_common.help_text %}
-          <div class="form-text">{{ form.is_common.help_text }}</div>
-          {% endif %}
-          {% if form.is_common.errors %}
-          <div class="text-danger small mt-1">{{ form.is_common.errors|striptags }}</div>
-          {% endif %}
+          {% endfor %}
         </div>
+        {% if form.is_common.help_text %}<small>{{ form.is_common.help_text }}</small>{% endif %}
+        {% if form.is_common.errors %}<div class="field-error">{{ form.is_common.errors|striptags }}</div>{% endif %}
+      </div>
+      {% endif %}
 
-        <div class="mb-3" id="product-field-wrapper">
-          <label class="form-label fw-bold" for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
-          {{ form.product }}
-          {% if form.product.help_text %}
-          <div class="form-text">{{ form.product.help_text }}</div>
-          {% endif %}
-          {% if form.product.errors %}
-          <div class="text-danger small mt-1">{{ form.product.errors|striptags }}</div>
-          {% endif %}
-        </div>
+      {% if form.product %}
+      <div class="field-box" id="product-field-wrapper">
+        <label for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
+        {{ form.product }}
+        {% if form.product.help_text %}<small>{{ form.product.help_text }}</small>{% endif %}
+        {% if form.product.errors %}<div class="field-error">{{ form.product.errors|striptags }}</div>{% endif %}
+      </div>
+      {% endif %}
 
-        {% else %}
-
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-          {{ form.name }}
-          {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
-          {{ form.category }}
-          {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div class="mb-3 d-none" id="category-custom-wrapper">
-          <label class="form-label fw-bold" for="{{ form.category_custom.id_for_label }}">{{ form.category_custom.label }}</label>
-          {{ form.category_custom }}
-          {% if form.category_custom.errors %}<div class="text-danger small mt-1">{{ form.category_custom.errors|striptags }}</div>{% endif %}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
-          {{ form.amount }}
-          {% if form.amount.errors %}<div class="text-danger small mt-1">{{ form.amount.errors|striptags }}</div>{% endif %}
-        </div>
-
-        {% if form.is_common %}
-        <div class="mb-3 mt-3">
-          <div class="fw-bold mb-2">Type</div>
-          <div class="d-flex flex-column gap-2">
-            {% for radio in form.is_common %}
-            <div class="form-check">
-              {{ radio.tag }}
-              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-            </div>
-            {% endfor %}
-          </div>
-          {% if form.is_common.help_text %}<div class="form-text">{{ form.is_common.help_text }}</div>{% endif %}
-          {% if form.is_common.errors %}<div class="text-danger small mt-1">{{ form.is_common.errors|striptags }}</div>{% endif %}
-        </div>
-        {% endif %}
-
-        {% if form.product %}
-        <div class="mb-3" id="product-field-wrapper">
-          <label class="form-label fw-bold" for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
-          {{ form.product }}
-          {% if form.product.help_text %}<div class="form-text">{{ form.product.help_text }}</div>{% endif %}
-          {% if form.product.errors %}<div class="text-danger small mt-1">{{ form.product.errors|striptags }}</div>{% endif %}
-        </div>
-        {% endif %}
-
-        {% endif %}
-
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <a href="javascript:history.back()" class="text-decoration-none text-secondary">← Annuler</a>
-          <button type="submit" class="btn text-white" style="background-color: #0f766e">Enregistrer</button>
-        </div>
-      </form>
-    </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <a href="javascript:history.back()" class="btn-action btn-light">← Annuler</a>
+        <button type="submit" class="btn-action">Enregistrer</button>
+      </div>
+    </form>
   </div>
 </div>
+
 <script>
   (function () {
     const sel = document.getElementById("id_category");
@@ -143,7 +74,7 @@
 
     function toggleCategory() {
       const isCustom = sel.value === "__custom__";
-      wrapper.classList.toggle("d-none", !isCustom);
+      wrapper.classList.toggle("is-hidden", !isCustom);
       if (customInput) {
         customInput.required = isCustom;
         if (!isCustom) customInput.value = "";
@@ -154,6 +85,7 @@
     toggleCategory();
   })();
 </script>
+
 {% if scenario and scenario.method == 'direct_costing_advanced' %}
 <script>
   (function () {
@@ -161,18 +93,14 @@
     const productWrapper = document.getElementById("product-field-wrapper");
     const productField = document.getElementById("{{ form.product.id_for_label }}");
 
-    if (!commonRadios.length || !productWrapper || !productField) {
-      return;
-    }
+    if (!commonRadios.length || !productWrapper || !productField) return;
 
     function toggleProductField() {
       const selected = document.querySelector('input[name="{{ form.is_common.html_name }}"]:checked');
       const isCommon = !selected || selected.value === "true";
       productWrapper.style.display = isCommon ? "none" : "block";
       productField.disabled = isCommon;
-      if (isCommon) {
-        productField.value = "";
-      }
+      if (isCommon) productField.value = "";
     }
 
     commonRadios.forEach((radio) => radio.addEventListener("change", toggleProductField));
@@ -180,4 +108,5 @@
   })();
 </script>
 {% endif %}
+
 {% endblock %}

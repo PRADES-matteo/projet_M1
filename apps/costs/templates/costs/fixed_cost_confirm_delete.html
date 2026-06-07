@@ -1,10 +1,21 @@
 {% extends "costs/base.html" %}
- {% block content %}
-<h1>Confirmer la suppression</h1>
-<p>Voulez-vous réellement supprimer la charge fixe "{{ object.name }}" ?</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit">Confirmer</button>
-  <a href="{{ request.META.HTTP_REFERER }}">Annuler</a>
-</form>
+{% block content %}
+
+<div style="max-width:520px;">
+  <div class="card">
+    <h2 style="margin:0 0 .75rem; font-size:1.1rem; color:var(--c-danger);">Confirmer la suppression</h2>
+    <p style="margin-bottom:1.5rem; color:var(--c-text-md);">
+      Voulez-vous réellement supprimer la charge fixe <strong>« {{ object.name }} »</strong> ?
+      Cette action est irréversible.
+    </p>
+    <div style="display:flex; gap:.75rem; justify-content:flex-end;">
+      <a href="{{ request.META.HTTP_REFERER }}" class="btn-action btn-light">Annuler</a>
+      <form method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn-action btn-danger">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
