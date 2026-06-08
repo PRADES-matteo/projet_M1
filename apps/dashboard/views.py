@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import redirect
 
 
 def home(request):
-    return render(request, "dashboard/home.html")
+    if request.user.is_authenticated:
+        return redirect("scenario-list")
+    return redirect("login")
