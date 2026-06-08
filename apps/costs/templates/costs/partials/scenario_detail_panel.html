@@ -290,7 +290,11 @@
 </div>
 {% endif %}
 
-<div class="section-title">Vision d'ensemble Direct Costing</div>
+<div class="section-title">Vision d'ensemble
+  {% if scenario.method == 'center_analysis' %}Centres d'analyse
+  {% elif scenario.method == 'direct_costing_advanced' %}Direct Costing Évolué
+  {% else %}Direct Costing{% endif %}
+</div>
 
 <div class="table-wrap">
   {% if summary_rows %}

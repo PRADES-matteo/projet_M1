@@ -57,7 +57,11 @@
 {% endif %}
 
 <div class="section-card printable">
-  <h2>Vision d'ensemble Direct Costing</h2>
+  <h2>Vision d'ensemble
+    {% if scenario.method == 'center_analysis' %}Centres d'analyse
+    {% elif scenario.method == 'direct_costing_advanced' %}Direct Costing Évolué
+    {% else %}Direct Costing{% endif %}
+  </h2>
   <div class="table-wrap">
     {% if summary_rows %}
     <table class="summary">

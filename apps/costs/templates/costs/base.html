@@ -155,11 +155,12 @@
       .sidebar-toggle.collapsed svg { transform: rotate(180deg); }
 
       /* Main layout */
-      .main { display: flex; flex-direction: row; }
+      .main { display: flex; flex-direction: row; width: 100%; overflow-x: hidden; }
       .main-content {
         flex: 1;
+        min-width: 0;
         margin-left: 260px;
-        padding: 2rem;
+        padding: 1.5rem;
         min-height: 100vh;
         transition: margin-left .25s ease;
       }
