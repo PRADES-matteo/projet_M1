@@ -139,6 +139,24 @@
   </div>
 </div>
 
+<div class="print-only section-card printable">
+  <h2>Indicateurs clés</h2>
+  <table class="summary" style="width:auto; min-width:360px;">
+    <tbody>
+      <tr><td>Chiffre d'affaires total</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.total_revenue|floatformat:2 }} €</td></tr>
+      <tr><td>Coûts variables totaux</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.total_variable_costs|floatformat:2 }} €</td></tr>
+      <tr><td><strong>Marge sur coût variable (MCV)</strong></td><td style="text-align:right; padding-left:2rem;"><strong>{{ automatic_results.mcv|floatformat:2 }} €</strong></td></tr>
+      <tr><td>Taux de marge</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.taux_marge|floatformat:2 }} %</td></tr>
+      <tr><td>Charges fixes totales</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.total_fixed_costs|floatformat:2 }} €</td></tr>
+      <tr><td><strong>Seuil de rentabilité</strong></td><td style="text-align:right; padding-left:2rem;"><strong>{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</strong></td></tr>
+      <tr><td>Point mort</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.point_mort|floatformat:0 }} jour(s)</td></tr>
+      <tr><td>Marge de sécurité</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.marge_securite|floatformat:2 }} €</td></tr>
+      <tr><td>Indice de sécurité</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.indice_securite|floatformat:2 }} %</td></tr>
+      <tr><td>Levier opérationnel</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.levier_operationnel|floatformat:4 }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
 <div class="section-card">
   <h2>Produits et Stocks</h2>
   <div class="table-wrap">
@@ -323,7 +341,7 @@
   >
 </div>
 
-<div class="section-card printable">
+<div class="section-card">
   {% if seasonality_list %}
   <h2>Saisonnalité</h2>
 
@@ -454,7 +472,15 @@
             },
           ],
         },
-        options: { scales: { y: { beginAtZero: true, max: 100 } } },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: Math.min(Math.max(...data) * 1.25, 100) || 10,
+              ticks: { callback: (v) => v + ' %' },
+            }
+          }
+        },
       });
     }
   </script>
