@@ -32,6 +32,12 @@
         class="btn-action btn-secondary"
         >Dupliquer scénario</a
       >
+      <a
+        href="{% url 'calculate_results' scenario.id %}"
+        class="btn-action"
+        style="background-color:#059669;"
+        >Calculer les résultats</a
+      >
       <button
         type="button"
         class="btn-action btn-light"
@@ -341,6 +347,92 @@
   >
 </div>
 
+{% if scenario.method == "center_analysis" %}
+<div class="section-card">
+    <h2>Centres d'analyse</h2>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action">
+            Gérer les centres
+        </a>
+        <a href="{% url 'manage_product_usages' scenario.id %}" class="btn-action btn-secondary">
+            Unités d'œuvre par produit
+        </a>
+        <a href="{% url 'center_analysis_results' scenario.id %}" class="btn-action" style="background:#7c3aed;">
+            Voir les résultats
+        </a>
+    </div>
+
+    {% if centers %}
+    <div class="table-wrap">
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Unité d'œuvre</th>
+                    <th>Total UO</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for center in centers %}
+                <tr>
+                    <td>{{ center.code }}</td>
+                    <td>{{ center.name }}</td>
+                    <td>{% if center.is_auxiliary %}Auxiliaire{% else %}Principal{% endif %}</td>
+                    <td>{{ center.unit_of_work|default:"-" }}</td>
+                    <td>{{ center.total_units|floatformat:2 }}</td>
+                    <td style="text-align:left;">
+                        <a href="{% url 'manage_center_charges' scenario.id center.id %}" class="btn-action btn-light">Charges</a>
+                        {% if center.is_auxiliary %}
+                        <a href="{% url 'manage_allocations' scenario.id center.id %}" class="btn-action btn-secondary" style="margin-left:0.25rem;">Répartitions</a>
+                        {% endif %}
+                        <a href="{% url 'edit_cost_center' scenario.id center.id %}" class="btn-action btn-light" style="margin-left:0.25rem;">Modifier</a>
+                        <form method="post" action="{% url 'delete_cost_center' scenario.id center.id %}" style="display:inline; margin-left:0.25rem;" onsubmit="return confirm('Supprimer ce centre ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-light">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:#6b7280;">Aucun centre d'analyse défini. Cliquez sur "Gérer les centres" pour commencer.</p>
+    {% endif %}
+
+    {% if center_analysis_results %}
+    <h3 style="margin-top:1.5rem;">Résumé des taux de cession</h3>
+    <div class="table-wrap">
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th>Centre principal</th>
+                    <th>Charges totales après répartition</th>
+                    <th>Unités d'œuvre</th>
+                    <th>Taux de cession</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for center in center_analysis_results.principal_centers %}
+                <tr>
+                    <td>{{ center.name }}</td>
+                    <td>{{ center_analysis_results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
+                    <td>{{ center.total_units|floatformat:2 }} {{ center.unit_of_work }}</td>
+                    <td>{{ center_analysis_results.taux|dict_get:center.id|floatformat:4 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+
 <div class="section-card">
   {% if seasonality_list %}
   <h2>Saisonnalité</h2>
@@ -560,100 +652,5 @@
   {% else %}
   <p>Aucune version sauvegardée pour le moment.</p>
   {% endif %}
-</div>
-
-{% if scenario.method == "center_analysis" %}
-<div class="section-card">
-    <h2>Centres d'analyse</h2>
-
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-        <a href="{% url 'manage_cost_centers' scenario.id %}" class="btn-action">
-            Gérer les centres
-        </a>
-        <a href="{% url 'manage_product_usages' scenario.id %}" class="btn-action btn-secondary">
-            Unités d'œuvre par produit
-        </a>
-        <a href="{% url 'center_analysis_results' scenario.id %}" class="btn-action" style="background:#7c3aed;">
-            Voir les résultats
-        </a>
-    </div>
-
-    {% if centers %}
-    <div class="table-wrap">
-        <table class="summary">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Nom</th>
-                    <th>Type</th>
-                    <th>Unité d'œuvre</th>
-                    <th>Total UO</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for center in centers %}
-                <tr>
-                    <td>{{ center.code }}</td>
-                    <td>{{ center.name }}</td>
-                    <td>{% if center.is_auxiliary %}Auxiliaire{% else %}Principal{% endif %}</td>
-                    <td>{{ center.unit_of_work|default:"-" }}</td>
-                    <td>{{ center.total_units|floatformat:2 }}</td>
-                    <td style="text-align:left;">
-                        <a href="{% url 'manage_center_charges' scenario.id center.id %}" class="btn-action btn-light">Charges</a>
-                        {% if center.is_auxiliary %}
-                        <a href="{% url 'manage_allocations' scenario.id center.id %}" class="btn-action btn-secondary" style="margin-left:0.25rem;">Répartitions</a>
-                        {% endif %}
-                        <a href="{% url 'edit_cost_center' scenario.id center.id %}" class="btn-action btn-light" style="margin-left:0.25rem;">Modifier</a>
-                        <form method="post" action="{% url 'delete_cost_center' scenario.id center.id %}" style="display:inline; margin-left:0.25rem;" onsubmit="return confirm('Supprimer ce centre ?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-action btn-light">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p style="color:#6b7280;">Aucun centre d'analyse défini. Cliquez sur "Gérer les centres" pour commencer.</p>
-    {% endif %}
-
-    {% if center_analysis_results %}
-    <h3 style="margin-top:1.5rem;">Résumé des taux de cession</h3>
-    <div class="table-wrap">
-        <table class="summary">
-            <thead>
-                <tr>
-                    <th>Centre principal</th>
-                    <th>Charges totales après répartition</th>
-                    <th>Unités d'œuvre</th>
-                    <th>Taux de cession</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for center in center_analysis_results.principal_centers %}
-                <tr>
-                    <td>{{ center.name }}</td>
-                    <td>{{ center_analysis_results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
-                    <td>{{ center.total_units|floatformat:2 }} {{ center.unit_of_work }}</td>
-                    <td>{{ center_analysis_results.taux|dict_get:center.id|floatformat:4 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-</div>
-{% endif %}
-
-<div class="section-card">
-  <h2>Actions</h2>
-  <a href="{% url 'calculate_results' scenario.id %}" class="btn-action" style="background-color: #059669;"
-    >Calculer les résultats</a
-  >
-  <a href="{% url 'scenario-list' %}" class="btn-action btn-secondary"
-    >Retour à la liste des scénarios</a
-  >
 </div>
 {% endblock %}
