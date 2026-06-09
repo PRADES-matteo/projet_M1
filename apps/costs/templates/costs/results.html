@@ -845,130 +845,260 @@
 </div>
 
 {% else %}
-<div class="kpi-grid">
-  <div class="kpi-card {% if commercial_mode %}featured-commercial{% elif industrial_mode %}featured-industrial{% elif services_mode %}featured-services{% endif %}">
-    <div class="kpi-label">Chiffre d'affaires total</div>
-    <div class="kpi-value">{{ automatic_results.total_revenue|floatformat:2 }}</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</div>
-    <div class="kpi-value">{{ automatic_results.total_variable_costs|floatformat:2 }}</div>
-  </div>
-  {% if not services_mode %}
-  <div class="kpi-card">
-    <div class="kpi-label">CMP</div>
-    <div class="kpi-value">{{ total_cmp|floatformat:2 }}</div>
-  </div>
-  {% endif %}
-  <div class="kpi-card {% if commercial_mode %}featured-commercial{% elif industrial_mode %}featured-industrial{% elif services_mode %}featured-services{% endif %}">
-    <div class="kpi-label">{% if commercial_mode %}Marge commerciale{% elif services_mode %}MSCV{% else %}Marge sur coût variable{% endif %}</div>
-    <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }}</div>
-  </div>
-  <div class="kpi-card {% if automatic_results.resultat >= 0 %}featured-positive{% else %}featured-negative{% endif %}">
-    <div class="kpi-label">Résultat</div>
-    <div class="kpi-value" style="color:{% if automatic_results.resultat >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ automatic_results.resultat|floatformat:2 }}</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Taux de marge</div>
-    <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }}%</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Seuil de rentabilité</div>
-    <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
-  </div>
-  {% if automatic_results.resultat >= 0 %}
-  <div class="kpi-card">
-    <div class="kpi-label">Point mort</div>
-    <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} jours</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Indice de sécurité</div>
-    <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:2 }}%</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Marge de sécurité</div>
-    <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }} €</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">Levier opérationnel</div>
-    <div class="kpi-value">{{ automatic_results.levier_operationnel|floatformat:2 }}</div>
-  </div>
-  {% else %}
-  <div class="kpi-card featured-negative" style="grid-column:1/-1;">
-    <div class="kpi-label" style="font-size:.9rem;">⚠ Résultat déficitaire</div>
-    <div style="font-size:.88rem;color:#7f1d1d;margin-top:.3rem;line-height:1.5;">
-      Le seuil de rentabilité n'est pas atteint. Point mort, marge de sécurité, indice de sécurité
-      et levier opérationnel <strong>ne sont pas significatifs</strong> dans ce contexte.
-    </div>
-  </div>
-  {% endif %}
-</div>
 
+{# ── COMPTE DE RÉSULTAT DIFFÉRENTIEL ──────────────────────────────────────── #}
+{% if industrial_mode %}
+<div class="section-card" style="border-color:#0f766e;">
+  <h2 style="margin-top:0;color:#0f766e;">Compte de résultat différentiel <span style="font-size:0.85rem;font-weight:400;color:#6b7280;">— Industriel</span></h2>
+{% elif commercial_mode %}
+<div class="section-card" style="border-color:#fb923c;">
+  <h2 style="margin-top:0;color:#ea580c;">Compte de résultat différentiel <span style="font-size:0.85rem;font-weight:400;color:#6b7280;">— Commercial</span></h2>
+{% elif services_mode %}
+<div class="section-card" style="border-color:#7c3aed;">
+  <h2 style="margin-top:0;color:#7c3aed;">Compte de résultat différentiel <span style="font-size:0.85rem;font-weight:400;color:#6b7280;">— Services</span></h2>
+{% else %}
 <div class="section-card">
-  <h2>Compte de résultats différentiel</h2>
+  <h2 style="margin-top:0;">Compte de résultat différentiel</h2>
+{% endif %}
   <div class="table-wrap">
-    <table class="summary">
-      <thead><tr><th>Indicateur</th><th>Valeur</th></tr></thead>
+    <table class="summary" style="max-width:560px;">
       <tbody>
-        <tr><td>Chiffre d'affaires total</td><td>{{ automatic_results.total_revenue|floatformat:2 }}</td></tr>
-        <tr><td>{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</td><td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td></tr>
-        {% if not services_mode %}<tr><td>CMP</td><td>{{ total_cmp|floatformat:2 }}</td></tr>{% endif %}
-        <tr><td>{% if commercial_mode %}Marge commerciale{% else %}MCV{% endif %}</td><td>{{ automatic_results.mcv|floatformat:2 }}</td></tr>
-        {% if automatic_results.resultat >= 0 %}
-        <tr><td>Résultat</td><td style="color:#16a34a;font-weight:700;">{{ automatic_results.resultat|floatformat:2 }}</td></tr>
-        {% else %}
-        <tr><td>Résultat</td><td style="color:#dc2626;font-weight:700;">{{ automatic_results.resultat|floatformat:2 }}</td></tr>
-        {% endif %}
-        <tr style="border-top: 2px solid #d1d5db;">
-          <td colspan="2" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: #f9fafb;">Indicateurs analytiques</td>
+        <tr>
+          <td style="font-weight:600;">Chiffre d'affaires</td>
+          <td style="text-align:right;font-weight:600;">{{ automatic_results.total_revenue|floatformat:2 }} €</td>
         </tr>
-        <tr><td>Charges fixes totales</td><td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td></tr>
-        <tr><td>Taux de marge</td><td>{{ automatic_results.taux_marge|floatformat:2 }}%</td></tr>
-        <tr><td>Seuil de rentabilité</td><td>{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</td></tr>
-        {% if automatic_results.resultat >= 0 %}
-        <tr><td>Point mort</td><td>{{ automatic_results.point_mort|floatformat:0 }} jours</td></tr>
-        <tr><td>Indice de sécurité</td><td>{{ automatic_results.indice_securite|floatformat:2 }}%</td></tr>
-        <tr><td>Marge de sécurité</td><td>{{ automatic_results.marge_securite|floatformat:2 }} €</td></tr>
-        <tr><td>Levier opérationnel</td><td>{{ automatic_results.levier_operationnel|floatformat:2 }}</td></tr>
-        {% else %}
-        <tr style="background:#fef2f2;color:#991b1b;font-style:italic;">
-          <td colspan="2">Point mort, marge/indice de sécurité, levier opérationnel — non significatifs (déficit)</td>
+        <tr>
+          <td style="color:#6b7280;">
+            − {% if commercial_mode %}Coût d'achat des marchandises vendues{% elif services_mode %}Charges variables de production{% else %}Charges variables{% endif %}
+          </td>
+          <td style="text-align:right;color:#6b7280;">({{ automatic_results.total_variable_costs|floatformat:2 }}) €</td>
         </tr>
-        {% endif %}
+        <tr style="font-weight:700;{% if industrial_mode %}background:#f0fdfa;{% elif commercial_mode %}background:#fff7ed;{% elif services_mode %}background:#f5f3ff;{% endif %}">
+          <td>= {% if commercial_mode %}Marge commerciale{% elif services_mode %}Marge sur coût variable (MSCV){% else %}Marge sur coût variable (MCV){% endif %}</td>
+          <td style="text-align:right;">
+            {{ automatic_results.mcv|floatformat:2 }} €
+            <span style="font-size:0.82rem;font-weight:400;color:#6b7280;margin-left:0.5rem;">{{ automatic_results.taux_marge|floatformat:1 }} %</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#6b7280;">− Charges fixes totales</td>
+          <td style="text-align:right;color:#6b7280;">({{ automatic_results.total_fixed_costs|floatformat:2 }}) €</td>
+        </tr>
+        <tr style="font-weight:800;font-size:1.05rem;border-top:2px solid #e5e7eb;">
+          <td>= Résultat net</td>
+          <td style="text-align:right;">
+            <span style="color:{% if automatic_results.resultat >= 0 %}#16a34a{% else %}#dc2626{% endif %};">
+              {% if automatic_results.resultat >= 0 %}+{% endif %}{{ automatic_results.resultat|floatformat:2 }} €
+            </span>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-
+{# ── INDICATEURS ANALYTIQUES ─────────────────────────────────────────────── #}
 <div class="section-card">
-  <h2>{% if industrial_mode %}Graphiques industriels{% else %}Graphiques simples{% endif %}</h2>
+  <h2 style="margin-top:0;">Indicateurs analytiques</h2>
+
+  {% if automatic_results.resultat >= 0 %}
+
+    {# ---- COMMERCIAL ---- #}
+    {% if commercial_mode %}
+    <p style="font-size:0.82rem;color:#6b7280;margin-top:0;margin-bottom:0.75rem;">
+      Focus : rentabilité commerciale, couverture des charges de structure et marge de manœuvre face aux variations de ventes.
+    </p>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="border-left:4px solid #ea580c;">
+        <div class="kpi-label">Taux de marge commerciale</div>
+        <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Marge / Chiffre d'affaires</div>
+      </div>
+      <div class="kpi-card" style="border-left:4px solid #ea580c;">
+        <div class="kpi-label">Marge commerciale</div>
+        <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">CA − Coût d'achat des marchandises</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Charges de structure</div>
+        <div class="kpi-value">{{ automatic_results.total_fixed_costs|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">À couvrir par la marge commerciale</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Seuil de rentabilité</div>
+        <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">CA minimum à réaliser</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Point mort</div>
+        <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} jours</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Jour d'équilibre dans l'année</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Marge de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Baisse de CA absorbable</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Indice de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">% du CA au-delà du seuil</div>
+      </div>
+    </div>
+
+    {# ---- SERVICES ---- #}
+    {% elif services_mode %}
+    <p style="font-size:0.82rem;color:#6b7280;margin-top:0;margin-bottom:0.75rem;">
+      Focus : marge sur coût variable de service, absorption des charges de structure et sensibilité du résultat aux variations d'activité (levier).
+    </p>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="border-left:4px solid #7c3aed;">
+        <div class="kpi-label">Taux de MSCV</div>
+        <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">MSCV / Chiffre d'affaires</div>
+      </div>
+      <div class="kpi-card" style="border-left:4px solid #7c3aed;">
+        <div class="kpi-label">MSCV (€)</div>
+        <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Contribution aux charges fixes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Charges de structure</div>
+        <div class="kpi-value">{{ automatic_results.total_fixed_costs|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">À absorber par la MSCV</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Levier opérationnel</div>
+        <div class="kpi-value">{{ automatic_results.levier_operationnel|floatformat:2 }}</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Sensibilité du résultat à l'activité</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Seuil de rentabilité</div>
+        <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">CA minimum à facturer</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Point mort</div>
+        <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} jours</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Jour d'équilibre dans l'année</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Marge de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Baisse de CA absorbable</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Indice de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">% du CA au-delà du seuil</div>
+      </div>
+    </div>
+
+    {# ---- INDUSTRIEL (défaut) ---- #}
+    {% else %}
+    <p style="font-size:0.82rem;color:#6b7280;margin-top:0;margin-bottom:0.75rem;">
+      Focus : couverture des charges fixes de production, seuil d'équilibre et risque d'exploitation lié à la structure de coûts.
+    </p>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="border-left:4px solid #0f766e;">
+        <div class="kpi-label">Taux de MCV</div>
+        <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">MCV / Chiffre d'affaires</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Charges fixes totales</div>
+        <div class="kpi-value">{{ automatic_results.total_fixed_costs|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">À couvrir par la MCV</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Seuil de rentabilité</div>
+        <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">CA minimum à produire/vendre</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Point mort</div>
+        <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} jours</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Jour d'équilibre dans l'année</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Marge de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }} €</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Baisse de CA absorbable</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Indice de sécurité</div>
+        <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:2 }} %</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">% du CA au-delà du seuil</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Levier opérationnel</div>
+        <div class="kpi-value">{{ automatic_results.levier_operationnel|floatformat:2 }}</div>
+        <div style="font-size:0.73rem;color:#6b7280;margin-top:0.25rem;">Amplification des variations de résultat</div>
+      </div>
+    </div>
+    {% endif %}
+
+  {% else %}
+  {# ---- CAS DÉFICITAIRE ---- #}
+  <div class="kpi-grid" style="margin-bottom:0.75rem;">
+    {% if commercial_mode %}
+    <div class="kpi-card" style="border-left:4px solid #ea580c;">
+      <div class="kpi-label">Taux de marge commerciale</div>
+      <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+    </div>
+    <div class="kpi-card" style="border-left:4px solid #ea580c;">
+      <div class="kpi-label">Marge commerciale</div>
+      <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }} €</div>
+    </div>
+    {% elif services_mode %}
+    <div class="kpi-card" style="border-left:4px solid #7c3aed;">
+      <div class="kpi-label">Taux de MSCV</div>
+      <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+    </div>
+    <div class="kpi-card" style="border-left:4px solid #7c3aed;">
+      <div class="kpi-label">MSCV (€)</div>
+      <div class="kpi-value">{{ automatic_results.mcv|floatformat:2 }} €</div>
+    </div>
+    {% else %}
+    <div class="kpi-card" style="border-left:4px solid #0f766e;">
+      <div class="kpi-label">Taux de MCV</div>
+      <div class="kpi-value">{{ automatic_results.taux_marge|floatformat:2 }} %</div>
+    </div>
+    {% endif %}
+    <div class="kpi-card">
+      <div class="kpi-label">Charges fixes totales</div>
+      <div class="kpi-value">{{ automatic_results.total_fixed_costs|floatformat:2 }} €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Seuil de rentabilité</div>
+      <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
+    </div>
+  </div>
+  <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:0.75rem 1rem;color:#991b1b;font-size:0.88rem;">
+    ⚠ Résultat déficitaire — Point mort, marge de sécurité, indice de sécurité et levier opérationnel ne sont pas significatifs.
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── GRAPHIQUES ───────────────────────────────────────────────────────────── #}
+<div class="section-card">
+  <h2 style="margin-top:0;">Graphiques</h2>
   {% if automatic_results.has_chart_data %}
-  <div class="chart-grid {% if industrial_mode %}industrial-grid{% endif %}">
+  <div class="chart-grid">
     <div class="section-card chart-panel chart-doughnut">
       <h3>Répartition des charges</h3>
       <canvas id="mixChart"></canvas>
     </div>
-    {% if industrial_mode %}
-    <div class="section-card chart-panel chart-line">
-      <h3>Évolution du stock</h3>
-      <canvas id="stockChart"></canvas>
-    </div>
-    <div class="section-card chart-panel chart-doughnut">
-      <h3>Coûts fixes / variables</h3>
-      <canvas id="splitChart"></canvas>
-    </div>
-    {% else %}
     <div class="section-card chart-panel chart-bar">
       <h3>Vue synthétique</h3>
       <canvas id="kpiChart"></canvas>
     </div>
-    {% endif %}
   </div>
   {% else %}
-  <div class="section-card" style="background:#f9fafb;border-style:dashed;text-align:center;padding:2rem;">
+  <div style="background:#f9fafb;border:1px dashed #d1d5db;border-radius:8px;text-align:center;padding:2rem;">
     <strong>Aucune donnée suffisante pour afficher les graphiques.</strong>
-    <div style="margin-top:0.5rem;color:#6b7280">Ajoutez des produits et des charges pour générer la visualisation.</div>
+    <div style="margin-top:0.5rem;color:#6b7280;">Ajoutez des produits et des charges pour générer la visualisation.</div>
   </div>
   {% endif %}
 </div>
@@ -978,27 +1108,34 @@
 <script>
   const kpiCtx = document.getElementById('kpiChart');
   const mixCtx = document.getElementById('mixChart');
-  const stockCtx = document.getElementById('stockChart');
-  const splitCtx = document.getElementById('splitChart');
-  const industrialMode = {{ industrial_mode|yesno:"true,false" }};
-  const commercialMode = {{ commercial_mode|yesno:"true,false" }};
+  const isCommercial = {{ commercial_mode|yesno:"true,false" }};
+  const isServices  = {{ services_mode|yesno:"true,false" }};
 
-  if (kpiCtx && !industrialMode) {
-    const kpiLabels = commercialMode ? ['Revente', 'Achats', 'CF', 'Marge commerciale'] : ['CA', 'CV', 'CF', 'MCV'];
-    const kpiData = [{{ automatic_results.total_revenue|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.mcv|unlocalize }}];
-    new Chart(kpiCtx, { type: 'bar', data: { labels: kpiLabels, datasets: [{ label: 'Montant', data: kpiData, backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#16a34a'] }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  if (kpiCtx) {
+    const kpiLabels = isCommercial
+      ? ['CA', 'Achats', 'CF', 'Marge commerciale']
+      : isServices
+        ? ['CA', 'CV', 'CF', 'MSCV']
+        : ['CA', 'CV', 'CF', 'MCV'];
+    const kpiData = [
+      {{ automatic_results.total_revenue|unlocalize }},
+      {{ automatic_results.total_variable_costs|unlocalize }},
+      {{ automatic_results.total_fixed_costs|unlocalize }},
+      {{ automatic_results.mcv|unlocalize }}
+    ];
+    new Chart(kpiCtx, {
+      type: 'bar',
+      data: { labels: kpiLabels, datasets: [{ label: 'Montant (€)', data: kpiData, backgroundColor: ['#0f766e','#2563eb','#f59e0b','#16a34a'] }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
   }
 
   if (mixCtx) {
-    new Chart(mixCtx, { type: 'doughnut', data: { labels: ['Variables', 'Fixes'], datasets: [{ data: [{{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}], backgroundColor: ['#2563eb', '#0f766e'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
-  }
-
-  if (industrialMode && stockCtx) {
-    new Chart(stockCtx, { type: 'line', data: { labels: {{ seasonality_labels|safe }}, datasets: [{ label: 'Indice de stock restant', data: {{ stock_evolution_values|safe }}, borderColor: '#0f766e', backgroundColor: 'rgba(15, 118, 110, 0.12)', tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, max: 100 } } } });
-  }
-
-  if (industrialMode && splitCtx) {
-    new Chart(splitCtx, { type: 'doughnut', data: { labels: ['Charges fixes', 'Charges variables'], datasets: [{ data: [{{ automatic_results.total_fixed_costs|unlocalize }}, {{ automatic_results.total_variable_costs|unlocalize }}], backgroundColor: ['#0f766e', '#2563eb'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
+    new Chart(mixCtx, {
+      type: 'doughnut',
+      data: { labels: ['Charges variables','Charges fixes'], datasets: [{ data: [{{ automatic_results.total_variable_costs|unlocalize }}, {{ automatic_results.total_fixed_costs|unlocalize }}], backgroundColor: ['#2563eb','#0f766e'] }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+    });
   }
 </script>
 {% endif %}
