@@ -919,6 +919,9 @@
         {% else %}
         <tr><td>Résultat</td><td style="color:#dc2626;font-weight:700;">{{ automatic_results.resultat|floatformat:2 }}</td></tr>
         {% endif %}
+        <tr style="border-top: 2px solid #d1d5db;">
+          <td colspan="2" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; background: #f9fafb;">Indicateurs analytiques</td>
+        </tr>
         <tr><td>Charges fixes totales</td><td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td></tr>
         <tr><td>Taux de marge</td><td>{{ automatic_results.taux_marge|floatformat:2 }}%</td></tr>
         <tr><td>Seuil de rentabilité</td><td>{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</td></tr>
