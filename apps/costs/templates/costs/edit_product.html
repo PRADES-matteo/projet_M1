@@ -28,6 +28,18 @@
         {% if form.unit_price.errors %}<div class="field-error">{{ form.unit_price.errors|striptags }}</div>{% endif %}
       </div>
 
+      <div class="field-box">
+        <label for="{{ form.stock_initial.id_for_label }}">{{ form.stock_initial.label }}</label>
+        {{ form.stock_initial }}
+        {% if form.stock_initial.errors %}<div class="field-error">{{ form.stock_initial.errors|striptags }}</div>{% endif %}
+      </div>
+
+      <div class="field-box">
+        <label for="{{ form.stock_final.id_for_label }}">{{ form.stock_final.label }}</label>
+        {{ form.stock_final }}
+        {% if form.stock_final.errors %}<div class="field-error">{{ form.stock_final.errors|striptags }}</div>{% endif %}
+      </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
         <a href="{% url 'scenario-detail' scenario.id %}" class="btn-action btn-light">← Retour</a>
         <button type="submit" class="btn-action">Enregistrer</button>

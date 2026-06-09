@@ -739,7 +739,8 @@ def add_cost_line(request, scenario_id, product_id):
             cost_line.scenario = scenario
             cost_line.product = product
             cost_line.save()
-            return redirect("add_cost_line", scenario_id=scenario.id, product_id=product.id)
+            messages.success(request, f"Ligne de coût « {cost_line.label} » ajoutée.")
+            return redirect("scenario-detail", pk=scenario.id)
     else:
         form = CostLineForm(scenario=scenario)
     return render(request, "costs/add_cost_line.html", {"form": form, "scenario": scenario, "product": product})

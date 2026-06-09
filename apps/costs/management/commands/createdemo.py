@@ -531,6 +531,97 @@ class Command(BaseCommand):
                 seasonality=[7, 7, 8, 8, 9, 10, 10, 9, 8, 7, 7, 8],
             )
 
+            # ----------------------------------------------------------------
+            # Comparaison templates — même données, 3 presets différents
+            # Atelier Sigma : illustration de l'impact du template sur l'affichage
+            # Preset 1 : industriel  (×2)
+            # Preset 2 : services    (×1)
+            # ----------------------------------------------------------------
+            SIGMA_PRODUCTS = [
+                {'key': 'p1', 'name': 'Produit Alpha', 'quantity': 200, 'unit_price': '150.00'},
+                {'key': 'p2', 'name': 'Produit Beta',  'quantity': 150, 'unit_price': '200.00'},
+            ]
+            SIGMA_VARIABLE = [
+                {'name': 'Ressources — Alpha',          'category': 'Material', 'amount':  '8000.00', 'product_key': 'p1'},
+                {'name': "Main d'œuvre — Alpha",        'category': 'Labor',    'amount':  '4500.00', 'product_key': 'p1'},
+                {'name': 'Ressources — Beta',           'category': 'Material', 'amount':  '9000.00', 'product_key': 'p2'},
+                {'name': "Main d'œuvre — Beta",         'category': 'Labor',    'amount':  '6000.00', 'product_key': 'p2'},
+                {'name': 'Charges variables communes',  'category': 'Overhead', 'amount':  '3000.00'},
+            ]
+            SIGMA_FIXED = [
+                {'name': 'Salaires permanents', 'category': 'Salary',      'amount': '48000.00', 'is_common': True},
+                {'name': 'Loyer',               'category': 'Rent',        'amount': '10800.00', 'is_common': True},
+                {'name': 'Assurances',          'category': 'Other',       'amount':  '2400.00', 'is_common': True},
+                {'name': 'Équipement Alpha',    'category': 'Depreciation','amount': '12000.00', 'is_common': False, 'product_key': 'p1'},
+                {'name': 'Équipement Beta',     'category': 'Depreciation','amount': '15000.00', 'is_common': False, 'product_key': 'p2'},
+            ]
+            SIGMA_SEASONALITY = [6, 6, 8, 9, 10, 11, 10, 9, 8, 7, 8, 8]
+
+            for preset, label in [
+                ('industriel', 'Industriel'),
+                ('industriel', 'Industriel (v2)'),
+                ('services',   'Services'),
+            ]:
+                make_advanced_scenario(
+                    name=f'Atelier Sigma — {label}',
+                    preset=preset,
+                    period='Annuel 2025',
+                    description=(
+                        f'Scénario de comparaison templates — même données, preset {preset}. '
+                        'Permet d\'observer l\'impact du template sur l\'affichage des résultats.'
+                    ),
+                    products_data=SIGMA_PRODUCTS,
+                    variable_costs=SIGMA_VARIABLE,
+                    fixed_costs=SIGMA_FIXED,
+                    seasonality=SIGMA_SEASONALITY,
+                )
+
+            # ----------------------------------------------------------------
+            # Comparaison templates bénéficiaire — même données, 2 presets
+            # Atelier Côté Sud : résultat = +15 700 €
+            # Objectif : montrer concrètement la différence d'affichage entre
+            # le template industriel (stocks, CMP, saisonnalité) et services
+            # (sans stocks ni CMP) sur un jeu de données identique rentable.
+            # CA = 90 000 €  |  CV = 30 500 €  |  CF = 43 800 €
+            # ----------------------------------------------------------------
+            COTE_SUD_PRODUCTS = [
+                {'key': 'p1', 'name': 'Prestation Alpha', 'quantity': 600, 'unit_price': '80.00'},
+                {'key': 'p2', 'name': 'Prestation Beta',  'quantity': 350, 'unit_price': '120.00'},
+            ]
+            COTE_SUD_VARIABLE = [
+                {'name': 'Ressources directes — Alpha', 'category': 'Material', 'amount': '15000.00', 'product_key': 'p1'},
+                {'name': 'Ressources directes — Beta',  'category': 'Material', 'amount': '12000.00', 'product_key': 'p2'},
+                {'name': 'Charges variables communes',  'category': 'Overhead', 'amount':  '3500.00'},
+            ]
+            COTE_SUD_FIXED = [
+                {'name': 'Salaires permanents',         'category': 'Salary',      'amount': '24000.00', 'is_common': True},
+                {'name': 'Loyer',                       'category': 'Rent',        'amount':  '9600.00', 'is_common': True},
+                {'name': 'Amortissement équipements',   'category': 'Depreciation','amount':  '6000.00', 'is_common': True},
+                {'name': 'Outillage spécifique — Alpha','category': 'Depreciation','amount':  '2400.00', 'is_common': False, 'product_key': 'p1'},
+                {'name': 'Outillage spécifique — Beta', 'category': 'Depreciation','amount':  '1800.00', 'is_common': False, 'product_key': 'p2'},
+            ]
+            COTE_SUD_SEASONALITY = [5, 6, 9, 10, 11, 12, 10, 9, 8, 7, 7, 6]
+
+            for preset, label in [
+                ('industriel', 'Industriel'),
+                ('services',   'Services'),
+            ]:
+                make_advanced_scenario(
+                    name=f'Atelier Côté Sud — {label}',
+                    preset=preset,
+                    period='Annuel 2025',
+                    description=(
+                        f'Comparaison templates (preset {preset}) — résultat bénéficiaire +15 700 €. '
+                        'Même données qu\'Atelier Côté Sud — '
+                        + ('Services' if preset == 'industriel' else 'Industriel')
+                        + '. Observer : stocks et CMP (industriel) vs affichage épuré (services).'
+                    ),
+                    products_data=COTE_SUD_PRODUCTS,
+                    variable_costs=COTE_SUD_VARIABLE,
+                    fixed_costs=COTE_SUD_FIXED,
+                    seasonality=COTE_SUD_SEASONALITY,
+                )
+
             self.stdout.write(self.style.SUCCESS(
                 'Demo scenarios created and assigned to user "demo".\n'
                 '  Direct costing simple:\n'
@@ -545,4 +636,11 @@ class Command(BaseCommand):
                 '    - Mécanique Leclerc — Évolué (industriel)\n'
                 '    - Mode & Style — Évolué (commercial)\n'
                 '    - Cabinet Formation Pro — Évolué (services)\n'
+                '  Comparaison templates (mêmes données, direct costing évolué):\n'
+                '    - Atelier Sigma — Industriel (industriel)\n'
+                '    - Atelier Sigma — Industriel (v2) (industriel)\n'
+                '    - Atelier Sigma — Services (services)\n'
+                '  Comparaison templates bénéficiaire (direct costing évolué, résultat +15 700 €):\n'
+                '    - Atelier Côté Sud — Industriel (industriel)\n'
+                '    - Atelier Côté Sud — Services (services)\n'
             ))
