@@ -119,7 +119,7 @@
           <td style="font-weight:700;background:#f0fdfa;">{{ row.cmp|floatformat:2 }}</td>
           <td>{{ row.mscv|floatformat:2 }}</td>
           <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }}</td>
-          <td>{{ row.taux_ms|floatformat:1 }} %</td>
+          <td>{{ row.taux_ms|floatformat:2 }} %</td>
         </tr>
         {% empty %}
         <tr><td colspan="13" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
@@ -335,7 +335,7 @@
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Taux de marge (global)</div>
-    <div class="kpi-value">{{ advanced_direct_costing.taux_ms_global|floatformat:1 }} %</div>
+    <div class="kpi-value">{{ advanced_direct_costing.taux_ms_global|floatformat:2 }} %</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">CF spécifiques</div>
@@ -376,11 +376,11 @@
           <td style="font-weight:700;">{{ row.product.name }}</td>
           <td>{{ row.revenue|floatformat:2 }} €</td>
           <td>{{ row.mscv|floatformat:2 }} €</td>
-          <td>{{ row.taux_mscv|floatformat:1 }} %</td>
+          <td>{{ row.taux_mscv|floatformat:2 }} %</td>
           <td>{{ row.fixed_specific_cost|floatformat:2 }} €</td>
           <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }} €</td>
-          <td>{{ row.taux_ms|floatformat:1 }} %</td>
-          <td>{{ row.contrib_pct|floatformat:1 }} %</td>
+          <td>{{ row.taux_ms|floatformat:2 }} %</td>
+          <td>{{ row.contrib_pct|floatformat:2 }} %</td>
         </tr>
         {% empty %}
         <tr><td colspan="9" style="text-align:center;color:#6b7280;">Aucun produit saisi.</td></tr>
@@ -394,7 +394,7 @@
           <td>—</td>
           <td>{{ advanced_direct_costing.total_specific_fixed_costs|floatformat:2 }} €</td>
           <td>{{ advanced_direct_costing.total_marge_specifique|floatformat:2 }} €</td>
-          <td>{{ advanced_direct_costing.taux_ms_global|floatformat:1 }} %</td>
+          <td>{{ advanced_direct_costing.taux_ms_global|floatformat:2 }} %</td>
           <td>100 %</td>
         </tr>
       </tfoot>
@@ -509,7 +509,7 @@
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Marge de sécurité</div>
-      <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:1 }} %</div>
+      <div class="kpi-value">{{ automatic_results.indice_securite|floatformat:2 }} %</div>
     </div>
   </div>
 </details>
@@ -731,7 +731,7 @@
           <td>{{ row.revenue|floatformat:2 }} €</td>
           <td>{{ row.variable_cost|floatformat:2 }} €</td>
           <td>{{ row.mscv|floatformat:2 }} €</td>
-          <td>{{ row.taux_mscv|floatformat:1 }} %</td>
+          <td>{{ row.taux_mscv|floatformat:2 }} %</td>
           <td>{{ row.fixed_specific_cost|floatformat:2 }} €</td>
           <td style="font-weight:700;color:{% if row.marge_specifique >= 0 %}#7c3aed{% else %}#dc2626{% endif %};">{{ row.marge_specifique|floatformat:2 }} €</td>
         </tr>
@@ -876,6 +876,7 @@
     <div class="kpi-label">Seuil de rentabilité</div>
     <div class="kpi-value">{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</div>
   </div>
+  {% if automatic_results.resultat >= 0 %}
   <div class="kpi-card">
     <div class="kpi-label">Point mort</div>
     <div class="kpi-value">{{ automatic_results.point_mort|floatformat:0 }} jours</div>
@@ -886,16 +887,25 @@
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Marge de sécurité</div>
-    <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }}</div>
+    <div class="kpi-value">{{ automatic_results.marge_securite|floatformat:2 }} €</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Levier opérationnel</div>
     <div class="kpi-value">{{ automatic_results.levier_operationnel|floatformat:2 }}</div>
   </div>
+  {% else %}
+  <div class="kpi-card featured-negative" style="grid-column:1/-1;">
+    <div class="kpi-label" style="font-size:.9rem;">⚠ Résultat déficitaire</div>
+    <div style="font-size:.88rem;color:#7f1d1d;margin-top:.3rem;line-height:1.5;">
+      Le seuil de rentabilité n'est pas atteint. Point mort, marge de sécurité, indice de sécurité
+      et levier opérationnel <strong>ne sont pas significatifs</strong> dans ce contexte.
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <div class="section-card">
-  <h2>Tableau récapitulatif</h2>
+  <h2>Compte de résultats différentiel</h2>
   <div class="table-wrap">
     <table class="summary">
       <thead><tr><th>Indicateur</th><th>Valeur</th></tr></thead>
@@ -904,45 +914,29 @@
         <tr><td>{% if commercial_mode %}Achats (total){% else %}CV total{% endif %}</td><td>{{ automatic_results.total_variable_costs|floatformat:2 }}</td></tr>
         {% if not services_mode %}<tr><td>CMP</td><td>{{ total_cmp|floatformat:2 }}</td></tr>{% endif %}
         <tr><td>{% if commercial_mode %}Marge commerciale{% else %}MCV{% endif %}</td><td>{{ automatic_results.mcv|floatformat:2 }}</td></tr>
-        <tr><td>Résultat</td><td>{{ automatic_results.resultat|floatformat:2 }}</td></tr>
+        {% if automatic_results.resultat >= 0 %}
+        <tr><td>Résultat</td><td style="color:#16a34a;font-weight:700;">{{ automatic_results.resultat|floatformat:2 }}</td></tr>
+        {% else %}
+        <tr><td>Résultat</td><td style="color:#dc2626;font-weight:700;">{{ automatic_results.resultat|floatformat:2 }}</td></tr>
+        {% endif %}
         <tr><td>Charges fixes totales</td><td>{{ automatic_results.total_fixed_costs|floatformat:2 }}</td></tr>
         <tr><td>Taux de marge</td><td>{{ automatic_results.taux_marge|floatformat:2 }}%</td></tr>
-        <tr><td>Seuil de rentabilité</td><td>{{ automatic_results.seuil_rentabilite|floatformat:2 }}</td></tr>
+        <tr><td>Seuil de rentabilité</td><td>{{ automatic_results.seuil_rentabilite|floatformat:2 }} €</td></tr>
+        {% if automatic_results.resultat >= 0 %}
         <tr><td>Point mort</td><td>{{ automatic_results.point_mort|floatformat:0 }} jours</td></tr>
         <tr><td>Indice de sécurité</td><td>{{ automatic_results.indice_securite|floatformat:2 }}%</td></tr>
-        <tr><td>Marge de sécurité</td><td>{{ automatic_results.marge_securite|floatformat:2 }}</td></tr>
+        <tr><td>Marge de sécurité</td><td>{{ automatic_results.marge_securite|floatformat:2 }} €</td></tr>
         <tr><td>Levier opérationnel</td><td>{{ automatic_results.levier_operationnel|floatformat:2 }}</td></tr>
+        {% else %}
+        <tr style="background:#fef2f2;color:#991b1b;font-style:italic;">
+          <td colspan="2">Point mort, marge/indice de sécurité, levier opérationnel — non significatifs (déficit)</td>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="section-card">
-  <h2>Résultat détaillé de la méthode</h2>
-  {% if scenario.method == "direct_costing" %}
-  <ul>
-    <li>Coûts directs : {{ result.direct_costs }}</li>
-    <li>Coûts indirects : {{ result.indirect_costs }}</li>
-    <li>Coût total : {{ result.total_cost }}</li>
-    <li>Rentabilité globale : {{ result.global_profitability }}%</li>
-  </ul>
-  {% elif scenario.method == "center_analysis" %}
-  <ul>
-    <li>Total général : {{ result.total_general }}</li>
-    <li>Rentabilité globale : {{ result.global_profitability }}%</li>
-  </ul>
-  <div class="table-wrap">
-    <table class="summary">
-      <thead><tr><th>Centre</th><th>Total</th></tr></thead>
-      <tbody>
-        {% for center, total in result.total_by_center.items %}
-        <tr><td>{{ center }}</td><td>{{ total }}</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endif %}
-</div>
 
 <div class="section-card">
   <h2>{% if industrial_mode %}Graphiques industriels{% else %}Graphiques simples{% endif %}</h2>

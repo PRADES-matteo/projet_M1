@@ -9,6 +9,7 @@
       <div class="meta">
         <span class="pill">Méthode : {{ scenario.get_method_display }}</span>
         <span class="pill">Période : {{ scenario.period|default:"N/A" }}</span>
+        {% if scenario.preset %}<span class="pill">Template : {{ scenario.get_preset_display }}</span>{% endif %}
       </div>
     </div>
     <div class="actions">
@@ -33,7 +34,7 @@
         >Dupliquer scénario</a
       >
       <a
-        href="{% url 'calculate_results' scenario.id %}"
+        href="{% if scenario.method == 'center_analysis' %}{% url 'center_analysis_results' scenario.id %}{% else %}{% url 'calculate_results' scenario.id %}{% endif %}"
         class="btn-action"
         style="background-color:#059669;"
         >Calculer les résultats</a
@@ -158,7 +159,7 @@
       <tr><td>Point mort</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.point_mort|floatformat:0 }} jour(s)</td></tr>
       <tr><td>Marge de sécurité</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.marge_securite|floatformat:2 }} €</td></tr>
       <tr><td>Indice de sécurité</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.indice_securite|floatformat:2 }} %</td></tr>
-      <tr><td>Levier opérationnel</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.levier_operationnel|floatformat:4 }}</td></tr>
+      <tr><td>Levier opérationnel</td><td style="text-align:right; padding-left:2rem;">{{ automatic_results.levier_operationnel|floatformat:2 }}</td></tr>
     </tbody>
   </table>
 </div>
@@ -358,9 +359,6 @@
         <a href="{% url 'manage_product_usages' scenario.id %}" class="btn-action btn-secondary">
             Unités d'œuvre par produit
         </a>
-        <a href="{% url 'center_analysis_results' scenario.id %}" class="btn-action" style="background:#7c3aed;">
-            Voir les résultats
-        </a>
     </div>
 
     {% if centers %}
@@ -404,31 +402,6 @@
     <p style="color:#6b7280;">Aucun centre d'analyse défini. Cliquez sur "Gérer les centres" pour commencer.</p>
     {% endif %}
 
-    {% if center_analysis_results %}
-    <h3 style="margin-top:1.5rem;">Résumé des taux de cession</h3>
-    <div class="table-wrap">
-        <table class="summary">
-            <thead>
-                <tr>
-                    <th>Centre principal</th>
-                    <th>Charges totales après répartition</th>
-                    <th>Unités d'œuvre</th>
-                    <th>Taux de cession</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for center in center_analysis_results.principal_centers %}
-                <tr>
-                    <td>{{ center.name }}</td>
-                    <td>{{ center_analysis_results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
-                    <td>{{ center.total_units|floatformat:2 }} {{ center.unit_of_work }}</td>
-                    <td>{{ center_analysis_results.taux|dict_get:center.id|floatformat:4 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
 </div>
 {% endif %}
 

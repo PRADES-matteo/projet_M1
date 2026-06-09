@@ -79,7 +79,7 @@
   <div class="kpi-card {% if total_profit >= 0 %}featured-positive{% else %}featured-negative{% endif %}">
     <div class="kpi-label">Résultat global</div>
     <div class="kpi-value" style="color:{% if total_profit >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ total_profit|floatformat:2 }} €</div>
-    <div class="kpi-sub">{{ total_profit_rate|floatformat:1 }} % du CA</div>
+    <div class="kpi-sub">{{ total_profit_rate|floatformat:2 }} % du CA</div>
   </div>
   <div class="kpi-card featured-industrial">
     <div class="kpi-label">Centres principaux</div>
@@ -126,7 +126,7 @@
           <td>{{ center.unit_of_work|default:"—" }}</td>
           <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:0 }}{% else %}—{% endif %}</td>
           <td style="text-align:right; font-weight:700; color:#0f766e;">
-            {% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:4 }}{% else %}—{% endif %}
+            {% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:2 }}{% else %}—{% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -162,7 +162,7 @@
           <td style="text-align:right;">{{ row.total_cost|floatformat:2 }}</td>
           <td style="text-align:right; font-weight:600; color:#0f766e;">{{ row.unit_cost|floatformat:2 }}</td>
           <td style="text-align:right;" class="{% if row.profit >= 0 %}positive{% else %}negative{% endif %}">{{ row.profit|floatformat:2 }}</td>
-          <td style="text-align:right;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:1 }} %</td>
+          <td style="text-align:right;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:2 }} %</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -173,7 +173,7 @@
           <td style="text-align:right;">{{ total_cost|floatformat:2 }}</td>
           <td>—</td>
           <td style="text-align:right;" class="{% if total_profit >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit|floatformat:2 }}</td>
-          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:1 }} %</td>
+          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:2 }} %</td>
         </tr>
       </tfoot>
     </table>
@@ -212,7 +212,7 @@
           <tr>
             <td>{{ detail.center.name }}</td>
             <td style="text-align:right;">{{ detail.units_used|floatformat:2 }}</td>
-            <td style="text-align:right;">{{ detail.taux|floatformat:4 }}</td>
+            <td style="text-align:right;">{{ detail.taux|floatformat:2 }}</td>
             <td style="text-align:right;">{{ detail.cost|floatformat:2 }}</td>
           </tr>
           {% endfor %}
@@ -236,7 +236,7 @@
 <script>
 (function () {
   const labels = [{% for c in results.principal_centers %}"{{ c.name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
-  const tauxVals = [{% for c in results.principal_centers %}{{ results.taux|dict_get:c.id|floatformat:4 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const tauxVals = [{% for c in results.principal_centers %}{{ results.taux|dict_get:c.id|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
   new Chart(document.getElementById("tauxChart"), {
     type: "bar",
     data: {
@@ -270,12 +270,12 @@
   <div class="kpi-card {% if total_profit >= 0 %}featured-positive{% else %}featured-negative{% endif %}">
     <div class="kpi-label">Résultat global</div>
     <div class="kpi-value" style="color:{% if total_profit >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ total_profit|floatformat:2 }} €</div>
-    <div class="kpi-sub">{{ total_profit_rate|floatformat:1 }} % du CA</div>
+    <div class="kpi-sub">{{ total_profit_rate|floatformat:2 }} % du CA</div>
   </div>
   {% with best=results.product_results|dictsortreversed:"profitability_rate"|first %}
   <div class="kpi-card featured-commercial">
     <div class="kpi-label">Meilleur taux de profit</div>
-    <div class="kpi-value" style="color:#ea580c;">{{ best.profitability_rate|floatformat:1 }} %</div>
+    <div class="kpi-value" style="color:#ea580c;">{{ best.profitability_rate|floatformat:2 }} %</div>
     <div class="kpi-sub">{{ best.product.name }}</div>
   </div>
   {% endwith %}
@@ -308,7 +308,7 @@
           <td style="text-align:right;">{{ row.total_cost|floatformat:2 }}</td>
           <td style="text-align:right; color:#6b7280;">{{ row.unit_cost|floatformat:2 }}</td>
           <td style="text-align:right;" class="{% if row.profit >= 0 %}positive{% else %}negative{% endif %}">{{ row.profit|floatformat:2 }}</td>
-          <td style="text-align:right; font-weight:700;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:1 }} %</td>
+          <td style="text-align:right; font-weight:700;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:2 }} %</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -319,7 +319,7 @@
           <td style="text-align:right;">{{ total_cost|floatformat:2 }}</td>
           <td>—</td>
           <td style="text-align:right;" class="{% if total_profit >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit|floatformat:2 }}</td>
-          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:1 }} %</td>
+          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:2 }} %</td>
         </tr>
       </tfoot>
     </table>
@@ -366,7 +366,7 @@
             </td>
             <td>{{ center.unit_of_work|default:"—" }}</td>
             <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:0 }}{% else %}—{% endif %}</td>
-            <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:4 }}{% else %}—{% endif %}</td>
+            <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:2 }}{% else %}—{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -397,7 +397,7 @@
           <tr>
             <td>{{ detail.center.name }}</td>
             <td style="text-align:right;">{{ detail.units_used|floatformat:2 }}</td>
-            <td style="text-align:right;">{{ detail.taux|floatformat:4 }}</td>
+            <td style="text-align:right;">{{ detail.taux|floatformat:2 }}</td>
             <td style="text-align:right;">{{ detail.cost|floatformat:2 }}</td>
           </tr>
           {% endfor %}
@@ -457,7 +457,7 @@
   <div class="kpi-card {% if total_profit >= 0 %}featured-positive{% else %}featured-negative{% endif %}">
     <div class="kpi-label">Résultat global</div>
     <div class="kpi-value" style="color:{% if total_profit >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{{ total_profit|floatformat:2 }} €</div>
-    <div class="kpi-sub">{{ total_profit_rate|floatformat:1 }} % du CA</div>
+    <div class="kpi-sub">{{ total_profit_rate|floatformat:2 }} % du CA</div>
   </div>
   <div class="kpi-card featured-services">
     <div class="kpi-label">Centres de prestations</div>
@@ -492,7 +492,7 @@
           <td style="text-align:right; color:#6b7280;">+{{ received_costs|dict_get:center.id|floatformat:2 }}</td>
           <td style="text-align:right; font-weight:600;">{{ results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
           <td style="text-align:right;">{{ center.total_units|floatformat:0 }}</td>
-          <td style="text-align:right; font-weight:700; font-size:1.05rem; color:#7c3aed;">{{ results.taux|dict_get:center.id|floatformat:4 }} €</td>
+          <td style="text-align:right; font-weight:700; font-size:1.05rem; color:#7c3aed;">{{ results.taux|dict_get:center.id|floatformat:2 }} €</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -533,7 +533,7 @@
           <td style="text-align:right;">{{ row.revenue|floatformat:2 }}</td>
           <td style="text-align:right;">{{ row.total_cost|floatformat:2 }}</td>
           <td style="text-align:right;" class="{% if row.profit >= 0 %}positive{% else %}negative{% endif %}">{{ row.profit|floatformat:2 }}</td>
-          <td style="text-align:right;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:1 }} %</td>
+          <td style="text-align:right;" class="{% if row.profitability_rate >= 0 %}positive{% else %}negative{% endif %}">{{ row.profitability_rate|floatformat:2 }} %</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -543,7 +543,7 @@
           <td style="text-align:right;">{{ total_revenue|floatformat:2 }}</td>
           <td style="text-align:right;">{{ total_cost|floatformat:2 }}</td>
           <td style="text-align:right;" class="{% if total_profit >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit|floatformat:2 }}</td>
-          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:1 }} %</td>
+          <td style="text-align:right;" class="{% if total_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ total_profit_rate|floatformat:2 }} %</td>
         </tr>
       </tfoot>
     </table>
@@ -583,7 +583,7 @@
             </td>
             <td>{{ center.unit_of_work|default:"—" }}</td>
             <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:0 }}{% else %}—{% endif %}</td>
-            <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:4 }}{% else %}—{% endif %}</td>
+            <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:2 }}{% else %}—{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -615,7 +615,7 @@
           <tr>
             <td>{{ detail.center.name }}</td>
             <td style="text-align:right;">{{ detail.units_used|floatformat:2 }}</td>
-            <td style="text-align:right;">{{ detail.taux|floatformat:4 }}</td>
+            <td style="text-align:right;">{{ detail.taux|floatformat:2 }}</td>
             <td style="text-align:right;">{{ detail.cost|floatformat:2 }}</td>
           </tr>
           {% endfor %}
@@ -636,7 +636,7 @@
 <script>
 (function () {
   const labels = [{% for c in results.principal_centers %}"{{ c.name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
-  const tauxVals = [{% for c in results.principal_centers %}{{ results.taux|dict_get:c.id|floatformat:4 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const tauxVals = [{% for c in results.principal_centers %}{{ results.taux|dict_get:c.id|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
   new Chart(document.getElementById("tauxServiceChart"), {
     type: "bar",
     data: {
@@ -683,7 +683,7 @@
           <td style="text-align:right;">{{ results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
           <td>{{ center.unit_of_work|default:"—" }}</td>
           <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:2 }}{% else %}—{% endif %}</td>
-          <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:4 }}{% else %}—{% endif %}</td>
+          <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:2 }}{% else %}—{% endif %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -748,7 +748,7 @@
           <tr>
             <td>{{ detail.center.name }}</td>
             <td style="text-align:right;">{{ detail.units_used|floatformat:2 }}</td>
-            <td style="text-align:right;">{{ detail.taux|floatformat:4 }}</td>
+            <td style="text-align:right;">{{ detail.taux|floatformat:2 }}</td>
             <td style="text-align:right;">{{ detail.cost|floatformat:2 }}</td>
           </tr>
           {% endfor %}
