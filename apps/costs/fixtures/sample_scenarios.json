@@ -1,768 +1,199 @@
 [
-  {
-    "model": "costs.costscenario",
-    "pk": 1,
-    "fields": {
-      "user": null,
-      "name": "Industrie Alpha",
-      "period": "Annuel",
-      "description": "Direct costing simple — preset industriel",
-      "method": "direct_costing",
-      "preset": "industriel",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 2,
-    "fields": {
-      "user": null,
-      "name": "Commerce Beta",
-      "period": "Annuel",
-      "description": "Direct costing simple — preset commercial",
-      "method": "direct_costing",
-      "preset": "commercial",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 3,
-    "fields": {
-      "user": null,
-      "name": "Services Gamma",
-      "period": "Annuel",
-      "description": "Direct costing simple — preset services",
-      "method": "direct_costing",
-      "preset": "services",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 4,
-    "fields": {
-      "user": null,
-      "name": "Industrie Zeta — Évolué",
-      "period": "Annuel",
-      "description": "Direct costing évolué — preset industriel",
-      "method": "direct_costing_advanced",
-      "preset": "industriel",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 5,
-    "fields": {
-      "user": null,
-      "name": "Commerce Eta — Évolué",
-      "period": "Annuel",
-      "description": "Direct costing évolué — preset commercial",
-      "method": "direct_costing_advanced",
-      "preset": "commercial",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 6,
-    "fields": {
-      "user": null,
-      "name": "Services Iota — Évolué",
-      "period": "Annuel",
-      "description": "Direct costing évolué — preset services",
-      "method": "direct_costing_advanced",
-      "preset": "services",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 7,
-    "fields": {
-      "user": null,
-      "name": "Menuiserie Delta — Centres",
-      "period": "Annuel",
-      "description": "Centres d'analyse — preset industriel",
-      "method": "center_analysis",
-      "preset": "industriel",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 8,
-    "fields": {
-      "user": null,
-      "name": "Agence Epsilon — Centres",
-      "period": "Annuel",
-      "description": "Centres d'analyse — preset services",
-      "method": "center_analysis",
-      "preset": "services",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
-  {
-    "model": "costs.costscenario",
-    "pk": 9,
-    "fields": {
-      "user": null,
-      "name": "Distribution Kappa — Centres",
-      "period": "Annuel",
-      "description": "Centres d'analyse — preset commercial",
-      "method": "center_analysis",
-      "preset": "commercial",
-      "input_mode": "pv_volume",
-      "use_reciprocal_allocation": false,
-      "use_seasonality": false,
-      "created_at": "2026-01-01T00:00:00Z"
-    }
-  },
+  {"model": "costs.costscenario", "pk": 1, "fields": {
+    "user": null, "name": "Plasturgie Dupont", "period": "Annuel 2025",
+    "description": "Direct costing — fabrication de pièces plastiques (boîtiers et joints).",
+    "method": "direct_costing", "preset": "industriel",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 2, "fields": {
+    "user": null, "name": "Épicerie Figuier", "period": "Annuel 2025",
+    "description": "Direct costing — vente de paniers bio et coffrets dégustation.",
+    "method": "direct_costing", "preset": "commercial",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 3, "fields": {
+    "user": null, "name": "Cabinet Nexus Conseil", "period": "Annuel 2025",
+    "description": "Direct costing — missions de conseil RH et formations en entreprise.",
+    "method": "direct_costing", "preset": "services",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 4, "fields": {
+    "user": null, "name": "Menuiserie Moreau", "period": "Annuel 2025",
+    "description": "Centres d'analyse — menuiserie industrielle. Centres Entretien et Énergie répartis vers Débit et Assemblage.",
+    "method": "center_analysis", "preset": "industriel",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 5, "fields": {
+    "user": null, "name": "Agence Créa Paris", "period": "Annuel 2025",
+    "description": "Centres d'analyse — agence de communication. Centre Administration réparti vers Création, Production et Conseil.",
+    "method": "center_analysis", "preset": "services",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 6, "fields": {
+    "user": null, "name": "Logidis Distribution", "period": "Annuel 2025",
+    "description": "Centres d'analyse — distribution commerciale. Centre Logistique réparti vers Réception, Mise en rayon et Expédition.",
+    "method": "center_analysis", "preset": "commercial",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 7, "fields": {
+    "user": null, "name": "Mécanique Leclerc — Évolué", "period": "Annuel 2025",
+    "description": "Direct costing évolué — usinage de précision. CF spécifiques par ligne de production.",
+    "method": "direct_costing_advanced", "preset": "industriel",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 8, "fields": {
+    "user": null, "name": "Mode & Style — Évolué", "period": "Annuel 2025",
+    "description": "Direct costing évolué — prêt-à-porter. CF de lancement spécifiques par collection.",
+    "method": "direct_costing_advanced", "preset": "commercial",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
+  {"model": "costs.costscenario", "pk": 9, "fields": {
+    "user": null, "name": "Cabinet Formation Pro — Évolué", "period": "Annuel 2025",
+    "description": "Direct costing évolué — conseil et formation. CF spécifiques : certification et location salle.",
+    "method": "direct_costing_advanced", "preset": "services",
+    "input_mode": "pv_volume", "use_reciprocal_allocation": false, "use_seasonality": false,
+    "created_at": "2026-01-01T00:00:00Z"}},
 
-  {
-    "model": "costs.product",
-    "pk": 1,
-    "fields": {"scenario": 1, "name": "Produit A", "quantity": 1000, "unit_price": "45.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 2,
-    "fields": {"scenario": 1, "name": "Produit B", "quantity": 600,  "unit_price": "78.50", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 3,
-    "fields": {"scenario": 2, "name": "Article X", "quantity": 2000, "unit_price": "12.50", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 4,
-    "fields": {"scenario": 2, "name": "Article Y", "quantity": 1500, "unit_price": "9.75",  "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 5,
-    "fields": {"scenario": 3, "name": "Prestation Standard", "quantity": 500, "unit_price": "250.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 6,
-    "fields": {"scenario": 4, "name": "Produit X", "quantity": 800, "unit_price": "65.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 7,
-    "fields": {"scenario": 4, "name": "Produit Y", "quantity": 500, "unit_price": "95.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 8,
-    "fields": {"scenario": 5, "name": "Gamme A", "quantity": 3000, "unit_price": "18.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 9,
-    "fields": {"scenario": 5, "name": "Gamme B", "quantity": 1500, "unit_price": "32.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 10,
-    "fields": {"scenario": 5, "name": "Gamme C", "quantity": 800,  "unit_price": "55.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 11,
-    "fields": {"scenario": 6, "name": "Consulting RH", "quantity": 80, "unit_price": "1800.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 12,
-    "fields": {"scenario": 6, "name": "Formation Pro", "quantity": 60, "unit_price": "1200.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 13,
-    "fields": {"scenario": 7, "name": "Fenêtre PVC", "quantity": 400, "unit_price": "320.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 14,
-    "fields": {"scenario": 7, "name": "Porte bois",  "quantity": 250, "unit_price": "480.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 15,
-    "fields": {"scenario": 8, "name": "Campagne web",      "quantity": 30, "unit_price": "8500.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 16,
-    "fields": {"scenario": 8, "name": "Identité visuelle", "quantity": 20, "unit_price": "5200.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 17,
-    "fields": {"scenario": 9, "name": "Référence L", "quantity": 2000, "unit_price": "25.00", "stock_initial": 0, "stock_final": 0}
-  },
-  {
-    "model": "costs.product",
-    "pk": 18,
-    "fields": {"scenario": 9, "name": "Référence M", "quantity": 1200, "unit_price": "45.00", "stock_initial": 0, "stock_final": 0}
-  },
+  {"model": "costs.product", "pk":  1, "fields": {"scenario": 1, "name": "Boîtier série 100",        "quantity": 1500, "unit_price": "12.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  2, "fields": {"scenario": 1, "name": "Joint d'étanchéité",       "quantity": 3000, "unit_price":  "4.50", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  3, "fields": {"scenario": 2, "name": "Panier bio prestige",      "quantity":  600, "unit_price": "65.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  4, "fields": {"scenario": 2, "name": "Coffret dégustation",      "quantity":  400, "unit_price": "48.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  5, "fields": {"scenario": 3, "name": "Mission de conseil",       "quantity":  150, "unit_price":"1200.00","stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  6, "fields": {"scenario": 3, "name": "Formation en entreprise",  "quantity":   40, "unit_price":"2500.00","stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  7, "fields": {"scenario": 4, "name": "Fenêtre PVC",              "quantity":  400, "unit_price":"320.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  8, "fields": {"scenario": 4, "name": "Porte bois",               "quantity":  250, "unit_price":"480.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk":  9, "fields": {"scenario": 5, "name": "Campagne web",             "quantity":   30, "unit_price":"8500.00","stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 10, "fields": {"scenario": 5, "name": "Identité visuelle",        "quantity":   20, "unit_price":"5200.00","stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 11, "fields": {"scenario": 6, "name": "Produit entrée de gamme",  "quantity": 2000, "unit_price": "25.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 12, "fields": {"scenario": 6, "name": "Produit milieu de gamme",  "quantity": 1200, "unit_price": "45.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 13, "fields": {"scenario": 7, "name": "Vilebrequin standard",     "quantity":  800, "unit_price": "65.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 14, "fields": {"scenario": 7, "name": "Carter aluminium",         "quantity":  500, "unit_price": "95.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 15, "fields": {"scenario": 8, "name": "Collection Casual",        "quantity": 3000, "unit_price": "18.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 16, "fields": {"scenario": 8, "name": "Collection Premium",       "quantity": 1500, "unit_price": "32.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 17, "fields": {"scenario": 8, "name": "Accessoires luxe",         "quantity":  800, "unit_price": "55.00", "stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 18, "fields": {"scenario": 9, "name": "Audit organisationnel",    "quantity":   80, "unit_price":"1800.00","stock_initial": 0, "stock_final": 0}},
+  {"model": "costs.product", "pk": 19, "fields": {"scenario": 9, "name": "Formation management",     "quantity":   60, "unit_price":"1200.00","stock_initial": 0, "stock_final": 0}},
 
-  {
-    "model": "costs.variablecost",
-    "pk": 1,
-    "fields": {"scenario": 1, "name": "Consommables",          "category": "Material", "amount": "8000.00",  "product": 1}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 2,
-    "fields": {"scenario": 1, "name": "Main d'oeuvre directe", "category": "Labor",    "amount": "15000.00", "product": 2}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 3,
-    "fields": {"scenario": 2, "name": "Frais d'achat",         "category": "Material", "amount": "25000.00", "product": null}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 4,
-    "fields": {"scenario": 2, "name": "Emballage",             "category": "Material", "amount": "3000.00",  "product": null}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 5,
-    "fields": {"scenario": 3, "name": "Déplacements",          "category": "Overhead", "amount": "7000.00",  "product": null}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 6,
-    "fields": {"scenario": 4, "name": "Matières premières X",  "category": "Material", "amount": "12000.00", "product": 6}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 7,
-    "fields": {"scenario": 4, "name": "Main d'œuvre X",        "category": "Labor",    "amount": "8000.00",  "product": 6}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 8,
-    "fields": {"scenario": 4, "name": "Matières premières Y",  "category": "Material", "amount": "15000.00", "product": 7}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 9,
-    "fields": {"scenario": 4, "name": "Main d'œuvre Y",        "category": "Labor",    "amount": "10000.00", "product": 7}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 10,
-    "fields": {"scenario": 4, "name": "Énergie variable",      "category": "Overhead", "amount": "5000.00",  "product": null}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 11,
-    "fields": {"scenario": 5, "name": "Achat marchandises A",  "category": "Material", "amount": "32000.00", "product": 8}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 12,
-    "fields": {"scenario": 5, "name": "Transport A",           "category": "Overhead", "amount": "3000.00",  "product": 8}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 13,
-    "fields": {"scenario": 5, "name": "Achat marchandises B",  "category": "Material", "amount": "24000.00", "product": 9}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 14,
-    "fields": {"scenario": 5, "name": "Transport B",           "category": "Overhead", "amount": "2500.00",  "product": 9}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 15,
-    "fields": {"scenario": 5, "name": "Achat marchandises C",  "category": "Material", "amount": "20000.00", "product": 10}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 16,
-    "fields": {"scenario": 5, "name": "Commission vente C",    "category": "Labor",    "amount": "4000.00",  "product": 10}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 17,
-    "fields": {"scenario": 6, "name": "Déplacements RH",       "category": "Overhead", "amount": "8000.00",  "product": 11}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 18,
-    "fields": {"scenario": 6, "name": "Sous-traitance RH",     "category": "Labor",    "amount": "12000.00", "product": 11}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 19,
-    "fields": {"scenario": 6, "name": "Supports formation",    "category": "Material", "amount": "4000.00",  "product": 12}
-  },
-  {
-    "model": "costs.variablecost",
-    "pk": 20,
-    "fields": {"scenario": 6, "name": "Intervenants externes", "category": "Labor",    "amount": "9000.00",  "product": 12}
-  },
+  {"model": "costs.variablecost", "pk":  1, "fields": {"scenario": 1, "name": "Granulés plastique — Boîtier",    "category": "Material", "amount":  "6500.00", "product":  1}},
+  {"model": "costs.variablecost", "pk":  2, "fields": {"scenario": 1, "name": "Colorants industriels — Boîtier", "category": "Material", "amount":  "1200.00", "product":  1}},
+  {"model": "costs.variablecost", "pk":  3, "fields": {"scenario": 1, "name": "Caoutchouc brut — Joint",         "category": "Material", "amount":  "5500.00", "product":  2}},
+  {"model": "costs.variablecost", "pk":  4, "fields": {"scenario": 1, "name": "Énergie machines (partagée)",     "category": "Overhead", "amount":  "2800.00", "product": null}},
+  {"model": "costs.variablecost", "pk":  5, "fields": {"scenario": 2, "name": "Achats produits bio — Panier",    "category": "Material", "amount": "22000.00", "product":  3}},
+  {"model": "costs.variablecost", "pk":  6, "fields": {"scenario": 2, "name": "Achats produits traiteur — Coffret","category":"Material","amount": "12000.00", "product":  4}},
+  {"model": "costs.variablecost", "pk":  7, "fields": {"scenario": 2, "name": "Conditionnement & emballage",     "category": "Material", "amount":  "3500.00", "product": null}},
+  {"model": "costs.variablecost", "pk":  8, "fields": {"scenario": 2, "name": "Commissions représentants",       "category": "Labor",    "amount":  "4000.00", "product": null}},
+  {"model": "costs.variablecost", "pk":  9, "fields": {"scenario": 3, "name": "Déplacements & hébergement — Conseil","category":"Overhead","amount": "9000.00","product":  5}},
+  {"model": "costs.variablecost", "pk": 10, "fields": {"scenario": 3, "name": "Intervenants externes — Formation","category": "Labor",  "amount":  "7000.00", "product":  6}},
+  {"model": "costs.variablecost", "pk": 11, "fields": {"scenario": 3, "name": "Supports & ressources pédagogiques","category":"Material","amount": "2500.00","product": null}},
+  {"model": "costs.variablecost", "pk": 12, "fields": {"scenario": 7, "name": "Matières premières — Vilebrequin","category": "Material", "amount": "12000.00", "product": 13}},
+  {"model": "costs.variablecost", "pk": 13, "fields": {"scenario": 7, "name": "Main d'œuvre directe — Vilebrequin","category":"Labor",  "amount":  "8000.00", "product": 13}},
+  {"model": "costs.variablecost", "pk": 14, "fields": {"scenario": 7, "name": "Matières premières — Carter",     "category": "Material", "amount": "15000.00", "product": 14}},
+  {"model": "costs.variablecost", "pk": 15, "fields": {"scenario": 7, "name": "Main d'œuvre directe — Carter",   "category": "Labor",    "amount": "10000.00", "product": 14}},
+  {"model": "costs.variablecost", "pk": 16, "fields": {"scenario": 7, "name": "Énergie variable (partagée)",     "category": "Overhead", "amount":  "5000.00", "product": null}},
+  {"model": "costs.variablecost", "pk": 17, "fields": {"scenario": 8, "name": "Achats marchandises Casual",      "category": "Material", "amount": "32000.00", "product": 15}},
+  {"model": "costs.variablecost", "pk": 18, "fields": {"scenario": 8, "name": "Transport Casual",                "category": "Overhead", "amount":  "3000.00", "product": 15}},
+  {"model": "costs.variablecost", "pk": 19, "fields": {"scenario": 8, "name": "Achats marchandises Premium",     "category": "Material", "amount": "24000.00", "product": 16}},
+  {"model": "costs.variablecost", "pk": 20, "fields": {"scenario": 8, "name": "Transport Premium",               "category": "Overhead", "amount":  "2500.00", "product": 16}},
+  {"model": "costs.variablecost", "pk": 21, "fields": {"scenario": 8, "name": "Achats marchandises Accessoires", "category": "Material", "amount": "20000.00", "product": 17}},
+  {"model": "costs.variablecost", "pk": 22, "fields": {"scenario": 8, "name": "Commission vente Accessoires",    "category": "Labor",    "amount":  "4000.00", "product": 17}},
+  {"model": "costs.variablecost", "pk": 23, "fields": {"scenario": 9, "name": "Déplacements — Audit",            "category": "Overhead", "amount":  "8000.00", "product": 18}},
+  {"model": "costs.variablecost", "pk": 24, "fields": {"scenario": 9, "name": "Sous-traitance — Audit",          "category": "Labor",    "amount": "12000.00", "product": 18}},
+  {"model": "costs.variablecost", "pk": 25, "fields": {"scenario": 9, "name": "Supports formation",              "category": "Material", "amount":  "4000.00", "product": 19}},
+  {"model": "costs.variablecost", "pk": 26, "fields": {"scenario": 9, "name": "Intervenants externes",           "category": "Labor",    "amount":  "9000.00", "product": 19}},
 
-  {
-    "model": "costs.fixedcost",
-    "pk": 1,
-    "fields": {"scenario": 1, "name": "Loyer usine",   "category": "Rent",   "amount": "12000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 2,
-    "fields": {"scenario": 1, "name": "Salaires",      "category": "Salary", "amount": "48000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 3,
-    "fields": {"scenario": 2, "name": "Boutique loyer","category": "Rent",   "amount": "18000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 4,
-    "fields": {"scenario": 2, "name": "Marketing",     "category": "Other",  "amount": "6000.00",  "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 5,
-    "fields": {"scenario": 3, "name": "Salaires",      "category": "Salary", "amount": "60000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 6,
-    "fields": {"scenario": 3, "name": "Assurances",    "category": "Other",  "amount": "4000.00",  "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 7,
-    "fields": {"scenario": 4, "name": "Loyer usine",         "category": "Rent",        "amount": "15000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 8,
-    "fields": {"scenario": 4, "name": "Salaires direction",  "category": "Salary",      "amount": "42000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 9,
-    "fields": {"scenario": 4, "name": "Amort. bâtiment",     "category": "Depreciation","amount": "8000.00",  "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 10,
-    "fields": {"scenario": 4, "name": "Amort. ligne Produit X","category": "Depreciation","amount": "18000.00","is_common": false, "product": 6}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 11,
-    "fields": {"scenario": 4, "name": "Contrôle qualité X",  "category": "Other",       "amount": "6000.00",  "is_common": false, "product": 6}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 12,
-    "fields": {"scenario": 4, "name": "Amort. ligne Produit Y","category": "Depreciation","amount": "22000.00","is_common": false, "product": 7}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 13,
-    "fields": {"scenario": 5, "name": "Loyer boutique",   "category": "Rent",   "amount": "24000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 14,
-    "fields": {"scenario": 5, "name": "Frais généraux",   "category": "Other",  "amount": "8000.00",  "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 15,
-    "fields": {"scenario": 5, "name": "Salaires accueil", "category": "Salary", "amount": "18000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 16,
-    "fields": {"scenario": 5, "name": "Publicité Gamme A","category": "Other",  "amount": "5000.00",  "is_common": false, "product": 8}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 17,
-    "fields": {"scenario": 5, "name": "SAV Gamme B",      "category": "Other",  "amount": "3000.00",  "is_common": false, "product": 9}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 18,
-    "fields": {"scenario": 5, "name": "Publicité Gamme C","category": "Other",  "amount": "8000.00",  "is_common": false, "product": 10}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 19,
-    "fields": {"scenario": 6, "name": "Salaires fixes",       "category": "Salary", "amount": "72000.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 20,
-    "fields": {"scenario": 6, "name": "Loyer bureaux",        "category": "Rent",   "amount": "14400.00", "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 21,
-    "fields": {"scenario": 6, "name": "Assurance entreprise", "category": "Other",  "amount": "3600.00",  "is_common": true,  "product": null}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 22,
-    "fields": {"scenario": 6, "name": "Certification RH",     "category": "Other",  "amount": "5000.00",  "is_common": false, "product": 11}
-  },
-  {
-    "model": "costs.fixedcost",
-    "pk": 23,
-    "fields": {"scenario": 6, "name": "Location salle",       "category": "Rent",   "amount": "9000.00",  "is_common": false, "product": 12}
-  },
+  {"model": "costs.fixedcost", "pk":  1, "fields": {"scenario": 1, "name": "Loyer atelier de production",      "category": "Rent",        "amount":  "9600.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  2, "fields": {"scenario": 1, "name": "Salaires de production",          "category": "Salary",      "amount": "36000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  3, "fields": {"scenario": 1, "name": "Amortissement presses",           "category": "Depreciation","amount": "10000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  4, "fields": {"scenario": 1, "name": "Assurances industrielles",        "category": "Other",       "amount":  "3200.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  5, "fields": {"scenario": 2, "name": "Loyer boutique",                  "category": "Rent",        "amount": "18000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  6, "fields": {"scenario": 2, "name": "Salaires vendeurs",               "category": "Salary",      "amount": "28000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  7, "fields": {"scenario": 2, "name": "Publicité & communication",       "category": "Other",       "amount":  "5500.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  8, "fields": {"scenario": 2, "name": "Assurances commerce",             "category": "Other",       "amount":  "1800.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk":  9, "fields": {"scenario": 3, "name": "Salaires consultants permanents", "category": "Salary",      "amount": "68000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 10, "fields": {"scenario": 3, "name": "Loyer bureaux",                   "category": "Rent",        "amount": "12000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 11, "fields": {"scenario": 3, "name": "Assurance responsabilité civile", "category": "Other",       "amount":  "2400.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 12, "fields": {"scenario": 3, "name": "Frais informatiques & outils",   "category": "Other",       "amount":  "4800.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 13, "fields": {"scenario": 7, "name": "Loyer usine",                     "category": "Rent",        "amount": "15000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 14, "fields": {"scenario": 7, "name": "Salaires direction",              "category": "Salary",      "amount": "42000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 15, "fields": {"scenario": 7, "name": "Amort. bâtiment",                 "category": "Depreciation","amount":  "8000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 16, "fields": {"scenario": 7, "name": "Amort. ligne Vilebrequin",        "category": "Depreciation","amount": "18000.00", "is_common": false, "product": 13}},
+  {"model": "costs.fixedcost", "pk": 17, "fields": {"scenario": 7, "name": "Contrôle qualité Vilebrequin",   "category": "Other",       "amount":  "6000.00", "is_common": false, "product": 13}},
+  {"model": "costs.fixedcost", "pk": 18, "fields": {"scenario": 7, "name": "Amort. ligne Carter",             "category": "Depreciation","amount": "22000.00", "is_common": false, "product": 14}},
+  {"model": "costs.fixedcost", "pk": 19, "fields": {"scenario": 8, "name": "Loyer boutique",                  "category": "Rent",        "amount": "24000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 20, "fields": {"scenario": 8, "name": "Frais généraux",                  "category": "Other",       "amount":  "8000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 21, "fields": {"scenario": 8, "name": "Salaires accueil",                "category": "Salary",      "amount": "18000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 22, "fields": {"scenario": 8, "name": "Publicité Collection Casual",     "category": "Other",       "amount":  "5000.00", "is_common": false, "product": 15}},
+  {"model": "costs.fixedcost", "pk": 23, "fields": {"scenario": 8, "name": "SAV Collection Premium",          "category": "Other",       "amount":  "3000.00", "is_common": false, "product": 16}},
+  {"model": "costs.fixedcost", "pk": 24, "fields": {"scenario": 8, "name": "Publicité Accessoires luxe",      "category": "Other",       "amount":  "8000.00", "is_common": false, "product": 17}},
+  {"model": "costs.fixedcost", "pk": 25, "fields": {"scenario": 9, "name": "Salaires fixes",                  "category": "Salary",      "amount": "72000.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 26, "fields": {"scenario": 9, "name": "Loyer bureaux",                   "category": "Rent",        "amount": "14400.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 27, "fields": {"scenario": 9, "name": "Assurance entreprise",            "category": "Other",       "amount":  "3600.00", "is_common": true,  "product": null}},
+  {"model": "costs.fixedcost", "pk": 28, "fields": {"scenario": 9, "name": "Certification professionnelle — Audit","category":"Other",  "amount":  "5000.00", "is_common": false, "product": 18}},
+  {"model": "costs.fixedcost", "pk": 29, "fields": {"scenario": 9, "name": "Location salle de formation",    "category": "Rent",        "amount":  "9000.00", "is_common": false, "product": 19}},
 
-  {
-    "model": "costs.costcenter",
-    "pk": 1,
-    "fields": {"scenario": 7, "code": "ENT", "name": "Entretien",          "is_auxiliary": true,  "unit_of_work": "",              "total_units": "0.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 2,
-    "fields": {"scenario": 7, "code": "ENE", "name": "Énergie",            "is_auxiliary": true,  "unit_of_work": "",              "total_units": "0.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 3,
-    "fields": {"scenario": 7, "code": "DEB", "name": "Centre Débit",       "is_auxiliary": false, "unit_of_work": "heure machine", "total_units": "2000.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 4,
-    "fields": {"scenario": 7, "code": "ASM", "name": "Centre Assemblage",  "is_auxiliary": false, "unit_of_work": "heure MOD",     "total_units": "3000.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 5,
-    "fields": {"scenario": 8, "code": "ADM", "name": "Administration",     "is_auxiliary": true,  "unit_of_work": "",              "total_units": "0.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 6,
-    "fields": {"scenario": 8, "code": "CRE", "name": "Création",           "is_auxiliary": false, "unit_of_work": "heure créa",    "total_units": "1500.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 7,
-    "fields": {"scenario": 8, "code": "PRO", "name": "Production",         "is_auxiliary": false, "unit_of_work": "heure prod",    "total_units": "800.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 8,
-    "fields": {"scenario": 8, "code": "CON", "name": "Conseil",            "is_auxiliary": false, "unit_of_work": "mission",       "total_units": "50.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 9,
-    "fields": {"scenario": 9, "code": "LOG", "name": "Logistique commune", "is_auxiliary": true,  "unit_of_work": "",               "total_units": "0.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 10,
-    "fields": {"scenario": 9, "code": "REC", "name": "Réception",          "is_auxiliary": false, "unit_of_work": "palette traitée","total_units": "500.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 11,
-    "fields": {"scenario": 9, "code": "MRY", "name": "Mise en rayon",      "is_auxiliary": false, "unit_of_work": "heure travail",  "total_units": "1200.00"}
-  },
-  {
-    "model": "costs.costcenter",
-    "pk": 12,
-    "fields": {"scenario": 9, "code": "EXP", "name": "Expédition",         "is_auxiliary": false, "unit_of_work": "colis expédié",  "total_units": "3200.00"}
-  },
+  {"model": "costs.costcenter", "pk":  1, "fields": {"scenario": 4, "code": "ENT", "name": "Entretien",           "is_auxiliary": true,  "unit_of_work": "",               "total_units": "0.00"}},
+  {"model": "costs.costcenter", "pk":  2, "fields": {"scenario": 4, "code": "ENE", "name": "Énergie",             "is_auxiliary": true,  "unit_of_work": "",               "total_units": "0.00"}},
+  {"model": "costs.costcenter", "pk":  3, "fields": {"scenario": 4, "code": "DEB", "name": "Centre Débit",        "is_auxiliary": false, "unit_of_work": "heure machine",  "total_units": "2000.00"}},
+  {"model": "costs.costcenter", "pk":  4, "fields": {"scenario": 4, "code": "ASM", "name": "Centre Assemblage",   "is_auxiliary": false, "unit_of_work": "heure MOD",      "total_units": "3000.00"}},
+  {"model": "costs.costcenter", "pk":  5, "fields": {"scenario": 5, "code": "ADM", "name": "Administration",      "is_auxiliary": true,  "unit_of_work": "",               "total_units": "0.00"}},
+  {"model": "costs.costcenter", "pk":  6, "fields": {"scenario": 5, "code": "CRE", "name": "Création",            "is_auxiliary": false, "unit_of_work": "heure créa",     "total_units": "1500.00"}},
+  {"model": "costs.costcenter", "pk":  7, "fields": {"scenario": 5, "code": "PRO", "name": "Production",          "is_auxiliary": false, "unit_of_work": "heure prod",     "total_units": "800.00"}},
+  {"model": "costs.costcenter", "pk":  8, "fields": {"scenario": 5, "code": "CON", "name": "Conseil",             "is_auxiliary": false, "unit_of_work": "mission",        "total_units": "50.00"}},
+  {"model": "costs.costcenter", "pk":  9, "fields": {"scenario": 6, "code": "LOG", "name": "Logistique commune",  "is_auxiliary": true,  "unit_of_work": "",               "total_units": "0.00"}},
+  {"model": "costs.costcenter", "pk": 10, "fields": {"scenario": 6, "code": "REC", "name": "Réception",           "is_auxiliary": false, "unit_of_work": "palette traitée","total_units": "500.00"}},
+  {"model": "costs.costcenter", "pk": 11, "fields": {"scenario": 6, "code": "MRY", "name": "Mise en rayon",       "is_auxiliary": false, "unit_of_work": "heure travail",  "total_units": "1200.00"}},
+  {"model": "costs.costcenter", "pk": 12, "fields": {"scenario": 6, "code": "EXP", "name": "Expédition",          "is_auxiliary": false, "unit_of_work": "colis expédié",  "total_units": "3200.00"}},
 
-  {
-    "model": "costs.costline",
-    "pk": 1,
-    "fields": {"scenario": 7, "label": "Salaires entretien",        "amount": "18000.00", "center": 1, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 2,
-    "fields": {"scenario": 7, "label": "Fournitures entretien",     "amount": "4000.00",  "center": 1, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 3,
-    "fields": {"scenario": 7, "label": "Électricité",               "amount": "12000.00", "center": 2, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 4,
-    "fields": {"scenario": 7, "label": "Gaz industriel",            "amount": "5000.00",  "center": 2, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 5,
-    "fields": {"scenario": 7, "label": "Amortissement machines",    "amount": "24000.00", "center": 3, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 6,
-    "fields": {"scenario": 7, "label": "Salaires opérateurs débit", "amount": "36000.00", "center": 3, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 7,
-    "fields": {"scenario": 7, "label": "Salaires monteurs",         "amount": "45000.00", "center": 4, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 8,
-    "fields": {"scenario": 7, "label": "Outillage assemblage",      "amount": "8000.00",  "center": 4, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 9,
-    "fields": {"scenario": 8, "label": "Salaires administratifs",          "amount": "28000.00", "center": 5, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 10,
-    "fields": {"scenario": 8, "label": "Loyer bureaux (quote-part admin)", "amount": "6000.00",  "center": 5, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 11,
-    "fields": {"scenario": 8, "label": "Salaires créatifs",                "amount": "55000.00", "center": 6, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 12,
-    "fields": {"scenario": 8, "label": "Licences logiciels",               "amount": "8000.00",  "center": 6, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 13,
-    "fields": {"scenario": 8, "label": "Salaires techniciens",             "amount": "32000.00", "center": 7, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 14,
-    "fields": {"scenario": 8, "label": "Matériel production",              "amount": "5000.00",  "center": 7, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 15,
-    "fields": {"scenario": 8, "label": "Salaires consultants",             "amount": "42000.00", "center": 8, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 16,
-    "fields": {"scenario": 8, "label": "Déplacements conseil",             "amount": "4000.00",  "center": 8, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 17,
-    "fields": {"scenario": 9, "label": "Salaires logistique",    "amount": "20000.00", "center": 9,  "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 18,
-    "fields": {"scenario": 9, "label": "Assurances entrepôt",    "amount": "5000.00",  "center": 9,  "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 19,
-    "fields": {"scenario": 9, "label": "Salaires réception",     "amount": "18000.00", "center": 10, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 20,
-    "fields": {"scenario": 9, "label": "Matériel manutention",   "amount": "6000.00",  "center": 10, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 21,
-    "fields": {"scenario": 9, "label": "Salaires mise en rayon", "amount": "22000.00", "center": 11, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 22,
-    "fields": {"scenario": 9, "label": "Fournitures",            "amount": "3000.00",  "center": 11, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 23,
-    "fields": {"scenario": 9, "label": "Salaires expédition",    "amount": "28000.00", "center": 12, "is_direct": false, "is_product": false, "product": null}
-  },
-  {
-    "model": "costs.costline",
-    "pk": 24,
-    "fields": {"scenario": 9, "label": "Emballages",             "amount": "8000.00",  "center": 12, "is_direct": false, "is_product": false, "product": null}
-  },
+  {"model": "costs.costline", "pk":  1, "fields": {"scenario": 4, "label": "Salaires entretien",        "amount": "18000.00", "center":  1, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  2, "fields": {"scenario": 4, "label": "Fournitures entretien",     "amount":  "4000.00", "center":  1, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  3, "fields": {"scenario": 4, "label": "Électricité",               "amount": "12000.00", "center":  2, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  4, "fields": {"scenario": 4, "label": "Gaz industriel",            "amount":  "5000.00", "center":  2, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  5, "fields": {"scenario": 4, "label": "Amortissement machines",    "amount": "24000.00", "center":  3, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  6, "fields": {"scenario": 4, "label": "Salaires opérateurs débit", "amount": "36000.00", "center":  3, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  7, "fields": {"scenario": 4, "label": "Salaires monteurs",         "amount": "45000.00", "center":  4, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  8, "fields": {"scenario": 4, "label": "Outillage assemblage",      "amount":  "8000.00", "center":  4, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk":  9, "fields": {"scenario": 5, "label": "Salaires administratifs",          "amount": "28000.00", "center":  5, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 10, "fields": {"scenario": 5, "label": "Loyer bureaux (quote-part admin)", "amount":  "6000.00", "center":  5, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 11, "fields": {"scenario": 5, "label": "Salaires créatifs",                "amount": "55000.00", "center":  6, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 12, "fields": {"scenario": 5, "label": "Licences logiciels",               "amount":  "8000.00", "center":  6, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 13, "fields": {"scenario": 5, "label": "Salaires techniciens",             "amount": "32000.00", "center":  7, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 14, "fields": {"scenario": 5, "label": "Matériel production",              "amount":  "5000.00", "center":  7, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 15, "fields": {"scenario": 5, "label": "Salaires consultants",             "amount": "42000.00", "center":  8, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 16, "fields": {"scenario": 5, "label": "Déplacements conseil",             "amount":  "4000.00", "center":  8, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 17, "fields": {"scenario": 6, "label": "Salaires logistique",    "amount": "20000.00", "center":  9, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 18, "fields": {"scenario": 6, "label": "Assurances entrepôt",    "amount":  "5000.00", "center":  9, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 19, "fields": {"scenario": 6, "label": "Salaires réception",     "amount": "18000.00", "center": 10, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 20, "fields": {"scenario": 6, "label": "Matériel manutention",   "amount":  "6000.00", "center": 10, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 21, "fields": {"scenario": 6, "label": "Salaires mise en rayon", "amount": "22000.00", "center": 11, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 22, "fields": {"scenario": 6, "label": "Fournitures rayon",      "amount":  "3000.00", "center": 11, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 23, "fields": {"scenario": 6, "label": "Salaires expédition",    "amount": "28000.00", "center": 12, "is_direct": false, "is_product": false, "product": null}},
+  {"model": "costs.costline", "pk": 24, "fields": {"scenario": 6, "label": "Emballages expédition",  "amount":  "8000.00", "center": 12, "is_direct": false, "is_product": false, "product": null}},
 
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 1,
-    "fields": {"scenario": 7, "from_center": 1, "to_center": 3, "percentage": "60.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 2,
-    "fields": {"scenario": 7, "from_center": 1, "to_center": 4, "percentage": "40.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 3,
-    "fields": {"scenario": 7, "from_center": 2, "to_center": 3, "percentage": "70.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 4,
-    "fields": {"scenario": 7, "from_center": 2, "to_center": 4, "percentage": "30.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 5,
-    "fields": {"scenario": 8, "from_center": 5, "to_center": 6, "percentage": "40.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 6,
-    "fields": {"scenario": 8, "from_center": 5, "to_center": 7, "percentage": "30.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 7,
-    "fields": {"scenario": 8, "from_center": 5, "to_center": 8, "percentage": "30.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 8,
-    "fields": {"scenario": 9, "from_center": 9,  "to_center": 10, "percentage": "30.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 9,
-    "fields": {"scenario": 9, "from_center": 9,  "to_center": 11, "percentage": "40.00"}
-  },
-  {
-    "model": "costs.costcenterallocation",
-    "pk": 10,
-    "fields": {"scenario": 9, "from_center": 9,  "to_center": 12, "percentage": "30.00"}
-  },
+  {"model": "costs.costcenterallocation", "pk":  1, "fields": {"scenario": 4, "from_center":  1, "to_center":  3, "percentage": "60.00"}},
+  {"model": "costs.costcenterallocation", "pk":  2, "fields": {"scenario": 4, "from_center":  1, "to_center":  4, "percentage": "40.00"}},
+  {"model": "costs.costcenterallocation", "pk":  3, "fields": {"scenario": 4, "from_center":  2, "to_center":  3, "percentage": "70.00"}},
+  {"model": "costs.costcenterallocation", "pk":  4, "fields": {"scenario": 4, "from_center":  2, "to_center":  4, "percentage": "30.00"}},
+  {"model": "costs.costcenterallocation", "pk":  5, "fields": {"scenario": 5, "from_center":  5, "to_center":  6, "percentage": "40.00"}},
+  {"model": "costs.costcenterallocation", "pk":  6, "fields": {"scenario": 5, "from_center":  5, "to_center":  7, "percentage": "30.00"}},
+  {"model": "costs.costcenterallocation", "pk":  7, "fields": {"scenario": 5, "from_center":  5, "to_center":  8, "percentage": "30.00"}},
+  {"model": "costs.costcenterallocation", "pk":  8, "fields": {"scenario": 6, "from_center":  9, "to_center": 10, "percentage": "30.00"}},
+  {"model": "costs.costcenterallocation", "pk":  9, "fields": {"scenario": 6, "from_center":  9, "to_center": 11, "percentage": "40.00"}},
+  {"model": "costs.costcenterallocation", "pk": 10, "fields": {"scenario": 6, "from_center":  9, "to_center": 12, "percentage": "30.00"}},
 
-  {
-    "model": "costs.productcenterusage",
-    "pk": 1,
-    "fields": {"product": 13, "center": 3,  "units_used": "800.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 2,
-    "fields": {"product": 13, "center": 4,  "units_used": "1200.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 3,
-    "fields": {"product": 14, "center": 3,  "units_used": "1200.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 4,
-    "fields": {"product": 14, "center": 4,  "units_used": "1800.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 5,
-    "fields": {"product": 15, "center": 6,  "units_used": "900.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 6,
-    "fields": {"product": 15, "center": 7,  "units_used": "500.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 7,
-    "fields": {"product": 15, "center": 8,  "units_used": "25.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 8,
-    "fields": {"product": 16, "center": 6,  "units_used": "600.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 9,
-    "fields": {"product": 16, "center": 7,  "units_used": "300.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 10,
-    "fields": {"product": 16, "center": 8,  "units_used": "25.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 11,
-    "fields": {"product": 17, "center": 10, "units_used": "200.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 12,
-    "fields": {"product": 17, "center": 11, "units_used": "700.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 13,
-    "fields": {"product": 17, "center": 12, "units_used": "2000.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 14,
-    "fields": {"product": 18, "center": 10, "units_used": "300.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 15,
-    "fields": {"product": 18, "center": 11, "units_used": "500.00"}
-  },
-  {
-    "model": "costs.productcenterusage",
-    "pk": 16,
-    "fields": {"product": 18, "center": 12, "units_used": "1200.00"}
-  }
+  {"model": "costs.productcenterusage", "pk":  1, "fields": {"product":  7, "center":  3, "units_used":  "800.00"}},
+  {"model": "costs.productcenterusage", "pk":  2, "fields": {"product":  7, "center":  4, "units_used": "1200.00"}},
+  {"model": "costs.productcenterusage", "pk":  3, "fields": {"product":  8, "center":  3, "units_used": "1200.00"}},
+  {"model": "costs.productcenterusage", "pk":  4, "fields": {"product":  8, "center":  4, "units_used": "1800.00"}},
+  {"model": "costs.productcenterusage", "pk":  5, "fields": {"product":  9, "center":  6, "units_used":  "900.00"}},
+  {"model": "costs.productcenterusage", "pk":  6, "fields": {"product":  9, "center":  7, "units_used":  "500.00"}},
+  {"model": "costs.productcenterusage", "pk":  7, "fields": {"product":  9, "center":  8, "units_used":   "25.00"}},
+  {"model": "costs.productcenterusage", "pk":  8, "fields": {"product": 10, "center":  6, "units_used":  "600.00"}},
+  {"model": "costs.productcenterusage", "pk":  9, "fields": {"product": 10, "center":  7, "units_used":  "300.00"}},
+  {"model": "costs.productcenterusage", "pk": 10, "fields": {"product": 10, "center":  8, "units_used":   "25.00"}},
+  {"model": "costs.productcenterusage", "pk": 11, "fields": {"product": 11, "center": 10, "units_used":  "200.00"}},
+  {"model": "costs.productcenterusage", "pk": 12, "fields": {"product": 11, "center": 11, "units_used":  "700.00"}},
+  {"model": "costs.productcenterusage", "pk": 13, "fields": {"product": 11, "center": 12, "units_used": "2000.00"}},
+  {"model": "costs.productcenterusage", "pk": 14, "fields": {"product": 12, "center": 10, "units_used":  "300.00"}},
+  {"model": "costs.productcenterusage", "pk": 15, "fields": {"product": 12, "center": 11, "units_used":  "500.00"}},
+  {"model": "costs.productcenterusage", "pk": 16, "fields": {"product": 12, "center": 12, "units_used": "1200.00"}}
 ]
