@@ -226,6 +226,7 @@
   >
 </div>
 
+{% if scenario.method != "center_analysis" %}
 <div class="section-card">
   <h2>Charges variables</h2>
   <div class="table-wrap">
@@ -347,6 +348,7 @@
     >Ajouter une charge fixe</a
   >
 </div>
+{% endif %}
 
 {% if scenario.method == "center_analysis" %}
 <div class="section-card">
