@@ -218,7 +218,7 @@
         {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
         <tr>
           <td>{{ cost.name }}</td>
-          <td>{{ cost.category }}</td>
+          <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
         </tr>
         {% empty %}
@@ -463,7 +463,7 @@
         {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
         <tr>
           <td>{{ cost.name }}</td>
-          <td>{{ cost.category }}</td>
+          <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }} €</td>
         </tr>
         {% empty %}
@@ -655,7 +655,7 @@
         {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
         <tr>
           <td style="font-weight:600;">{{ cost.name }}</td>
-          <td>{{ cost.category }}</td>
+          <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }} €</td>
         </tr>
         {% empty %}
@@ -695,7 +695,7 @@
           {% for cost in row.fixed_specific_cost_lines %}
           <tr>
             <td>{{ cost.name }}</td>
-            <td>{{ cost.category }}</td>
+            <td>{{ cost.get_category_display }}</td>
             <td>{{ cost.amount|floatformat:2 }} €</td>
           </tr>
           {% endfor %}
@@ -809,7 +809,7 @@
         {% for cost in advanced_direct_costing.common_fixed_cost_lines %}
         <tr>
           <td>{{ cost.name }}</td>
-          <td>{{ cost.category }}</td>
+          <td>{{ cost.get_category_display }}</td>
           <td>{{ cost.amount|floatformat:2 }}</td>
         </tr>
         {% empty %}

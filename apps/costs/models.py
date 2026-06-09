@@ -178,6 +178,20 @@ class CostLine(models.Model):
         return self.label
 
 
+_VARIABLE_CATEGORY_LABELS = {
+    "Material": "Matériel",
+    "Labor": "Main-d'œuvre",
+    "Overhead": "Frais généraux",
+}
+
+_FIXED_CATEGORY_LABELS = {
+    "Rent": "Loyer",
+    "Salary": "Salaires",
+    "Depreciation": "Amortissement",
+    "Other": "Autre",
+}
+
+
 class VariableCost(models.Model):
     name = models.CharField(max_length=255)
     category = models.CharField(max_length=100)
@@ -187,6 +201,9 @@ class VariableCost(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_category_display(self):
+        return _VARIABLE_CATEGORY_LABELS.get(self.category, self.category)
 
 
 class FixedCostCategory(models.TextChoices):
@@ -206,6 +223,9 @@ class FixedCost(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_category_display(self):
+        return _FIXED_CATEGORY_LABELS.get(self.category, self.category)
 
 
 class SeasonalityEntry(models.Model):

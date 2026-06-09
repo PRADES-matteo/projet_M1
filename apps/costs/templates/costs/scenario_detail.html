@@ -586,6 +586,11 @@
 
   <h3 style="margin: 1rem 0 0.5rem">Restaurer une ancienne version</h3>
   {% if scenario_versions %}
+  <p style="margin-bottom:0.75rem;">
+    <a href="{% url 'compare_scenarios' %}?mode=versions&version_scenario={{ scenario.id }}" class="btn-action btn-light" style="font-size:0.85rem;">
+      Comparer deux versions →
+    </a>
+  </p>
   <div class="table-wrap">
     <table class="summary">
       <thead>

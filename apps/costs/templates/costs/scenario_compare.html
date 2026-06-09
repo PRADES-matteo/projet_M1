@@ -1,94 +1,133 @@
-{% extends "costs/base.html" %} {% block content %}
-<h1>Comparer deux scénarios</h1>
+{% extends "costs/base.html" %}
+{% block content %}
 
-<form
-  method="get"
-  action="{% url 'compare_scenarios' %}"
-  class="inline-form"
-  style="margin-bottom: 1rem"
->
-  <label style="margin-right: 0.5rem">Scénario A</label>
-  <select name="scenario_a" required>
-    <option value="">Choisir...</option>
-    {% for s in scenarios %}
-    <option
-      value="{{ s.id }}"
-      {%
-      if
-      scenario_a
-      and
-      scenario_a.id=""
-      ="s.id"
-      %}selected{%
-      endif
-      %}
-    >
-      {{ s.name }}
-    </option>
-    {% endfor %}
-  </select>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+  <h1 style="margin:0;">Comparer</h1>
+  <a href="{% url 'scenario-list' %}" class="btn-action btn-light">← Retour</a>
+</div>
 
-  <label style="margin: 0 0.5rem">Scénario B</label>
-  <select name="scenario_b" required>
-    <option value="">Choisir...</option>
-    {% for s in scenarios_b %}
-    <option
-      value="{{ s.id }}"
-      {%
-      if
-      scenario_b
-      and
-      scenario_b.id=""
-      ="s.id"
-      %}selected{%
-      endif
-      %}
-    >
-      {{ s.name }}
-    </option>
-    {% endfor %}
-  </select>
+<!-- Mode selector -->
+<div style="display:flex; gap:0.5rem; margin-bottom:1.5rem;">
+  <a href="{% url 'compare_scenarios' %}?mode=scenarios{% if scenario_a %}&scenario_a={{ scenario_a.id }}{% endif %}{% if scenario_b %}&scenario_b={{ scenario_b.id }}{% endif %}"
+     class="btn-action{% if mode != 'versions' %} {% else %} btn-light{% endif %}">
+    Deux scénarios
+  </a>
+  <a href="{% url 'compare_scenarios' %}?mode=versions{% if version_scenario %}&version_scenario={{ version_scenario.id }}{% endif %}"
+     class="btn-action{% if mode == 'versions' %} {% else %} btn-light{% endif %}">
+    Versions d'un même scénario
+  </a>
+</div>
 
-  <button type="submit" class="btn-action" style="margin-left: 0.6rem">
-    Comparer
-  </button>
+{% if mode == 'versions' %}
+<!-- ── Mode versions ─────────────────────────────────────── -->
+<form method="get" action="{% url 'compare_scenarios' %}" style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end; margin-bottom:1.25rem;">
+  <input type="hidden" name="mode" value="versions">
+
+  <div>
+    <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Scénario</label>
+    <select name="version_scenario" onchange="this.form.submit()" style="min-width:200px;">
+      <option value="">Choisir un scénario…</option>
+      {% for s in scenarios %}
+      <option value="{{ s.id }}" {% if version_scenario and version_scenario.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  {% if versions %}
+  <div>
+    <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Version A</label>
+    <select name="version_a" style="min-width:180px;">
+      <option value="">Choisir…</option>
+      {% for v in versions %}
+      <option value="{{ v.id }}" {% if version_a and version_a.id == v.id %}selected{% endif %}>
+        v{{ v.version_number }}{% if v.label %} — {{ v.label }}{% endif %} ({{ v.created_at|date:"d/m/Y" }})
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Version B</label>
+    <select name="version_b" style="min-width:180px;">
+      <option value="">Choisir…</option>
+      {% for v in versions %}
+      <option value="{{ v.id }}" {% if version_b and version_b.id == v.id %}selected{% endif %}>
+        v{{ v.version_number }}{% if v.label %} — {{ v.label }}{% endif %} ({{ v.created_at|date:"d/m/Y" }})
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn-action">Comparer</button>
+
+  {% else %}
+  {% if version_scenario %}
+  <p style="color:#9ca3af; font-style:italic; margin:0;">Ce scénario n'a aucune version sauvegardée.</p>
+  {% endif %}
+  {% endif %}
 </form>
+
+{% else %}
+<!-- ── Mode scénarios ────────────────────────────────────── -->
+<form method="get" action="{% url 'compare_scenarios' %}" style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end; margin-bottom:1.25rem;">
+  <input type="hidden" name="mode" value="scenarios">
+
+  <div>
+    <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Scénario A</label>
+    <select name="scenario_a" required style="min-width:200px;">
+      <option value="">Choisir…</option>
+      {% for s in scenarios %}
+      <option value="{{ s.id }}" {% if scenario_a and scenario_a.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label style="display:block; font-size:0.8rem; margin-bottom:0.25rem;">Scénario B</label>
+    <select name="scenario_b" required style="min-width:200px;">
+      <option value="">Choisir…</option>
+      {% for s in scenarios_b %}
+      <option value="{{ s.id }}" {% if scenario_b and scenario_b.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn-action">Comparer</button>
+</form>
+{% endif %}
 
 {% if comparison %}
 <div class="section-card">
-  <h2>Résultats de la comparaison</h2>
+  <h2 style="margin-bottom:1rem;">Résultats</h2>
   <div class="table-wrap">
     <table class="summary">
       <thead>
         <tr>
           <th>Indicateur</th>
-          <th>{{ scenario_a.name }}</th>
-          <th>{{ scenario_b.name }}</th>
-          <th>Delta (A - B)</th>
+          <th style="text-align:right;">{{ label_a }}</th>
+          <th style="text-align:right;">{{ label_b }}</th>
+          <th style="text-align:right;">Delta (A − B)</th>
         </tr>
       </thead>
       <tbody>
         {% for row in comparison %}
         <tr>
           <td>{{ row.label }}</td>
-          <td style="text-align: right">{{ row.value_a }}</td>
-          <td style="text-align: right">{{ row.value_b }}</td>
-          <td style="text-align: right">{{ row.delta }}</td>
+          <td style="text-align:right;">{{ row.value_a|floatformat:2 }}</td>
+          <td style="text-align:right;">{{ row.value_b|floatformat:2 }}</td>
+          <td style="text-align:right; {% if row.delta > 0 %}color:#059669;{% elif row.delta < 0 %}color:#dc2626;{% endif %}">
+            {% if row.delta > 0 %}+{% endif %}{{ row.delta|floatformat:2 }}
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-{% else %}
-<p>
-  Sélectionnez deux scénarios puis cliquez sur « Comparer » pour afficher les
-  différences.
-</p>
+{% elif mode == 'scenarios' %}
+<p style="color:#9ca3af; font-style:italic;">Sélectionnez deux scénarios puis cliquez sur « Comparer ».</p>
+{% elif mode == 'versions' and version_scenario and versions %}
+<p style="color:#9ca3af; font-style:italic;">Sélectionnez deux versions puis cliquez sur « Comparer ».</p>
 {% endif %}
-
-<p style="margin-top: 1rem">
-  <a href="{% url 'scenario-list' %}">Retour à la liste des scénarios</a>
-</p>
 
 {% endblock %}

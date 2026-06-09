@@ -114,6 +114,81 @@ def build_automatic_results(scenario):
     }
 
 
+def build_automatic_results_from_snapshot(snapshot):
+    """Compute the same 7 KPIs as build_automatic_results() but from a snapshot dict."""
+    products_data = snapshot.get("products", [])
+    variable_costs_data = snapshot.get("variable_costs", [])
+    fixed_costs_data = snapshot.get("fixed_costs", [])
+
+    total_revenue = Decimal("0.00")
+    total_variable_costs_production = Decimal("0.00")
+    total_fixed_costs = Decimal("0.00")
+    total_production_volume = 0
+
+    for p in products_data:
+        qty = int(p.get("quantity", 0))
+        price = Decimal(str(p.get("unit_price", "0")))
+        stock_initial = int(p.get("stock_initial", 0))
+        stock_final = int(p.get("stock_final", 0))
+        total_revenue += qty * price
+        total_production_volume += qty + stock_final - stock_initial
+
+    for cost in variable_costs_data:
+        total_variable_costs_production += Decimal(str(cost.get("amount", "0")))
+
+    for cost in fixed_costs_data:
+        total_fixed_costs += Decimal(str(cost.get("amount", "0")))
+
+    total_production_cost = total_variable_costs_production + total_fixed_costs
+    cump = total_production_cost / total_production_volume if total_production_volume > 0 else Decimal("0.00")
+
+    cost_of_goods_sold = sum(cump * int(p.get("quantity", 0)) for p in products_data)
+    gross_margin = total_revenue - cost_of_goods_sold
+    mcv = total_revenue - total_variable_costs_production
+    taux_marge = (mcv / total_revenue * Decimal("100.00")) if total_revenue else Decimal("0.00")
+    seuil_rentabilite = (total_fixed_costs / (mcv / total_revenue)) if total_revenue and mcv > 0 else Decimal("0.00")
+    if seuil_rentabilite:
+        try:
+            seuil_rentabilite = seuil_rentabilite.quantize(Decimal("0.01"), rounding=ROUND_CEILING)
+        except Exception:
+            pass
+    point_mort = ((seuil_rentabilite / total_revenue) * Decimal("365.00")) if total_revenue and seuil_rentabilite else Decimal("0.00")
+    if point_mort:
+        try:
+            point_mort = point_mort.quantize(Decimal("1"), rounding=ROUND_CEILING)
+        except Exception:
+            pass
+    marge_securite = total_revenue - seuil_rentabilite
+    resultat = gross_margin
+
+    return {
+        "total_revenue": total_revenue,
+        "total_variable_costs": total_variable_costs_production,
+        "total_fixed_costs": total_fixed_costs,
+        "mcv": mcv,
+        "taux_marge": taux_marge,
+        "seuil_rentabilite": seuil_rentabilite,
+        "point_mort": point_mort,
+        "marge_securite": marge_securite,
+        "resultat": resultat,
+    }
+
+
+def _build_comparison_rows(auto_a, auto_b):
+    def row(label, key):
+        va, vb = auto_a[key], auto_b[key]
+        return {"label": label, "value_a": va, "value_b": vb, "delta": va - vb}
+    return [
+        row("Chiffre d'affaires", "total_revenue"),
+        row("Charges variables", "total_variable_costs"),
+        row("Charges fixes", "total_fixed_costs"),
+        row("MCV", "mcv"),
+        row("Taux de marge (%)", "taux_marge"),
+        row("Seuil de rentabilité", "seuil_rentabilite"),
+        row("Résultat", "resultat"),
+    ]
+
+
 def build_advanced_direct_costing_results(scenario):
     products = list(scenario.products.all())
     variable_costs = list(scenario.variable_costs.select_related("product"))
@@ -250,6 +325,8 @@ def _serialize_scenario_snapshot(scenario):
                 "name": product.name,
                 "quantity": product.quantity,
                 "unit_price": str(product.unit_price),
+                "stock_initial": product.stock_initial,
+                "stock_final": product.stock_final,
             }
             for product in scenario.products.all()
         ],
@@ -573,36 +650,60 @@ def restore_scenario_version(request, pk, version_id):
 @login_required
 def compare_scenarios(request):
     scenarios = CostScenario.objects.filter(user=request.user).order_by("name")
+    mode = request.GET.get("mode", "scenarios")
+
+    # Mode 1: deux scénarios différents
     scenario_a_id = request.GET.get("scenario_a")
     scenario_b_id = request.GET.get("scenario_b")
-    scenario_a = None
-    scenario_b = None
-    comparison = None
-    scenarios_b = scenarios
-    if scenario_a_id:
-        scenarios_b = scenarios.exclude(pk=scenario_a_id)
+    scenario_a = scenario_b = None
+    scenarios_b = scenarios.exclude(pk=scenario_a_id) if scenario_a_id else scenarios
 
-    if scenario_a_id and scenario_b_id:
+    # Mode 2: deux versions du même scénario
+    version_scenario_id = request.GET.get("version_scenario")
+    version_a_id = request.GET.get("version_a")
+    version_b_id = request.GET.get("version_b")
+    version_scenario = versions = version_a = version_b = None
+
+    comparison = None
+    label_a = label_b = ""
+
+    if mode == "scenarios" and scenario_a_id and scenario_b_id:
         scenario_a = get_object_or_404(CostScenario, pk=scenario_a_id, user=request.user)
         scenario_b = get_object_or_404(CostScenario, pk=scenario_b_id, user=request.user)
-        auto_a = build_automatic_results(scenario_a)
-        auto_b = build_automatic_results(scenario_b)
-        comparison = [
-            {"label": "Chiffre d'affaires", "value_a": auto_a["total_revenue"], "value_b": auto_b["total_revenue"], "delta": auto_a["total_revenue"] - auto_b["total_revenue"]},
-            {"label": "Charges variables", "value_a": auto_a["total_variable_costs"], "value_b": auto_b["total_variable_costs"], "delta": auto_a["total_variable_costs"] - auto_b["total_variable_costs"]},
-            {"label": "Charges fixes", "value_a": auto_a["total_fixed_costs"], "value_b": auto_b["total_fixed_costs"], "delta": auto_a["total_fixed_costs"] - auto_b["total_fixed_costs"]},
-            {"label": "MCV", "value_a": auto_a["mcv"], "value_b": auto_b["mcv"], "delta": auto_a["mcv"] - auto_b["mcv"]},
-            {"label": "Taux de marge (%)", "value_a": auto_a["taux_marge"], "value_b": auto_b["taux_marge"], "delta": auto_a["taux_marge"] - auto_b["taux_marge"]},
-            {"label": "Seuil de rentabilité", "value_a": auto_a["seuil_rentabilite"], "value_b": auto_b["seuil_rentabilite"], "delta": auto_a["seuil_rentabilite"] - auto_b["seuil_rentabilite"]},
-            {"label": "Résultat", "value_a": auto_a["resultat"], "value_b": auto_b["resultat"], "delta": auto_a["resultat"] - auto_b["resultat"]},
-        ]
+        comparison = _build_comparison_rows(
+            build_automatic_results(scenario_a),
+            build_automatic_results(scenario_b),
+        )
+        label_a = scenario_a.name
+        label_b = scenario_b.name
+
+    elif mode == "versions":
+        if version_scenario_id:
+            version_scenario = get_object_or_404(CostScenario, pk=version_scenario_id, user=request.user)
+            versions = list(version_scenario.versions.order_by("-version_number"))
+        if version_scenario and version_a_id and version_b_id:
+            version_a = get_object_or_404(ScenarioVersion, pk=version_a_id, scenario=version_scenario)
+            version_b = get_object_or_404(ScenarioVersion, pk=version_b_id, scenario=version_scenario)
+            comparison = _build_comparison_rows(
+                build_automatic_results_from_snapshot(version_a.snapshot),
+                build_automatic_results_from_snapshot(version_b.snapshot),
+            )
+            label_a = f"v{version_a.version_number}" + (f" — {version_a.label}" if version_a.label else "")
+            label_b = f"v{version_b.version_number}" + (f" — {version_b.label}" if version_b.label else "")
 
     return render(request, "costs/scenario_compare.html", {
+        "mode": mode,
         "scenarios": scenarios,
         "scenarios_b": scenarios_b,
         "scenario_a": scenario_a,
         "scenario_b": scenario_b,
+        "version_scenario": version_scenario,
+        "versions": versions,
+        "version_a": version_a,
+        "version_b": version_b,
         "comparison": comparison,
+        "label_a": label_a,
+        "label_b": label_b,
     })
 
 
