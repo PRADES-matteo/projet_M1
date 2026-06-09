@@ -1072,7 +1072,7 @@ def manage_product_usages(request, scenario_id):
         usages[product.id] = {}
         for center in principal_centers:
             usage = ProductCenterUsage.objects.filter(product=product, center=center).first()
-            usages[product.id][center.id] = usage.units_used if usage else Decimal("0")
+            usages[product.id][center.id] = str(usage.units_used) if usage else "0"
 
     return render(request, "costs/center_analysis/manage_usages.html", {
         "scenario": scenario,

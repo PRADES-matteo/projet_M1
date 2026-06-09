@@ -668,7 +668,8 @@
           <th>Centre</th>
           <th>Type</th>
           <th style="text-align:right;">Charges primaires</th>
-          <th style="text-align:right;">Charges secondaires</th>
+          <th style="text-align:right;">Reçu des aux.</th>
+          <th style="text-align:right;">Total après répartition</th>
           <th>Unité d'œuvre</th>
           <th style="text-align:right;">Total UO</th>
           <th style="text-align:right;">Taux de cession</th>
@@ -680,7 +681,12 @@
           <td>{{ center.name }}</td>
           <td>{% if center.is_auxiliary %}<span style="color:#92400e; font-weight:600;">Auxiliaire</span>{% else %}<span style="color:#065f46; font-weight:600;">Principal</span>{% endif %}</td>
           <td style="text-align:right;">{{ results.primary_costs|dict_get:center.id|floatformat:2 }}</td>
-          <td style="text-align:right;">{{ results.secondary_costs|dict_get:center.id|floatformat:2 }}</td>
+          <td style="text-align:right; color:#6b7280;">
+            {% if center.is_auxiliary %}—{% else %}+{{ received_costs|dict_get:center.id|floatformat:2 }}{% endif %}
+          </td>
+          <td style="text-align:right; font-weight:600;">
+            {% if center.is_auxiliary %}0.00{% else %}{{ results.secondary_costs|dict_get:center.id|floatformat:2 }}{% endif %}
+          </td>
           <td>{{ center.unit_of_work|default:"—" }}</td>
           <td style="text-align:right;">{% if not center.is_auxiliary %}{{ center.total_units|floatformat:2 }}{% else %}—{% endif %}</td>
           <td style="text-align:right;">{% if not center.is_auxiliary %}{{ results.taux|dict_get:center.id|floatformat:2 }}{% else %}—{% endif %}</td>
