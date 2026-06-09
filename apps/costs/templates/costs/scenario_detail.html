@@ -141,7 +141,7 @@
       </tbody>
     </table>
     {% else %}
-    <p>Aucun produit saisi.</p>
+    <p style="text-align:center; color:#9ca3af; padding:1.5rem 0; font-style:italic; margin:0;">Aucun produit saisi — le tableau de synthèse sera disponible après la saisie des produits.</p>
     {% endif %}
   </div>
 </div>
@@ -215,7 +215,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7">Aucun produit saisi.</td>
+          <td colspan="7" style="text-align:center; color:#9ca3af; padding:1.5rem 0; font-style:italic;">Aucun produit saisi.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -268,7 +268,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}5{% endif %}">Aucune charge variable saisie.</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}5{% endif %}" style="text-align:center; color:#9ca3af; padding:1.5rem 0; font-style:italic;">Aucune charge variable saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -332,7 +332,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}6{% endif %}">Aucune charge fixe saisie.</td>
+          <td colspan="{% if scenario.method == 'direct_costing' %}4{% else %}6{% endif %}" style="text-align:center; color:#9ca3af; padding:1.5rem 0; font-style:italic;">Aucune charge fixe saisie.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -408,8 +408,8 @@
 {% endif %}
 
 
+{% if seasonality_list %}
 <div class="section-card">
-  {% if seasonality_list %}
   <h2>Saisonnalité</h2>
 
   {% for message in messages %}{% if message.tags == 'error' %}
@@ -551,7 +551,7 @@
       });
     }
   </script>
-  {% endif %}
+{% endif %}
 </div>
 
 <div class="section-card">
