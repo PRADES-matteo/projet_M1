@@ -46,6 +46,8 @@ class Command(BaseCommand):
                         name=p['name'],
                         quantity=p['quantity'],
                         unit_price=Decimal(p['unit_price']),
+                        stock_initial=p.get('stock_initial', 0),
+                        stock_final=p.get('stock_final', 0),
                     )
                     prod_objs[p['key']] = prod
 
@@ -98,6 +100,8 @@ class Command(BaseCommand):
                         name=p['name'],
                         quantity=p['quantity'],
                         unit_price=Decimal(p['unit_price']),
+                        stock_initial=p.get('stock_initial', 0),
+                        stock_final=p.get('stock_final', 0),
                     )
                     prod_objs[p['key']] = prod
 
@@ -167,6 +171,8 @@ class Command(BaseCommand):
                         name=p['name'],
                         quantity=p['quantity'],
                         unit_price=Decimal(p['unit_price']),
+                        stock_initial=p.get('stock_initial', 0),
+                        stock_final=p.get('stock_final', 0),
                     )
                     prod_objs[p['key']] = prod
 
@@ -622,6 +628,102 @@ class Command(BaseCommand):
                     seasonality=COTE_SUD_SEASONALITY,
                 )
 
+            # ----------------------------------------------------------------
+            # DÉMO VIDÉO 1 — Direct costing simple — Industriel
+            # Ébénisterie Martin : tables et chaises avec mouvements de stocks
+            # CA = 78 000 €  |  CV = 29 000 €  |  CF = 33 400 €
+            # Résultat ≈ +17 050 €  (bénéfice)
+            # ----------------------------------------------------------------
+            make_scenario(
+                name='[Démo] Ébénisterie Martin',
+                preset='industriel',
+                period='Annuel 2025',
+                description=(
+                    'Scénario démo vidéo — Direct Costing Simple. '
+                    'Fabrication de mobilier en bois massif. '
+                    'Stocks remplis pour illustrer le calcul du volume de production.'
+                ),
+                products_data=[
+                    {
+                        'key': 'p1', 'name': 'Table bois massif',
+                        'quantity': 120, 'unit_price': '350.00',
+                        'stock_initial': 10, 'stock_final': 15,
+                    },
+                    {
+                        'key': 'p2', 'name': 'Chaise en chêne',
+                        'quantity': 300, 'unit_price': '120.00',
+                        'stock_initial': 25, 'stock_final': 30,
+                    },
+                ],
+                variable_costs=[
+                    {'name': 'Bois massif — Table',       'category': 'Material', 'amount':  '8400.00', 'product_key': 'p1'},
+                    {'name': 'Assemblage & quincaillerie — Table', 'category': 'Labor', 'amount': '5200.00', 'product_key': 'p1'},
+                    {'name': 'Panneaux chêne — Chaise',   'category': 'Material', 'amount':  '9600.00', 'product_key': 'p2'},
+                    {'name': 'Finitions laquées — Chaise','category': 'Material', 'amount':  '3800.00', 'product_key': 'p2'},
+                    {'name': 'Vernis & consommables atelier', 'category': 'Material', 'amount': '2000.00'},
+                ],
+                fixed_costs=[
+                    {'name': 'Loyer atelier menuiserie',  'category': 'Rent',        'amount':  '7200.00'},
+                    {'name': 'Salaires permanents',       'category': 'Salary',      'amount': '18000.00'},
+                    {'name': 'Amortissement machines',    'category': 'Depreciation','amount':  '5800.00'},
+                    {'name': 'Assurance atelier',         'category': 'Other',       'amount':  '2400.00'},
+                ],
+                seasonality=[5, 6, 8, 10, 11, 12, 10, 9, 8, 7, 7, 7],
+            )
+
+            # ----------------------------------------------------------------
+            # DÉMO VIDÉO 2 — Direct costing évolué — Industriel
+            # Fonderie Pelletier Créations : poterie artisanale, 3 gammes
+            # CA = 102 100 €  |  CV = 34 600 €  |  CF spé = 10 500 €
+            # CF communes = 35 600 €  →  Résultat ≈ +21 400 €  (bénéfice)
+            # ----------------------------------------------------------------
+            make_advanced_scenario(
+                name='[Démo] Fonderie Pelletier',
+                preset='industriel',
+                period='Annuel 2025',
+                description=(
+                    'Scénario démo vidéo — Direct Costing Évolué. '
+                    'Poterie artisanale : 3 gammes avec CF spécifiques (moules) '
+                    'et CV commune (énergie cuisson). Stocks remplis.'
+                ),
+                products_data=[
+                    {
+                        'key': 'p1', 'name': 'Vase décoratif',
+                        'quantity': 800, 'unit_price': '45.00',
+                        'stock_initial': 50, 'stock_final': 60,
+                    },
+                    {
+                        'key': 'p2', 'name': 'Bol collection',
+                        'quantity': 1200, 'unit_price': '28.00',
+                        'stock_initial': 80, 'stock_final': 100,
+                    },
+                    {
+                        'key': 'p3', 'name': 'Figurine artisanale',
+                        'quantity': 500, 'unit_price': '65.00',
+                        'stock_initial': 30, 'stock_final': 40,
+                    },
+                ],
+                variable_costs=[
+                    {'name': 'Argile & terre — Vase',          'category': 'Material', 'amount':  '7200.00', 'product_key': 'p1'},
+                    {'name': 'Émaux & colorants — Vase',       'category': 'Material', 'amount':  '2400.00', 'product_key': 'p1'},
+                    {'name': 'Argile & terre — Bol',           'category': 'Material', 'amount':  '8400.00', 'product_key': 'p2'},
+                    {'name': 'Colorants — Bol',                'category': 'Material', 'amount':  '2100.00', 'product_key': 'p2'},
+                    {'name': 'Argile fine — Figurine',         'category': 'Material', 'amount':  '6500.00', 'product_key': 'p3'},
+                    {'name': 'Patine artisanale — Figurine',   'category': 'Material', 'amount':  '3200.00', 'product_key': 'p3'},
+                    {'name': 'Énergie cuisson (commune)',      'category': 'Overhead', 'amount':  '4800.00'},
+                ],
+                fixed_costs=[
+                    {'name': 'Loyer atelier cuisson',          'category': 'Rent',        'amount':  '9600.00', 'is_common': True},
+                    {'name': 'Salaires permanents',            'category': 'Salary',      'amount': '16800.00', 'is_common': True},
+                    {'name': 'Amortissement four',             'category': 'Depreciation','amount':  '6000.00', 'is_common': True},
+                    {'name': 'Assurance industrielle',         'category': 'Other',       'amount':  '3200.00', 'is_common': True},
+                    {'name': 'Moules Vase (spécifique)',       'category': 'Depreciation','amount':  '3200.00', 'is_common': False, 'product_key': 'p1'},
+                    {'name': 'Moules Bol (spécifique)',        'category': 'Depreciation','amount':  '2800.00', 'is_common': False, 'product_key': 'p2'},
+                    {'name': 'Outillage Figurine (spécifique)','category': 'Depreciation','amount':  '4500.00', 'is_common': False, 'product_key': 'p3'},
+                ],
+                seasonality=[5, 6, 8, 10, 11, 12, 10, 9, 8, 7, 7, 7],
+            )
+
             self.stdout.write(self.style.SUCCESS(
                 'Demo scenarios created and assigned to user "demo".\n'
                 '  Direct costing simple:\n'
@@ -643,4 +745,7 @@ class Command(BaseCommand):
                 '  Comparaison templates bénéficiaire (direct costing évolué, résultat +15 700 €):\n'
                 '    - Atelier Côté Sud — Industriel (industriel)\n'
                 '    - Atelier Côté Sud — Services (services)\n'
+                '  Scénarios démo vidéo (stocks remplis, bénéficiaires):\n'
+                '    - [Démo] Ébénisterie Martin (DC simple, résultat ≈ +17 050 €)\n'
+                '    - [Démo] Fonderie Pelletier (DC évolué, résultat ≈ +21 400 €)\n'
             ))
