@@ -65,13 +65,13 @@
                 {{ form.name }}
                 {{ form.name.errors }}
             </div>
-            <div class="field-box">
+            <div class="field-box" id="edit_uo_box">
                 {{ form.unit_of_work.label_tag }}
                 {{ form.unit_of_work }}
                 <small>{{ form.unit_of_work.help_text }}</small>
                 {{ form.unit_of_work.errors }}
             </div>
-            <div class="field-box">
+            <div class="field-box" id="edit_tu_box">
                 {{ form.total_units.label_tag }}
                 {{ form.total_units }}
                 {{ form.total_units.errors }}
@@ -89,5 +89,26 @@
         </div>
     </form>
 </div>
+
+<script>
+(function () {
+  var cb = document.getElementById('id_is_auxiliary');
+  var uoBox = document.getElementById('edit_uo_box');
+  var tuBox = document.getElementById('edit_tu_box');
+
+  function toggleEditForm() {
+    var hide = cb.checked;
+    uoBox.style.display = hide ? 'none' : '';
+    tuBox.style.display = hide ? 'none' : '';
+    if (hide) {
+      uoBox.querySelector('input').value = '';
+      tuBox.querySelector('input').value = '0';
+    }
+  }
+
+  cb.addEventListener('change', toggleEditForm);
+  toggleEditForm();
+})();
+</script>
 
 {% endblock %}

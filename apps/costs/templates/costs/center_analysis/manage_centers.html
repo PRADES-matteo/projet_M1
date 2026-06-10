@@ -28,13 +28,13 @@
         {{ form.name }}
         {% if form.name.errors %}<div class="field-error">{{ form.name.errors|striptags }}</div>{% endif %}
       </div>
-      <div class="field-box">
+      <div class="field-box" id="add_uo_box">
         {{ form.unit_of_work.label_tag }}
         {{ form.unit_of_work }}
         <small>{{ form.unit_of_work.help_text }}</small>
         {% if form.unit_of_work.errors %}<div class="field-error">{{ form.unit_of_work.errors|striptags }}</div>{% endif %}
       </div>
-      <div class="field-box">
+      <div class="field-box" id="add_tu_box">
         {{ form.total_units.label_tag }}
         {{ form.total_units }}
         <small>{{ form.total_units.help_text }}</small>
@@ -53,6 +53,27 @@
     </div>
   </form>
 </div>
+
+<script>
+(function () {
+  var cb = document.getElementById('id_is_auxiliary');
+  var uoBox = document.getElementById('add_uo_box');
+  var tuBox = document.getElementById('add_tu_box');
+
+  function toggleAddForm() {
+    var hide = cb.checked;
+    uoBox.style.display = hide ? 'none' : '';
+    tuBox.style.display = hide ? 'none' : '';
+    if (hide) {
+      uoBox.querySelector('input').value = '';
+      tuBox.querySelector('input').value = '0';
+    }
+  }
+
+  cb.addEventListener('change', toggleAddForm);
+  toggleAddForm();
+})();
+</script>
 
 <div class="card">
   <h2 style="font-size:1.05rem;">Centres existants</h2>
